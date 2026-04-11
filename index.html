@@ -126,12 +126,35 @@
         <div style="background: white; width: 100%; padding: 40px; border-radius: 15px; text-align: center;">
             <div style="font-size: 50px; margin-bottom: 10px;">🚧</div>
             <h2>¡Aquí irán los temas!</h2>
+            <p>Aún estamos construyendo este módulo. ¡Vuelve pronto!</p>
         </div>
     </div>
 
     <script>
         const URL_BASE = "https://esmate-2026-default-rtdb.firebaseio.com/";
         let estudianteActual = null;
+
+        // ==========================================
+        // DICCIONARIOS DE RUTAS (NUEVO SISTEMA)
+        // ==========================================
+        const mapaGrados = {
+            "1": "primero", "2": "segundo", "3": "tercero",
+            "4": "cuarto", "5": "quinto", "6": "sexto"
+        };
+
+        const mapaCarpetasMateria = {
+            "Lenguaje": "lenguaje",
+            "Matemática": "matematica",
+            "Ciencia": "ciencia",
+            "Ciudadanía y Valores": "ciudadania"
+        };
+
+        const mapaPrefijosArchivo = {
+            "Lenguaje": "lenguaje",
+            "Matemática": "mate",
+            "Ciencia": "ciencia",
+            "Ciudadanía y Valores": "ciudadania"
+        };
 
         window.onload = function() {
             let guardado = localStorage.getItem('estudiante_esmate');
@@ -209,7 +232,6 @@
             });
             tablaHTML += `</table>`;
 
-            // AHORA CALCULA SOBRE 60 PUNTOS (6 NIVELES)
             let notaUnidad1 = maxN1 + maxN2 + maxN3 + maxN4 + maxN5 + maxN6;
             let resumenUnidadHTML = "";
             
@@ -246,23 +268,48 @@
             `;
         }
 
-        // --- NAVEGACIÓN ---
         let currentSubjectName = "", currentGrade = "";
+        
         function goTo(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(screenId).classList.add('active'); }
+        
         function selectSubject(name, colorClass) {
             currentSubjectName = name; document.getElementById('title-grades').textContent = name;
             document.getElementById('grades-container').innerHTML = `<div class="card ${colorClass}" onclick="selectGrade(${estudianteActual.grado})"><div class="card-icon">🎓</div><h2>${estudianteActual.grado}º Grado</h2></div>`;
             goTo('screen-grades');
         }
+        
         function selectGrade(grade) {
-            currentGrade = grade + "º Grado"; document.getElementById('title-units').textContent = `${currentSubjectName} - ${currentGrade}`;
+            currentGrade = grade; document.getElementById('title-units').textContent = `${currentSubjectName} - ${grade}º Grado`;
             document.getElementById('units-container').innerHTML = ""; 
             for(let i = 1; i <= 10; i++) document.getElementById('units-container').innerHTML += `<div class="card-small" onclick="selectUnit(${i})">Unidad ${i}</div>`;
             goTo('screen-units');
         }
+        
+        // ==========================================
+        // ENRUTADOR DINÁMICO
+        // ==========================================
         function selectUnit(unitNumber) {
-            if (currentSubjectName === 'Matemática' && currentGrade === '2º Grado' && unitNumber === 1) window.location.href = 'mate-2-u1.html';
-            else { document.getElementById('title-topics').textContent = `Unidad ${unitNumber}`; goTo('screen-topics'); }
+            let gradoStr = currentGrade.toString(); // "2", "3", etc.
+            
+            // Calculamos los nombres de la ruta usando los diccionarios
+            let carpetaGrado = mapaGrados[gradoStr] || "segundo";
+            let carpetaMateria = mapaCarpetasMateria[currentSubjectName];
+            let prefijoArchivo = mapaPrefijosArchivo[currentSubjectName];
+
+            // Armamos la dirección final. Ejemplo: "segundo/ciencia/ciencia-2-u3.html"
+            let rutaDestino = `${carpetaGrado}/${carpetaMateria}/${prefijoArchivo}-${gradoStr}-u${unitNumber}.html`;
+
+            // Si es la Unidad 1 de las materias que creaste, intentará abrirla.
+            // (Si no has creado el archivo de verdad, GitHub arrojará su error 404 de página no encontrada,
+            // pero para eso tú ya creaste las plantillas vacías).
+            if (unitNumber === 1) {
+                window.location.href = rutaDestino;
+            } else {
+                // Por protección, si eligen de la Unidad 2 en adelante, mostramos "En construcción"
+                // Hasta que tú me digas que ya creaste esos archivos.
+                document.getElementById('title-topics').textContent = `Unidad ${unitNumber}`;
+                goTo('screen-topics');
+            }
         }
     </script>
 </body>
