@@ -1,1 +1,273 @@
-<h1>Pronto llegará contenido nuevo...</h1>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sumas Visuales - ESMATE U2</title>
+    <style>
+        :root {
+            --esmate-blue: #4361ee; --bg-color: #f8f9fa; --text-dark: #2b2d42;
+            --correct-color: #2d6a4f; --incorrect-color: #d90429;
+            --box-green: #81b29a;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        
+        .header { width: 100%; max-width: 800px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; z-index: 10; }
+        .btn-back { background: white; border: 1px solid #ccc; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; color: #555; text-decoration: none; font-size: 14px;}
+        
+        .screen { display: none; width: 100%; max-width: 700px; flex-direction: column; align-items: center; animation: fadeIn 0.4s; z-index: 10;}
+        .screen.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .game-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); width: 100%; text-align: center; box-sizing: border-box; }
+        
+        button.primary { background-color: var(--esmate-blue); color: white; border: none; padding: 12px 24px; font-weight: bold; font-size: 18px; border-radius: 10px; cursor: pointer; width: 100%; transition: 0.2s; margin-top: 10px;}
+        button.primary:hover { background-color: #3f37c9; }
+        button.secondary { background-color: #f4a261; color: white; border: none; padding: 12px 24px; font-weight: bold; font-size: 18px; border-radius: 10px; cursor: pointer; width: 100%; margin-top: 10px; }
+        
+        .btn-cheat { background-color: #2b2d42; color: #00ff00; border: 2px dashed #00ff00; padding: 10px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 15px; cursor: pointer; display: none; }
+
+        .correct-cell { background-color: #d8f3dc !important; border-color: var(--correct-color) !important; color: var(--correct-color) !important; }
+        .error-cell { background-color: #ffccd5 !important; border-color: var(--incorrect-color) !important; color: var(--incorrect-color) !important; }
+
+        /* ESTILOS DE LOS OBJETOS (DIBUJOS) */
+        .visual-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin: 20px 0; flex-wrap: wrap;}
+        .emoji-box { border: 3px solid var(--box-green); border-radius: 15px; padding: 15px; min-width: 100px; min-height: 80px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 5px; font-size: 35px; background: #f4fcf8;}
+        .arrow-sign { font-size: 30px; color: var(--box-green); font-weight: bold; }
+        
+        /* ESTILOS DEL PO Y R */
+        .math-row { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 20px 0; font-size: 24px; font-weight: bold; color: var(--text-dark); flex-wrap: wrap;}
+        .math-input { width: 60px; height: 50px; text-align: center; font-size: 24px; font-weight: bold; border: 2px solid #ccc; border-radius: 10px; outline: none; transition: 0.3s; }
+        .math-symbol { color: #888; }
+        .label-po { font-size: 28px; font-weight: 900; margin-right: 10px; }
+
+        /* POPUPS */
+        #feedback-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box;}
+        #feedback-content { background: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 400px; width: 100%; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="../../index.html" class="btn-back">⬅️ Menú</a>
+        <div style="font-weight: bold; color: var(--esmate-blue); cursor: pointer; user-select: none;" id="jugador-nombre" onclick="activarModoPrueba()">👤 Estudiante</div>
+    </div>
+
+    <div id="screen-start" class="screen active">
+        <div class="game-card">
+            <h1 style="color: var(--esmate-blue); margin-top:0;">Unidad 2: Aprendamos más sobre la suma</h1>
+            
+            <div id="save-menu" style="display: none; margin-top: 20px; background: #e0fbfc; padding: 15px; border-radius: 10px;">
+                <p style="color: var(--correct-color); font-weight: bold; margin-top: 0;">¡Tienes progreso guardado!</p>
+                <div id="btn-n2" style="display: none;"><button class="primary">🚀 Siguiente Nivel (Pronto)</button></div>
+                <button class="secondary" style="background: white; color: #555; border: 1px solid #ccc; font-size: 14px;" onclick="iniciarNivel1()">🔄 Repasar Nivel 1</button>
+            </div>
+
+            <div id="new-menu">
+                <p>Comencemos a sumar uniendo grupos de objetos. ¡Cuenta bien!</p>
+                <button class="primary" onclick="iniciarNivel1()">▶ Comenzar Nivel 1</button>
+            </div>
+            
+            <button class="btn-cheat cheat-element" onclick="localStorage.removeItem('esmate_u2_progreso_'+estudiante.nie); location.reload();">🗑️ Borrar mi progreso</button>
+        </div>
+    </div>
+
+    <div id="screen-nivel1" class="screen">
+        <div class="game-card">
+            <div style="display: flex; justify-content: space-between; font-weight: bold; color: #666; margin-bottom: 10px;">
+                <span>Nivel 1 (<span id="n1-ronda">1</span>/10)</span>
+                <span style="color: var(--incorrect-color)">Intentos: <span id="n1-intentos">3</span> ❤️</span>
+            </div>
+            
+            <h3 style="margin: 0; color: #555;">Cuenta los objetos y completa la suma:</h3>
+            
+            <div class="visual-container">
+                <div class="emoji-box" id="box-1">🍌🍌🍌</div>
+                <div class="arrow-sign">→  ←</div>
+                <div class="emoji-box" id="box-2">🍌🍌</div>
+            </div>
+
+            <div class="math-row">
+                <span class="label-po">PO:</span>
+                <input type="tel" id="po-1" class="math-input" maxlength="2" autocomplete="off" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                <span class="math-symbol">＋</span>
+                <input type="tel" id="po-2" class="math-input" maxlength="2" autocomplete="off" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                <span class="math-symbol">＝</span>
+                <input type="tel" id="po-3" class="math-input" maxlength="2" autocomplete="off" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+            </div>
+
+            <div class="math-row" style="margin-top: 10px;">
+                <span class="label-po">R:</span>
+                <input type="tel" id="r-1" class="math-input" maxlength="2" autocomplete="off" oninput="this.value=this.value.replace(/[^0-9]/g,'')" style="border-color: var(--esmate-blue);">
+                <span id="obj-name" style="color: #666; font-size: 22px;">guineos.</span>
+            </div>
+
+            <button class="primary" onclick="revisarNivel1()">✅ Revisar</button>
+            <button class="btn-cheat cheat-element" onclick="saltarNivel1()">⏭️ AUTO-GANAR NIVEL 1</button>
+        </div>
+    </div>
+
+    <div id="screen-finale" class="screen">
+        <div class="game-card" style="background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%); color: white; border: none;">
+            <h1 style="font-size: 40px; margin: 10px 0;">¡Nivel Completado!</h1>
+            <p style="font-size: 18px;">¡Felicidades <span id="final-nombre"></span>! Lograste sumar los objetos.</p>
+            <div style="font-size: 80px; margin: 20px 0;">🍎➕🍌</div>
+            <p style="font-size: 20px; font-weight: bold; margin-bottom: 30px;">Tu nota ha sido guardada en tu progreso.</p>
+            <button class="primary" style="background: white; color: #2d6a4f;" onclick="window.location.href='../../index.html'">➡️ Volver al Menú Principal</button>
+        </div>
+    </div>
+
+    <div id="feedback-overlay">
+        <div id="feedback-content">
+            <div id="fb-icon" style="font-size: 60px; margin-bottom: 10px;">🏆</div>
+            <h2 id="fb-title" style="margin: 0; color: var(--text-dark);">Mensaje</h2>
+            <p id="fb-text" style="color: #555;">Detalle</p>
+            <button class="primary" id="fb-btn" onclick="cerrarFeedback()">Continuar</button>
+        </div>
+    </div>
+
+    <script>
+        const URL_BASE = "https://esmate-2026-default-rtdb.firebaseio.com/";
+        let estudiante = { nombre: "Estudiante", nie: "0000", grado: "2" };
+        let nivelGuardado = 1;
+
+        // DICCIONARIO DE OBJETOS DIVERTIDOS
+        const objetosMates = [
+            { emoji: '🍌', nombre: 'guineos' }, { emoji: '🍎', nombre: 'manzanas' },
+            { emoji: '🚗', nombre: 'carros' }, { emoji: '⚽', nombre: 'pelotas' },
+            { emoji: '🍓', nombre: 'fresas' }, { emoji: '🐶', nombre: 'gatos' } // Un poco de humor infantil
+        ];
+
+        // MODO DIOS
+        let contadorClics = 0;
+        function activarModoPrueba() {
+            contadorClics++;
+            if(contadorClics === 5) {
+                let psw = prompt("🔒 ACCESO RESTRINGIDO\nIngrese clave:");
+                if(psw === "rive2593") {
+                    alert("🛠️ ¡MODO DIOS ACTIVADO!");
+                    document.querySelectorAll('.cheat-element').forEach(btn => btn.style.display = 'block');
+                } else { contadorClics = 0; }
+            }
+        }
+        function saltarNivel1() { n1_aciertos = 10; finalizarNivel1(); }
+
+        // INICIALIZACIÓN
+        window.onload = function() {
+            let infoLocal = localStorage.getItem('estudiante_esmate');
+            if(infoLocal) {
+                estudiante = JSON.parse(infoLocal);
+                document.getElementById('jugador-nombre').textContent = `👤 ${estudiante.nombre}`;
+                document.getElementById('final-nombre').textContent = estudiante.nombre;
+            }
+            
+            // Usamos una variable nueva para el progreso de la Unidad 2
+            let progresoStr = localStorage.getItem('esmate_u2_progreso_' + estudiante.nie);
+            if(progresoStr) {
+                nivelGuardado = parseInt(progresoStr);
+                if(nivelGuardado >= 2) {
+                    document.getElementById('save-menu').style.display = 'block';
+                    document.getElementById('new-menu').style.display = 'none';
+                    if(nivelGuardado >= 2) document.getElementById('btn-n2').style.display = 'block';
+                }
+            }
+        };
+
+        function cambiarPantalla(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+        // ==========================================
+        // LÓGICA NIVEL 1
+        // ==========================================
+        let n1_ronda=1, n1_aciertos=0, n1_fallos=0, n1_sol={}, n1_intentos_actual=3;
+        
+        function iniciarNivel1() { n1_ronda=1; n1_aciertos=0; n1_fallos=0; cambiarPantalla('screen-nivel1'); generarEjercicioN1(); }
+        
+        function generarEjercicioN1() {
+            n1_intentos_actual=3; document.getElementById('n1-intentos').textContent=n1_intentos_actual;
+            
+            // Generamos dos números cuya suma no pase de 30
+            let val1 = Math.floor(Math.random() * 15) + 1; // 1 a 15
+            let val2 = Math.floor(Math.random() * 15) + 1; // 1 a 15
+            let suma = val1 + val2;
+            
+            let obj = objetosMates[Math.floor(Math.random() * objetosMates.length)];
+            
+            // Dibujamos los emojis
+            document.getElementById('box-1').textContent = obj.emoji.repeat(val1);
+            document.getElementById('box-2').textContent = obj.emoji.repeat(val2);
+            document.getElementById('obj-name').textContent = obj.nombre + ".";
+
+            // Guardamos la solución (Respetando el orden de las cajas)
+            n1_sol = { p1: val1, p2: val2, p3: suma, r1: suma };
+
+            // Limpiamos los inputs
+            ['po-1','po-2','po-3','r-1'].forEach(id=>{
+                let i = document.getElementById(id); i.value = ""; i.disabled = false; i.classList.remove('correct-cell','error-cell');
+            });
+            
+            document.getElementById('n1-ronda').textContent=n1_ronda; 
+            document.getElementById('po-1').focus();
+        }
+
+        function revisarNivel1() {
+            let correctos = 0;
+            
+            // Función auxiliar para chequear
+            function chequear(id, esperado) {
+                let input = document.getElementById(id);
+                if(input.disabled) { correctos++; return; }
+                let valText = input.value.trim();
+                if(valText === "") { input.classList.add('error-cell'); return; }
+                if(parseInt(valText) === esperado) {
+                    input.classList.add('correct-cell'); input.classList.remove('error-cell'); input.disabled = true; correctos++;
+                } else { input.classList.add('error-cell'); input.classList.remove('correct-cell'); }
+            }
+
+            chequear('po-1', n1_sol.p1);
+            chequear('po-2', n1_sol.p2);
+            chequear('po-3', n1_sol.p3);
+            chequear('r-1', n1_sol.r1);
+            
+            if(correctos === 4) {
+                n1_aciertos++; mostrarPopup("🌟", "¡Excelente!", "Planteaste bien la suma.", avanzarNivel1);
+            } else {
+                n1_intentos_actual--; document.getElementById('n1-intentos').textContent = n1_intentos_actual;
+                if(n1_intentos_actual > 0) mostrarPopup("⚠️", "Revisa tus números", `Cuenta bien los dibujos. Te quedan ${n1_intentos_actual} intentos.`, null);
+                else {
+                    n1_fallos++;
+                    mostrarPopup("💔", "Se acabaron los intentos", `La respuesta correcta era: ${n1_sol.p1} + ${n1_sol.p2} = ${n1_sol.p3}.`, avanzarNivel1);
+                }
+            }
+        }
+
+        function avanzarNivel1() { n1_ronda++; if(n1_ronda>10) finalizarNivel1(); else generarEjercicioN1(); }
+
+        function finalizarNivel1() {
+            guardarEnFirebase("Unidad 2 - Nivel 1: Suma Visual", n1_aciertos, n1_fallos);
+            if(n1_aciertos >= 8) { 
+                localStorage.setItem('esmate_u2_progreso_'+estudiante.nie, "2"); 
+                cambiarPantalla('screen-finale'); 
+            } else { 
+                mostrarPopup("💪", "¡Casi lo logras!", `Aciertos: ${n1_aciertos}/10. Necesitas 8 para pasar. ¡Tú puedes!`, iniciarNivel1); 
+            }
+        }
+
+        // ==========================================
+        // POPUPS Y FIREBASE
+        // ==========================================
+        let accionAlCerrar = null;
+        function mostrarPopup(icono, titulo, texto, funcionAlCerrar) {
+            document.getElementById('fb-icon').textContent = icono; document.getElementById('fb-title').textContent = titulo;
+            document.getElementById('fb-text').textContent = texto; accionAlCerrar = funcionAlCerrar;
+            document.getElementById('feedback-overlay').style.display = 'flex';
+        }
+        function cerrarFeedback() { document.getElementById('feedback-overlay').style.display = 'none'; if(accionAlCerrar) accionAlCerrar(); }
+        function guardarEnFirebase(nombreTema, numAciertos, numFallos) {
+            const paquete = { nombre: estudiante.nombre, grado: estudiante.grado, tema: nombreTema, aciertos: numAciertos, fallos: numFallos, fecha: new Date().toLocaleString('es-SV') };
+            fetch(URL_BASE + "practicas.json", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(paquete) });
+        }
+    </script>
+</body>
+</html>
