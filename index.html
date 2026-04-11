@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataforma Escolar Educativa</title>
+    <title>Plataforma Educativa Interactiva</title>
+    <meta property="og:title" content="Plataforma Educativa Interactiva">
+    <meta property="og:description" content="Aprende Matemática, Lenguaje, Ciencia y Ciudadanía de forma divertida.">
+    <meta property="og:type" content="website">
     <style>
         :root {
             --color-lenguaje: #e63946; --color-mate: #4361ee;
@@ -187,6 +190,25 @@
             });
         }
 
+        // ==========================================
+        // CEREBRO DE LAS NOTAS ACTUALIZADO
+        // ==========================================
+        function generarTarjetaUnidad(titulo, subtitulo, nota) {
+            let mensaje = nota >= 8 ? "¡Excelente dominio! 🥇" : "¡Sigue practicando! 💪";
+            return `
+                <div class="unit-summary" style="margin-top: 15px;">
+                    <div>
+                        <h2 style="margin:0; color: var(--color-mate); font-size: 20px;">${titulo}</h2>
+                        <p style="margin:5px 0 0 0; color: #555;">${subtitulo}</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="font-size: 24px; font-weight: bold; color: var(--correct-color);">${nota} <span style="font-size: 16px;">/ 10</span></span>
+                        <div style="font-size: 12px; color: #777;">${mensaje}</div>
+                    </div>
+                </div>
+            `;
+        }
+
         function renderizarProgreso(practicas) {
             if (practicas.length === 0) {
                 document.getElementById('progress-content').innerHTML = `<div style="text-align:center; padding: 40px; background: white; border-radius: 15px;"><h2>¡Aún no tienes prácticas!</h2></div>`;
@@ -194,48 +216,57 @@
             }
 
             let totalAciertos = 0; 
-            let maxN1=0, maxN2=0, maxN3=0, maxN4=0, maxN5=0, maxN6=0; 
+            
+            // Contenedores para las notas más altas de cada nivel
+            let u1_max = { n1:0, n2:0, n3:0, n4:0, n5:0, n6:0 };
+            let u2_max = { n1:0, n2:0 };
             
             let tablaHTML = `<table class="student-table"><tr><th>Fecha</th><th>Tema</th><th>Tu Nota</th></tr>`;
 
             practicas.forEach(p => {
-                let aciertos = parseInt(p.aciertos) || 0;
-                totalAciertos += aciertos;
+                let a = parseInt(p.aciertos) || 0;
+                totalAciertos += a;
+                let t = p.tema;
                 
-                if(p.tema.includes("Nivel 1") && aciertos > maxN1) maxN1 = aciertos;
-                if(p.tema.includes("Nivel 2") && aciertos > maxN2) maxN2 = aciertos;
-                if(p.tema.includes("Nivel 3") && aciertos > maxN3) maxN3 = aciertos;
-                if(p.tema.includes("Nivel 4") && aciertos > maxN4) maxN4 = aciertos;
-                if(p.tema.includes("Nivel 5") && aciertos > maxN5) maxN5 = aciertos;
-                if(p.tema.includes("Nivel 6") && aciertos > maxN6) maxN6 = aciertos;
+                // Lógica para detectar a qué Unidad pertenece
+                if(t.includes("U2") || t.includes("Unidad 2")) {
+                    if(t.includes("Nivel 1") && a > u2_max.n1) u2_max.n1 = a;
+                    if(t.includes("Nivel 2") && a > u2_max.n2) u2_max.n2 = a;
+                } else if(t.includes("Nivel")) {
+                    // Si no dice U2, asume que es de la Unidad 1
+                    if(t.includes("Nivel 1") && a > u1_max.n1) u1_max.n1 = a;
+                    if(t.includes("Nivel 2") && a > u1_max.n2) u1_max.n2 = a;
+                    if(t.includes("Nivel 3") && a > u1_max.n3) u1_max.n3 = a;
+                    if(t.includes("Nivel 4") && a > u1_max.n4) u1_max.n4 = a;
+                    if(t.includes("Nivel 5") && a > u1_max.n5) u1_max.n5 = a;
+                    if(t.includes("Nivel 6") && a > u1_max.n6) u1_max.n6 = a;
+                }
                 
-                let estrellita = (aciertos >= 8) ? "🌟" : (aciertos >= 6 ? "👍" : "💪");
-                let colorNota = (aciertos >= 6) ? "var(--correct-color)" : "var(--incorrect-color)";
-                tablaHTML += `<tr><td style="font-size: 13px; color: #555;">${(p.fecha || "").split(',')[0]}</td><td>${p.tema}</td><td style="color: ${colorNota}; font-weight: bold; font-size: 16px;">${aciertos} / 10 ${estrellita}</td></tr>`;
+                let estrellita = (a >= 8) ? "🌟" : (a >= 6 ? "👍" : "💪");
+                let colorNota = (a >= 6) ? "var(--correct-color)" : "var(--incorrect-color)";
+                tablaHTML += `<tr><td style="font-size: 13px; color: #555;">${(p.fecha || "").split(',')[0]}</td><td>${t}</td><td style="color: ${colorNota}; font-weight: bold; font-size: 16px;">${a} / 10 ${estrellita}</td></tr>`;
             });
             tablaHTML += `</table>`;
 
-            let notaUnidad1 = maxN1 + maxN2 + maxN3 + maxN4 + maxN5 + maxN6;
-            let resumenUnidadHTML = "";
-            
-            if(notaUnidad1 > 0) {
-                let notaBase10 = (notaUnidad1 / 60) * 10;
-                let mensaje = notaBase10 >= 8 ? "¡Excelente dominio! 🥇" : "¡Sigue practicando! 💪";
-                
-                resumenUnidadHTML = `
-                    <h3 style="color: var(--text-dark); margin-top: 25px;">Resumen por Unidades</h3>
-                    <div class="unit-summary">
-                        <div>
-                            <h2 style="margin:0; color: var(--color-mate); font-size: 20px;">📘 Matemática - Unidad 1</h2>
-                            <p style="margin:5px 0 0 0; color: #555;">Conozcamos los números</p>
-                        </div>
-                        <div style="text-align: right;">
-                            <span style="font-size: 24px; font-weight: bold; color: var(--correct-color);">${notaBase10.toFixed(1)} <span style="font-size: 16px;">/ 10</span></span>
-                            <div style="font-size: 12px; color: #777;">${mensaje}</div>
-                        </div>
-                    </div>
-                `;
+            // Calculamos los promedios reales
+            let totalU1 = u1_max.n1 + u1_max.n2 + u1_max.n3 + u1_max.n4 + u1_max.n5 + u1_max.n6;
+            let notaU1 = ((totalU1 / 60) * 10).toFixed(1);
+
+            let totalU2 = u2_max.n1 + u2_max.n2;
+            let notaU2 = ((totalU2 / 20) * 10).toFixed(1); // Sobre 20 puntos porque hay 2 niveles
+
+            let resumenUnidadHTML = `<h3 style="color: var(--text-dark); margin-top: 25px;">Resumen por Unidades</h3>`;
+            let mostroAlMenosUna = false;
+
+            if(totalU1 > 0) {
+                resumenUnidadHTML += generarTarjetaUnidad("📘 Matemática - Unidad 1", "Conozcamos los números", notaU1);
+                mostroAlMenosUna = true;
             }
+            if(totalU2 > 0) {
+                resumenUnidadHTML += generarTarjetaUnidad("📘 Matemática - Unidad 2", "Aprendamos más sobre la suma", notaU2);
+                mostroAlMenosUna = true;
+            }
+            if(!mostroAlMenosUna) resumenUnidadHTML = "";
 
             let medallas = totalAciertos >= 50 ? "🏆👑🌟" : (totalAciertos >= 20 ? "🏅🌟" : (totalAciertos >= 1 ? "🎖️" : "🌱"));
 
@@ -268,22 +299,12 @@
             goTo('screen-units');
         }
         
-        // ==========================================
-        // ENRUTADOR DINÁMICO (ACTUALIZADO, SIN CANDADO)
-        // ==========================================
         function selectUnit(unitNumber) {
-            // Extraemos solo el número del grado (por si acaso viene con la palabra "Grado")
             let gradoStr = currentGrade.toString().replace("º Grado", "").trim(); 
-            
-            // Calculamos los nombres de la ruta usando los diccionarios
             let carpetaGrado = mapaGrados[gradoStr] || "segundo";
             let carpetaMateria = mapaCarpetasMateria[currentSubjectName];
             let prefijoArchivo = mapaPrefijosArchivo[currentSubjectName];
-
-            // Armamos la dirección final. Ejemplo: "segundo/ciencia/ciencia-2-u3.html"
             let rutaDestino = `${carpetaGrado}/${carpetaMateria}/${prefijoArchivo}-${gradoStr}-u${unitNumber}.html`;
-
-            // Enviar directamente al archivo que corresponde (incluso si está vacío o en plantilla)
             window.location.href = rutaDestino;
         }
     </script>
