@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma Escolar ESMATE</title>
+    <style>
+        :root {
+            --color-lenguaje: #e63946; --color-mate: #4361ee;
+            --color-ciencia: #2a9d8f; --color-valores: #f4a261;
+            --bg-color: #f8f9fa; --text-dark: #2b2d42;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        
+        .screen { display: none; width: 100%; max-width: 900px; flex-direction: column; align-items: center; animation: fadeIn 0.3s ease-in-out; }
+        .screen.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header { width: 100%; display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 30px; flex-wrap: wrap; gap: 10px;}
+        .header h1 { margin: 0; font-size: 28px; text-align: center; }
+        .btn-back { position: absolute; left: 0; background: none; border: none; font-size: 16px; font-weight: bold; color: #555; cursor: pointer; padding: 10px; border-radius: 8px; transition: background 0.2s; }
+        .btn-back:hover { background: #e9ecef; }
+
+        .card-login { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); text-align: center; width: 90%; max-width: 450px; border-top: 8px solid var(--color-mate); }
+        .card-login input { width: 100%; padding: 15px; margin: 20px 0; border: 2px solid #ccc; border-radius: 10px; font-size: 20px; text-align: center; font-weight: bold; box-sizing: border-box; }
+        .card-login input:focus { border-color: var(--color-mate); outline: none; }
+        
+        button.primary { background-color: var(--color-mate); color: white; border: none; padding: 15px 30px; font-weight: bold; font-size: 18px; border-radius: 10px; cursor: pointer; width: 100%; transition: 0.2s; }
+        button.primary:hover { background-color: #3f37c9; }
+        button.action-btn { background: #f4a261; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button.action-btn:hover { background: #e76f51; }
+
+        .confirm-box { display: none; margin-top: 20px; padding: 20px; background: #e0fbfc; border-radius: 12px; border: 2px solid #90e0ef; }
+        .btn-yes { background: #2d6a4f; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; width: 48%; }
+        .btn-no { background: #d90429; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; width: 48%; }
+
+        .grid-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; width: 100%; justify-content: center; }
+        .card { background: white; border-radius: 15px; padding: 30px 20px; text-align: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-top: 8px solid #ccc; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .card h2 { margin: 10px 0 0 0; font-size: 22px; }
+        .card-icon { font-size: 50px; }
+
+        .card.lenguaje { border-color: var(--color-lenguaje); color: var(--color-lenguaje); }
+        .card.mate { border-color: var(--color-mate); color: var(--color-mate); }
+        .card.ciencia { border-color: var(--color-ciencia); color: var(--color-ciencia); }
+        .card.valores { border-color: var(--color-valores); color: var(--color-valores); }
+
+        .grid-small { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; width: 100%; }
+        .card-small { background: white; padding: 20px; border-radius: 10px; text-align: center; font-weight: bold; cursor: pointer; border: 2px solid #e9ecef;}
+        .card-small:hover { border-color: var(--text-dark); background: #f1f3f5; }
+
+        .student-table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-top: 10px; }
+        .student-table th, .student-table td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; }
+        .student-table th { background: var(--color-mate); color: white; }
+        .student-table tr:hover { background: #f1f3f5; }
+        
+        .unit-summary { background: #e0fbfc; border-left: 5px solid var(--color-mate); padding: 15px; border-radius: 8px; margin-bottom: 20px; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center;}
+    </style>
+</head>
+<body>
+
+    <div id="screen-login" class="screen active">
+        <div class="card-login">
+            <h1 style="margin-top: 0; color: var(--text-dark);">🎒 Acceso Estudiantes</h1>
+            <p style="color: #666;">Ingresa tu código NIE para entrar a tu cuenta.</p>
+            <input type="number" id="nie-input" placeholder="Ej. 12345" autocomplete="off">
+            <button class="primary" id="btn-buscar" onclick="buscarEstudiante()">🔍 Buscar mi nombre</button>
+            <p id="nie-error" style="color: var(--color-lenguaje); display: none; margin-top: 15px; font-weight: bold;">❌ NIE incorrecto o no registrado.</p>
+            <div id="confirmation-box" class="confirm-box">
+                <h3>¿Eres <span id="student-name-confirm"></span>?</h3>
+                <div style="display: flex; justify-content: space-between;">
+                    <button class="btn-yes" onclick="confirmarLogin()">✅ Sí, soy yo</button>
+                    <button class="btn-no" onclick="cancelarLogin()">❌ No, me equivoqué</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-subjects" class="screen">
+        <div class="header" style="justify-content: space-between; width: 100%;">
+            <div id="user-greeting" style="font-weight: bold; color: var(--color-mate); font-size: 20px;"></div>
+            <div>
+                <button class="action-btn" onclick="verMiProgreso()">🏆 Mi Progreso</button>
+                <button onclick="cerrarSesion()" style="background: white; border: 1px solid #ccc; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; color: #555;">Salir</button>
+            </div>
+        </div>
+        <h1 style="margin-bottom: 30px;">📚 Elige tu Materia</h1>
+        <div class="grid-menu">
+            <div class="card lenguaje" onclick="selectSubject('Lenguaje', 'lenguaje')"><div class="card-icon">📖</div><h2>Lenguaje</h2></div>
+            <div class="card mate" onclick="selectSubject('Matemática', 'mate')"><div class="card-icon">📐</div><h2>Matemática</h2></div>
+            <div class="card ciencia" onclick="selectSubject('Ciencia', 'ciencia')"><div class="card-icon">🔬</div><h2>Ciencia</h2></div>
+            <div class="card valores" onclick="selectSubject('Ciudadanía y Valores', 'valores')"><div class="card-icon">🤝</div><h2>Ciudadanía y Valores</h2></div>
+        </div>
+    </div>
+
+    <div id="screen-progress" class="screen">
+        <div class="header">
+            <button class="btn-back" onclick="goTo('screen-subjects')">⬅️ Volver al Menú</button>
+            <h1 style="color: var(--color-valores);">🏆 Mi Salón de Trofeos</h1>
+        </div>
+        <div id="progress-content" style="width: 100%;"></div>
+    </div>
+
+    <div id="screen-grades" class="screen">
+        <div class="header">
+            <button class="btn-back" onclick="goTo('screen-subjects')">⬅️ Volver</button>
+            <h1 id="title-grades">Materia</h1>
+        </div>
+        <div class="grid-menu" id="grades-container" style="max-width: 300px;"></div>
+    </div>
+
+    <div id="screen-units" class="screen">
+        <div class="header">
+            <button class="btn-back" onclick="goTo('screen-grades')">⬅️ Volver</button>
+            <h1 id="title-units">Grado</h1>
+        </div>
+        <div class="grid-small" id="units-container"></div>
+    </div>
+
+    <div id="screen-topics" class="screen">
+        <div class="header">
+            <button class="btn-back" onclick="goTo('screen-units')">⬅️ Volver</button>
+            <h1 id="title-topics">Unidad X</h1>
+        </div>
+        <div style="background: white; width: 100%; padding: 40px; border-radius: 15px; text-align: center;">
+            <div style="font-size: 50px; margin-bottom: 10px;">🚧</div>
+            <h2>¡Aquí irán los temas!</h2>
+        </div>
+    </div>
+
+    <script>
+        const URL_BASE = "https://esmate-2026-default-rtdb.firebaseio.com/";
+        let estudianteActual = null;
+
+        window.onload = function() {
+            let guardado = localStorage.getItem('estudiante_esmate');
+            if(guardado) {
+                estudianteActual = JSON.parse(guardado);
+                document.getElementById('user-greeting').textContent = `👤 Hola, ${estudianteActual.nombre}`;
+                
+                if(localStorage.getItem('esmate_show_progress') === 'true') {
+                    localStorage.removeItem('esmate_show_progress');
+                    verMiProgreso(); 
+                } else {
+                    goTo('screen-subjects');
+                }
+            }
+        };
+
+        function buscarEstudiante() {
+            const nie = document.getElementById('nie-input').value.trim();
+            if (!nie) return;
+            document.getElementById('btn-buscar').innerHTML = "⏳ Buscando...";
+            
+            fetch(URL_BASE + `estudiantes/${nie}.json`).then(res => res.json()).then(datos => {
+                document.getElementById('btn-buscar').innerHTML = "🔍 Buscar mi nombre";
+                if (datos) {
+                    estudianteActual = datos; estudianteActual.nie = nie;
+                    document.getElementById('student-name-confirm').textContent = estudianteActual.nombre;
+                    document.getElementById('confirmation-box').style.display = 'block';
+                    document.getElementById('btn-buscar').style.display = 'none'; 
+                    document.getElementById('nie-input').disabled = true;
+                } else { document.getElementById('nie-error').style.display = 'block'; }
+            });
+        }
+        document.getElementById('nie-input').addEventListener("keypress", e => { if (e.key === "Enter") buscarEstudiante(); });
+        function cancelarLogin() { estudianteActual = null; document.getElementById('confirmation-box').style.display = 'none'; document.getElementById('btn-buscar').style.display = 'block'; document.getElementById('nie-input').disabled = false; document.getElementById('nie-input').value = ""; }
+        function confirmarLogin() { localStorage.setItem('estudiante_esmate', JSON.stringify(estudianteActual)); document.getElementById('user-greeting').textContent = `👤 Hola, ${estudianteActual.nombre}`; goTo('screen-subjects'); }
+        function cerrarSesion() { localStorage.removeItem('estudiante_esmate'); cancelarLogin(); goTo('screen-login'); }
+
+        function verMiProgreso() {
+            goTo('screen-progress');
+            document.getElementById('progress-content').innerHTML = "<h3 style='text-align:center;'>Buscando tus medallas... ⏳</h3>";
+
+            fetch(URL_BASE + "practicas.json").then(res => res.json()).then(datos => {
+                let misPracticas = [];
+                for (let id in datos) { if (datos[id].nombre === estudianteActual.nombre) misPracticas.push(datos[id]); }
+                misPracticas.reverse(); 
+                renderizarProgreso(misPracticas);
+            });
+        }
+
+        function renderizarProgreso(practicas) {
+            if (practicas.length === 0) {
+                document.getElementById('progress-content').innerHTML = `<div style="text-align:center; padding: 40px; background: white; border-radius: 15px;"><h2>¡Aún no tienes prácticas!</h2></div>`;
+                return;
+            }
+
+            let totalAciertos = 0; 
+            let maxN1=0, maxN2=0, maxN3=0, maxN4=0, maxN5=0, maxN6=0; 
+            
+            let tablaHTML = `<table class="student-table"><tr><th>Fecha</th><th>Tema</th><th>Tu Nota</th></tr>`;
+
+            practicas.forEach(p => {
+                let aciertos = parseInt(p.aciertos) || 0;
+                totalAciertos += aciertos;
+                
+                if(p.tema.includes("Nivel 1") && aciertos > maxN1) maxN1 = aciertos;
+                if(p.tema.includes("Nivel 2") && aciertos > maxN2) maxN2 = aciertos;
+                if(p.tema.includes("Nivel 3") && aciertos > maxN3) maxN3 = aciertos;
+                if(p.tema.includes("Nivel 4") && aciertos > maxN4) maxN4 = aciertos;
+                if(p.tema.includes("Nivel 5") && aciertos > maxN5) maxN5 = aciertos;
+                if(p.tema.includes("Nivel 6") && aciertos > maxN6) maxN6 = aciertos;
+                
+                let estrellita = (aciertos >= 8) ? "🌟" : (aciertos >= 6 ? "👍" : "💪");
+                let colorNota = (aciertos >= 6) ? "var(--correct-color)" : "var(--incorrect-color)";
+                tablaHTML += `<tr><td style="font-size: 13px; color: #555;">${(p.fecha || "").split(',')[0]}</td><td>${p.tema}</td><td style="color: ${colorNota}; font-weight: bold; font-size: 16px;">${aciertos} / 10 ${estrellita}</td></tr>`;
+            });
+            tablaHTML += `</table>`;
+
+            // AHORA CALCULA SOBRE 60 PUNTOS (6 NIVELES)
+            let notaUnidad1 = maxN1 + maxN2 + maxN3 + maxN4 + maxN5 + maxN6;
+            let resumenUnidadHTML = "";
+            
+            if(notaUnidad1 > 0) {
+                let notaBase10 = (notaUnidad1 / 60) * 10;
+                let mensaje = notaBase10 >= 8 ? "¡Excelente dominio! 🥇" : "¡Sigue practicando! 💪";
+                
+                resumenUnidadHTML = `
+                    <h3 style="color: var(--text-dark); margin-top: 25px;">Resumen por Unidades</h3>
+                    <div class="unit-summary">
+                        <div>
+                            <h2 style="margin:0; color: var(--color-mate); font-size: 20px;">📘 Matemática - Unidad 1</h2>
+                            <p style="margin:5px 0 0 0; color: #555;">Conozcamos los números</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="font-size: 24px; font-weight: bold; color: var(--correct-color);">${notaBase10.toFixed(1)} <span style="font-size: 16px;">/ 10</span></span>
+                            <div style="font-size: 12px; color: #777;">${mensaje}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            let medallas = totalAciertos >= 50 ? "🏆👑🌟" : (totalAciertos >= 20 ? "🏅🌟" : (totalAciertos >= 1 ? "🎖️" : "🌱"));
+
+            document.getElementById('progress-content').innerHTML = `
+                <div class="grid-menu" style="margin-bottom: 20px;">
+                    <div class="card" style="border-top-color: #f4a261; padding: 15px;"><h2 style="font-size: 35px; color: #f4a261;">${practicas.length}</h2><p style="margin:5px 0; font-weight: bold; color:#666;">Prácticas</p></div>
+                    <div class="card" style="border-top-color: #2a9d8f; padding: 15px;"><h2 style="font-size: 35px; color: #2a9d8f;">${totalAciertos}</h2><p style="margin:5px 0; font-weight: bold; color:#666;">Aciertos</p></div>
+                    <div class="card" style="border-top-color: #e63946; padding: 15px;"><h2 style="font-size: 35px;">${medallas}</h2><p style="margin:5px 0; font-weight: bold; color:#666;">Medallas</p></div>
+                </div>
+                ${resumenUnidadHTML}
+                <h3 style="color: var(--text-dark);">Últimos Ejercicios</h3>
+                ${tablaHTML}
+            `;
+        }
+
+        // --- NAVEGACIÓN ---
+        let currentSubjectName = "", currentGrade = "";
+        function goTo(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(screenId).classList.add('active'); }
+        function selectSubject(name, colorClass) {
+            currentSubjectName = name; document.getElementById('title-grades').textContent = name;
+            document.getElementById('grades-container').innerHTML = `<div class="card ${colorClass}" onclick="selectGrade(${estudianteActual.grado})"><div class="card-icon">🎓</div><h2>${estudianteActual.grado}º Grado</h2></div>`;
+            goTo('screen-grades');
+        }
+        function selectGrade(grade) {
+            currentGrade = grade + "º Grado"; document.getElementById('title-units').textContent = `${currentSubjectName} - ${currentGrade}`;
+            document.getElementById('units-container').innerHTML = ""; 
+            for(let i = 1; i <= 10; i++) document.getElementById('units-container').innerHTML += `<div class="card-small" onclick="selectUnit(${i})">Unidad ${i}</div>`;
+            goTo('screen-units');
+        }
+        function selectUnit(unitNumber) {
+            if (currentSubjectName === 'Matemática' && currentGrade === '2º Grado' && unitNumber === 1) window.location.href = 'mate-2-u1.html';
+            else { document.getElementById('title-topics').textContent = `Unidad ${unitNumber}`; goTo('screen-topics'); }
+        }
+    </script>
+</body>
+</html>
