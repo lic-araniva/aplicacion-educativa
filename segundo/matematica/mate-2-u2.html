@@ -41,14 +41,14 @@
         .math-input { width: 60px; height: 50px; text-align: center; font-size: 24px; font-weight: bold; border: 2px solid #ccc; border-radius: 10px; outline: none; transition: 0.3s; }
         .label-po { font-size: 28px; font-weight: 900; margin-right: 10px; color: var(--esmate-blue);}
 
-        /* TABLA DE VALORES VERTICAL (C, D, U) Y LLEVADAS */
+        /* TABLA VERTICAL */
         .grid-suma { display: grid; grid-template-columns: 40px 70px 70px 70px; gap: 8px; align-items: center; justify-content: center; margin: 20px auto; width: fit-content;}
         .grid-header { text-align: center; color: white; padding: 8px; border-radius: 8px 8px 0 0; font-weight: bold; font-size: 22px; }
         .bg-c { background-color: var(--c-color); } .bg-d { background-color: var(--d-color); } .bg-u { background-color: var(--u-color); }
         .grid-cell { display: flex; justify-content: center; align-items: center; }
         .input-vertical { width: 100%; height: 60px; text-align: center; font-size: 30px; font-weight: bold; border: 2px solid #ccc; border-radius: 8px; outline: none; transition: 0.3s; }
         
-        /* Círculos para las llevadas */
+        /* Círculos Llevadas */
         .input-carry { width: 35px; height: 35px; text-align: center; font-size: 20px; font-weight: bold; border: 2px dashed var(--esmate-blue); border-radius: 50%; outline: none; transition: 0.3s; color: var(--esmate-blue); background: #fff;}
         
         .signo-mas { font-size: 35px; font-weight: bold; color: var(--esmate-blue); text-align: right; padding-right: 10px;}
@@ -81,8 +81,9 @@
                 <div id="btn-n4" style="display: none;"><button class="primary" style="background:#e63946;" onclick="iniciarNivel(4)">🔥 Nivel 4: Suma (2 Cifras)</button></div>
                 <div id="btn-n5" style="display: none;"><button class="primary" style="background:#f4a261;" onclick="iniciarNivel(5)">⚡ Nivel 5: Suma (3 Cifras)</button></div>
                 <div id="btn-n6" style="display: none;"><button class="primary" style="background:#2b2d42;" onclick="iniciarNivel(6)">👑 Nivel 6: REPASO</button></div>
-                <div id="btn-n7" style="display: none;"><button class="primary" style="background:#d90429;" onclick="iniciarNivel(7)">🎯 Nivel 7: Suma Llevando (Decenas)</button></div>
-                <div id="btn-n8" style="display: none;"><button class="primary" style="background:#9d0208;" onclick="iniciarNivel(8)">🌋 Nivel 8: Suma Llevando (D y C)</button></div>
+                <div id="btn-n7" style="display: none;"><button class="primary" style="background:#d90429;" onclick="iniciarNivel(7)">🎯 Nivel 7: Llevando (Decenas)</button></div>
+                <div id="btn-n8" style="display: none;"><button class="primary" style="background:#9d0208;" onclick="iniciarNivel(8)">🌋 Nivel 8: Llevando (D y C)</button></div>
+                <div id="btn-n9" style="display: none;"><button class="primary" style="background:#000; border: 4px solid #ffbf00;" onclick="iniciarNivel(9)">🏆 Nivel 9: EXAMEN FINAL</button></div>
                 <button class="secondary" style="background: white; color: #555; border: 1px solid #ccc; font-size: 14px;" onclick="iniciarNivel(1)">🔄 Repasar Nivel 1</button>
             </div>
 
@@ -98,7 +99,7 @@
         <div class="game-card">
             <div style="display: flex; justify-content: space-between; font-weight: bold; color: #666; margin-bottom: 10px;">
                 <span id="label-nivel-v">Nivel X</span>
-                <span>Ejercicio <span id="ronda-v">1</span>/10</span>
+                <span>Ejercicio <span id="ronda-v">1</span>/<span id="total-v">10</span></span>
                 <span style="color: var(--incorrect-color)">Intentos: <span id="intentos-v">2</span> ❤️</span>
             </div>
             <h3 style="margin: 0; color: #555;">Cuenta y suma:</h3>
@@ -129,7 +130,7 @@
         <div class="game-card">
             <div style="display: flex; justify-content: space-between; font-weight: bold; color: #666; margin-bottom: 10px;">
                 <span id="label-nivel-t">Nivel X</span>
-                <span>Ejercicio <span id="ronda-t">1</span>/10</span>
+                <span>Ejercicio <span id="ronda-t">1</span>/<span id="total-t">10</span></span>
                 <span style="color: var(--incorrect-color)">Intentos: <span id="intentos-t">2</span> ❤️</span>
             </div>
             <h3 style="margin: 0; color: #555;" id="instruccion-tabla">Ubica los números y suma:</h3>
@@ -170,8 +171,8 @@
     <div id="screen-finale" class="screen">
         <div class="game-card" style="background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%); color: white; border: none;">
             <h1 style="font-size: 35px;">¡Unidad 2 Completada!</h1>
-            <p>¡Eres un experto sumando con llevadas!</p>
-            <div style="font-size: 60px; margin: 20px 0;">🏆🌟🏆</div>
+            <p>¡Eres un Maestro de las Sumas!</p>
+            <div style="font-size: 60px; margin: 20px 0;">🌟🏆🌟</div>
             <button class="primary" style="background: white; color: #2d6a4f;" onclick="window.location.href='../../index.html'">➡️ Volver al Salón de Trofeos</button>
         </div>
     </div>
@@ -182,7 +183,7 @@
         const URL_BASE = "https://esmate-2026-default-rtdb.firebaseio.com/";
         let estudiante = { nombre: "Estudiante", nie: "0000", grado: "2" };
         let nivelActual = 1, ronda = 1, aciertos = 0, fallos = 0, intentosUsados = 0;
-        let tipoEjercicioActual = "visual", nivelParaGenerar = 1;
+        let tipoEjercicioActual = "visual", nivelParaGenerar = 1, totalRondas = 10;
         let solucion = {};
         const objetos = [{ e: '🍎', n: 'manzanas' }, { e: '🍌', n: 'guineos' }, { e: '⚽', n: 'pelotas' }, { e: '🚗', n: 'carros' }];
 
@@ -190,7 +191,7 @@
 
         let clics = 0;
         function activarModoPrueba() { clics++; if(clics===5) { let p=prompt("Clave:"); if(p==="rive2593") document.querySelectorAll('.cheat-element').forEach(b=>b.style.display='block'); } }
-        function autoGanar() { aciertos = 10; finalizarNivel(); }
+        function autoGanar() { aciertos = totalRondas; finalizarNivel(); }
 
         window.onload = function() {
             let info = localStorage.getItem('estudiante_esmate');
@@ -199,12 +200,13 @@
             if(progreso) {
                 let niv = parseInt(progreso);
                 document.getElementById('save-menu').style.display='block'; document.getElementById('new-menu').style.display='none';
-                for(let i=2; i<=8; i++) { if(niv >= i) document.getElementById('btn-n'+i).style.display='block'; }
+                for(let i=2; i<=9; i++) { if(niv >= i) document.getElementById('btn-n'+i).style.display='block'; }
             }
         };
 
         function iniciarNivel(nivel) {
             nivelActual = nivel; ronda = 1; aciertos = 0; fallos = 0;
+            totalRondas = (nivel === 9) ? 20 : 10;
             generarEjercicio();
         }
 
@@ -212,16 +214,20 @@
             intentosUsados = 0;
             nivelParaGenerar = nivelActual;
             
-            // Nivel 6: Repaso de 1 al 5
             if (nivelActual === 6) nivelParaGenerar = Math.floor(Math.random() * 5) + 1; 
+            if (nivelActual === 9) nivelParaGenerar = Math.floor(Math.random() * 8) + 1;
 
             tipoEjercicioActual = (nivelParaGenerar <= 2) ? "visual" : "tabla";
             
             if(tipoEjercicioActual === "visual") {
                 cambiarPantalla('screen-game-visual');
-                document.getElementById('label-nivel-v').textContent = (nivelActual === 6) ? "Nivel 6 (Repaso)" : "Nivel " + nivelActual;
+                if(nivelActual === 6) document.getElementById('label-nivel-v').textContent = "Nivel 6 (Repaso)";
+                else if(nivelActual === 9) document.getElementById('label-nivel-v').textContent = "Nivel 9 (FINAL)";
+                else document.getElementById('label-nivel-v').textContent = "Nivel " + nivelActual;
+                
                 document.getElementById('intentos-v').textContent = "2";
                 document.getElementById('ronda-v').textContent = ronda;
+                document.getElementById('total-v').textContent = totalRondas;
 
                 let maxTotal = (nivelParaGenerar === 1) ? 10 : 20;
                 let v1 = Math.floor(Math.random() * (maxTotal - 2)) + 1;
@@ -236,15 +242,21 @@
                 document.getElementById('po-1').focus();
             } else {
                 cambiarPantalla('screen-game-tabla');
-                document.getElementById('label-nivel-t').textContent = (nivelActual === 6) ? "Nivel 6 (Repaso)" : "Nivel " + nivelActual;
+                if(nivelActual === 6) document.getElementById('label-nivel-t').textContent = "Nivel 6 (Repaso)";
+                else if(nivelActual === 9) document.getElementById('label-nivel-t').textContent = "Nivel 9 (FINAL)";
+                else document.getElementById('label-nivel-t').textContent = "Nivel " + nivelActual;
+                
                 document.getElementById('intentos-t').textContent = "2";
                 document.getElementById('ronda-t').textContent = ronda;
-                document.getElementById('instruccion-tabla').textContent = (nivelActual >= 7) ? "Suma llevando (No olvides el 1 arriba):" : "Ubica los números y suma:";
+                document.getElementById('total-t').textContent = totalRondas;
+                
+                let inst = "Ubica los números y suma:";
+                if(nivelParaGenerar >= 7) inst = "Suma llevando (Usa el círculo de arriba):";
+                document.getElementById('instruccion-tabla').textContent = inst;
 
                 let inputs = ['t-c1','t-d1','t-u1','t-c2','t-d2','t-u2','t-cr','t-dr','t-ur', 't-cc', 't-cd'];
                 inputs.forEach(id => { let i = document.getElementById(id); i.value = ""; i.disabled = false; i.classList.remove('correct-cell', 'error-cell', 'disabled-cell'); });
                 
-                // Mostrar/Ocultar Círculos de Llevadas
                 document.getElementById('t-cc').classList.toggle('hidden-cell', nivelParaGenerar < 8);
                 document.getElementById('t-cd').classList.toggle('hidden-cell', nivelParaGenerar < 7);
 
@@ -262,14 +274,12 @@
                     c1 = r(7)+1; d1 = r(8); u1 = r(8); c2 = r(8-c1)+1; d2 = r(8-d1); u2 = r(8-u1);
                     document.getElementById('t-c1').focus();
                 } else if(nivelParaGenerar === 7) {
-                    // Llevando a Decenas (U1+U2 >= 10, D1+D2+1 < 10)
                     do { u1=r(9); u2=r(9); } while(u1+u2 < 10);
                     do { d1=r(9); d2=r(9); } while(d1+d2+1 >= 10);
                     do { c1=r(7)+1; c2=r(7)+1; } while(c1+c2 >= 10);
                     cd = 1; cc = 0;
                     document.getElementById('t-c1').focus();
                 } else if(nivelParaGenerar === 8) {
-                    // Llevando a Centenas y Decenas (U>=10, D>=10)
                     do { u1=r(9); u2=r(9); } while(u1+u2 < 10);
                     do { d1=r(9); d2=r(9); } while(d1+d2+1 < 10);
                     do { c1=r(7)+1; c2=r(7)+1; } while(c1+c2+1 >= 10);
@@ -279,12 +289,10 @@
 
                 let num1 = (c1*100)+(d1*10)+u1; let num2 = (c2*100)+(d2*10)+u2;
                 document.getElementById('target-suma').textContent = `${num1} + ${num2} = ?`;
-                
                 solucion = { c1:c1, d1:d1, u1:u1, c2:c2, d2:d2, u2:u2, cr:(c1+c2+cc), dr:((d1+d2+cd)%10), ur:((u1+u2)%10), cc:cc, cd:cd };
             }
         }
 
-        // Validador Estricto (Obliga a poner "1" en el circulito si se lleva)
         function checkValue(id, expected) {
             let input = document.getElementById(id);
             if(input.disabled && !input.classList.contains('disabled-cell')) return true;
@@ -324,27 +332,33 @@
             } else {
                 intentosUsados++;
                 document.getElementById(tipoEjercicioActual==="visual" ? 'intentos-v' : 'intentos-t').textContent = (2 - intentosUsados);
-                if(intentosUsados < 2) mostrarPopup("⚠️", "Inténtalo de nuevo", "Revisa las casillas rojas. (Si llevas, no olvides poner el 1 en el círculo).", null);
+                if(intentosUsados < 2) mostrarPopup("⚠️", "Inténtalo de nuevo", "Revisa las casillas rojas. (Si llevas, no olvides poner el 1 arriba).", null);
                 else { fallos++; mostrarPopup("💔", "Sin intentos", "Pasemos al siguiente ejercicio.", avanzar); }
             }
         }
 
-        function avanzar() { ronda++; if(ronda > 10) finalizarNivel(); else generarEjercicio(); }
+        function avanzar() { ronda++; if(ronda > totalRondas) finalizarNivel(); else generarEjercicio(); }
 
         function finalizarNivel() {
-            guardarEnFirebase(`U2 - Nivel ${nivelActual}`, aciertos, fallos);
-            if(aciertos >= 8) {
-                if(nivelActual < 8) {
+            // Nota: Para el nivel 9 (20 ejercicios) promediamos para que se guarde sobre 10
+            let notaGuardar = (nivelActual === 9) ? Math.round((aciertos/20)*10) : aciertos;
+            
+            guardarEnFirebase(`U2 - Nivel ${nivelActual}`, notaGuardar, fallos);
+            
+            let minPasar = (nivelActual === 9) ? 16 : 8; // 80% mínimo
+            
+            if(aciertos >= minPasar) {
+                if(nivelActual < 9) {
                     let sig = nivelActual + 1;
                     localStorage.setItem('esmate_u2_progreso_'+estudiante.nie, sig.toString());
                     mostrarPopup("🏆", `¡Nivel ${nivelActual} Superado!`, `Vamos al siguiente nivel.`, () => { iniciarNivel(sig); });
                 } else {
-                    localStorage.setItem('esmate_u2_progreso_'+estudiante.nie, "9"); 
+                    localStorage.setItem('esmate_u2_progreso_'+estudiante.nie, "10"); 
                     localStorage.setItem('esmate_show_progress', 'true');
                     cambiarPantalla('screen-finale'); dispararConfeti();
                 }
             } else {
-                mostrarPopup("💪", "¡Casi lo logras!", `Tuviste ${aciertos}/10. Necesitas 8 para pasar.`, () => { iniciarNivel(nivelActual); });
+                mostrarPopup("💪", "¡Casi lo logras!", `Tuviste ${aciertos}/${totalRondas}. Necesitas ${minPasar} para pasar.`, () => { iniciarNivel(nivelActual); });
             }
         }
 
