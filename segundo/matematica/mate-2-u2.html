@@ -31,6 +31,7 @@
         .correct-cell { background-color: #d8f3dc !important; border-color: var(--correct-color) !important; color: var(--correct-color) !important; }
         .error-cell { background-color: #ffccd5 !important; border-color: var(--incorrect-color) !important; color: var(--incorrect-color) !important; }
         .disabled-cell { background-color: #e9ecef !important; border-color: #ccc !important; cursor: not-allowed; color: #aaa !important;}
+        .hidden-cell { visibility: hidden; }
 
         /* VISUALES */
         .visual-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin: 20px 0; flex-wrap: wrap;}
@@ -40,12 +41,16 @@
         .math-input { width: 60px; height: 50px; text-align: center; font-size: 24px; font-weight: bold; border: 2px solid #ccc; border-radius: 10px; outline: none; transition: 0.3s; }
         .label-po { font-size: 28px; font-weight: 900; margin-right: 10px; color: var(--esmate-blue);}
 
-        /* TABLA DE VALORES VERTICAL (C, D, U) */
+        /* TABLA DE VALORES VERTICAL (C, D, U) Y LLEVADAS */
         .grid-suma { display: grid; grid-template-columns: 40px 70px 70px 70px; gap: 8px; align-items: center; justify-content: center; margin: 20px auto; width: fit-content;}
         .grid-header { text-align: center; color: white; padding: 8px; border-radius: 8px 8px 0 0; font-weight: bold; font-size: 22px; }
         .bg-c { background-color: var(--c-color); } .bg-d { background-color: var(--d-color); } .bg-u { background-color: var(--u-color); }
         .grid-cell { display: flex; justify-content: center; align-items: center; }
         .input-vertical { width: 100%; height: 60px; text-align: center; font-size: 30px; font-weight: bold; border: 2px solid #ccc; border-radius: 8px; outline: none; transition: 0.3s; }
+        
+        /* Círculos para las llevadas */
+        .input-carry { width: 35px; height: 35px; text-align: center; font-size: 20px; font-weight: bold; border: 2px dashed var(--esmate-blue); border-radius: 50%; outline: none; transition: 0.3s; color: var(--esmate-blue); background: #fff;}
+        
         .signo-mas { font-size: 35px; font-weight: bold; color: var(--esmate-blue); text-align: right; padding-right: 10px;}
         .linea-suma { grid-column: 1 / span 4; height: 5px; background: var(--text-dark); border-radius: 2px; margin: 5px 0; }
         .target-number { font-size: 35px; font-weight: bold; color: var(--text-dark); margin: 15px 0; background: #e0fbfc; border-radius: 10px; padding: 15px; border: 2px dashed #90e0ef; letter-spacing: 2px;}
@@ -72,10 +77,12 @@
             <div id="save-menu" style="display: none; margin-top: 20px; background: #e0fbfc; padding: 15px; border-radius: 10px;">
                 <p style="color: var(--correct-color); font-weight: bold; margin-top: 0;">¡Progreso encontrado!</p>
                 <div id="btn-n2" style="display: none;"><button class="primary" onclick="iniciarNivel(2)">🚀 Nivel 2: Suma Visual</button></div>
-                <div id="btn-n3" style="display: none;"><button class="primary" style="background:#2a9d8f;" onclick="iniciarNivel(3)">📐 Nivel 3: Suma Vertical (1 Cifra)</button></div>
-                <div id="btn-n4" style="display: none;"><button class="primary" style="background:#e63946;" onclick="iniciarNivel(4)">🔥 Nivel 4: Suma Vertical (2 Cifras)</button></div>
-                <div id="btn-n5" style="display: none;"><button class="primary" style="background:#f4a261;" onclick="iniciarNivel(5)">⚡ Nivel 5: Suma Vertical (3 Cifras)</button></div>
-                <div id="btn-n6" style="display: none;"><button class="primary" style="background:#2b2d42;" onclick="iniciarNivel(6)">👑 Nivel 6: REPASO FINAL</button></div>
+                <div id="btn-n3" style="display: none;"><button class="primary" style="background:#2a9d8f;" onclick="iniciarNivel(3)">📐 Nivel 3: Suma (1 Cifra)</button></div>
+                <div id="btn-n4" style="display: none;"><button class="primary" style="background:#e63946;" onclick="iniciarNivel(4)">🔥 Nivel 4: Suma (2 Cifras)</button></div>
+                <div id="btn-n5" style="display: none;"><button class="primary" style="background:#f4a261;" onclick="iniciarNivel(5)">⚡ Nivel 5: Suma (3 Cifras)</button></div>
+                <div id="btn-n6" style="display: none;"><button class="primary" style="background:#2b2d42;" onclick="iniciarNivel(6)">👑 Nivel 6: REPASO</button></div>
+                <div id="btn-n7" style="display: none;"><button class="primary" style="background:#d90429;" onclick="iniciarNivel(7)">🎯 Nivel 7: Suma Llevando (Decenas)</button></div>
+                <div id="btn-n8" style="display: none;"><button class="primary" style="background:#9d0208;" onclick="iniciarNivel(8)">🌋 Nivel 8: Suma Llevando (D y C)</button></div>
                 <button class="secondary" style="background: white; color: #555; border: 1px solid #ccc; font-size: 14px;" onclick="iniciarNivel(1)">🔄 Repasar Nivel 1</button>
             </div>
 
@@ -125,21 +132,30 @@
                 <span>Ejercicio <span id="ronda-t">1</span>/10</span>
                 <span style="color: var(--incorrect-color)">Intentos: <span id="intentos-t">2</span> ❤️</span>
             </div>
-            <h3 style="margin: 0; color: #555;">Ubica los números y suma (sin llevar):</h3>
+            <h3 style="margin: 0; color: #555;" id="instruccion-tabla">Ubica los números y suma:</h3>
             
             <div class="target-number" id="target-suma">0 + 0 = ?</div>
 
             <div class="grid-suma">
+                <div></div> 
+                <div class="grid-cell"><input type="tel" id="t-cc" class="input-carry hidden-cell" maxlength="1" autocomplete="off"></div> 
+                <div class="grid-cell"><input type="tel" id="t-cd" class="input-carry hidden-cell" maxlength="1" autocomplete="off"></div> 
+                <div></div>
+
                 <div></div> <div class="grid-header bg-c">C</div> <div class="grid-header bg-d">D</div> <div class="grid-header bg-u">U</div>
+                
                 <div></div> 
                 <div class="grid-cell"><input type="tel" id="t-c1" class="input-vertical" maxlength="1" autocomplete="off"></div> 
                 <div class="grid-cell"><input type="tel" id="t-d1" class="input-vertical" maxlength="1" autocomplete="off"></div> 
                 <div class="grid-cell"><input type="tel" id="t-u1" class="input-vertical" maxlength="1" autocomplete="off"></div>
+                
                 <div class="signo-mas">＋</div> 
                 <div class="grid-cell"><input type="tel" id="t-c2" class="input-vertical" maxlength="1" autocomplete="off"></div> 
                 <div class="grid-cell"><input type="tel" id="t-d2" class="input-vertical" maxlength="1" autocomplete="off"></div> 
                 <div class="grid-cell"><input type="tel" id="t-u2" class="input-vertical" maxlength="1" autocomplete="off"></div>
+                
                 <div class="linea-suma"></div>
+                
                 <div></div> 
                 <div class="grid-cell"><input type="tel" id="t-cr" class="input-vertical" maxlength="1" autocomplete="off" style="border-color:var(--esmate-blue);"></div> 
                 <div class="grid-cell"><input type="tel" id="t-dr" class="input-vertical" maxlength="1" autocomplete="off" style="border-color:var(--esmate-blue);"></div> 
@@ -154,8 +170,8 @@
     <div id="screen-finale" class="screen">
         <div class="game-card" style="background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%); color: white; border: none;">
             <h1 style="font-size: 35px;">¡Unidad 2 Completada!</h1>
-            <p>¡Dominaste las sumas sin llevar!</p>
-            <div style="font-size: 60px; margin: 20px 0;">🏆</div>
+            <p>¡Eres un experto sumando con llevadas!</p>
+            <div style="font-size: 60px; margin: 20px 0;">🏆🌟🏆</div>
             <button class="primary" style="background: white; color: #2d6a4f;" onclick="window.location.href='../../index.html'">➡️ Volver al Salón de Trofeos</button>
         </div>
     </div>
@@ -166,9 +182,11 @@
         const URL_BASE = "https://esmate-2026-default-rtdb.firebaseio.com/";
         let estudiante = { nombre: "Estudiante", nie: "0000", grado: "2" };
         let nivelActual = 1, ronda = 1, aciertos = 0, fallos = 0, intentosUsados = 0;
-        let tipoEjercicioActual = "visual"; // "visual" o "tabla"
+        let tipoEjercicioActual = "visual", nivelParaGenerar = 1;
         let solucion = {};
         const objetos = [{ e: '🍎', n: 'manzanas' }, { e: '🍌', n: 'guineos' }, { e: '⚽', n: 'pelotas' }, { e: '🚗', n: 'carros' }];
+
+        function r(max) { return Math.floor(Math.random() * (max + 1)); }
 
         let clics = 0;
         function activarModoPrueba() { clics++; if(clics===5) { let p=prompt("Clave:"); if(p==="rive2593") document.querySelectorAll('.cheat-element').forEach(b=>b.style.display='block'); } }
@@ -181,11 +199,7 @@
             if(progreso) {
                 let niv = parseInt(progreso);
                 document.getElementById('save-menu').style.display='block'; document.getElementById('new-menu').style.display='none';
-                if(niv >= 2) document.getElementById('btn-n2').style.display='block';
-                if(niv >= 3) document.getElementById('btn-n3').style.display='block';
-                if(niv >= 4) document.getElementById('btn-n4').style.display='block';
-                if(niv >= 5) document.getElementById('btn-n5').style.display='block';
-                if(niv >= 6) document.getElementById('btn-n6').style.display='block';
+                for(let i=2; i<=8; i++) { if(niv >= i) document.getElementById('btn-n'+i).style.display='block'; }
             }
         };
 
@@ -196,14 +210,11 @@
 
         function generarEjercicio() {
             intentosUsados = 0;
+            nivelParaGenerar = nivelActual;
             
-            // Lógica Nivel 6 (Mezcla de todo)
-            let nivelParaGenerar = nivelActual;
-            if (nivelActual === 6) {
-                nivelParaGenerar = Math.floor(Math.random() * 5) + 1; // Elige al azar del 1 al 5
-            }
+            // Nivel 6: Repaso de 1 al 5
+            if (nivelActual === 6) nivelParaGenerar = Math.floor(Math.random() * 5) + 1; 
 
-            // Detectar qué pantalla usar
             tipoEjercicioActual = (nivelParaGenerar <= 2) ? "visual" : "tabla";
             
             if(tipoEjercicioActual === "visual") {
@@ -216,9 +227,11 @@
                 let v1 = Math.floor(Math.random() * (maxTotal - 2)) + 1;
                 let v2 = Math.floor(Math.random() * (maxTotal - v1 - 1)) + 1;
                 let obj = objetos[Math.floor(Math.random()*objetos.length)];
+                
                 document.getElementById('box-1').textContent = obj.e.repeat(v1); document.getElementById('box-2').textContent = obj.e.repeat(v2);
                 document.getElementById('obj-name').textContent = obj.n + ".";
                 solucion = { p1: v1, p2: v2, p3: v1+v2, r: v1+v2 };
+                
                 ['po-1','po-2','po-3','r-1'].forEach(id => { let i = document.getElementById(id); i.value = ""; i.disabled = false; i.classList.remove('correct-cell', 'error-cell'); });
                 document.getElementById('po-1').focus();
             } else {
@@ -226,43 +239,58 @@
                 document.getElementById('label-nivel-t').textContent = (nivelActual === 6) ? "Nivel 6 (Repaso)" : "Nivel " + nivelActual;
                 document.getElementById('intentos-t').textContent = "2";
                 document.getElementById('ronda-t').textContent = ronda;
-                
-                let inputs = ['t-c1','t-d1','t-u1','t-c2','t-d2','t-u2','t-cr','t-dr','t-ur'];
+                document.getElementById('instruccion-tabla').textContent = (nivelActual >= 7) ? "Suma llevando (No olvides el 1 arriba):" : "Ubica los números y suma:";
+
+                let inputs = ['t-c1','t-d1','t-u1','t-c2','t-d2','t-u2','t-cr','t-dr','t-ur', 't-cc', 't-cd'];
                 inputs.forEach(id => { let i = document.getElementById(id); i.value = ""; i.disabled = false; i.classList.remove('correct-cell', 'error-cell', 'disabled-cell'); });
                 
+                // Mostrar/Ocultar Círculos de Llevadas
+                document.getElementById('t-cc').classList.toggle('hidden-cell', nivelParaGenerar < 8);
+                document.getElementById('t-cd').classList.toggle('hidden-cell', nivelParaGenerar < 7);
+
+                let c1=0, d1=0, u1=0, c2=0, d2=0, u2=0, cc=0, cd=0;
+
                 if(nivelParaGenerar === 3) {
-                    // 1 Cifra
-                    let v1 = Math.floor(Math.random() * 8) + 1;
-                    let v2 = Math.floor(Math.random() * (9 - v1)) + 1;
-                    document.getElementById('target-suma').textContent = `${v1} + ${v2} = ?`;
-                    solucion = { c1:0, d1:0, u1:v1, c2:0, d2:0, u2:v2, cr:0, dr:0, ur:v1+v2 };
-                    ['t-c1','t-d1','t-c2','t-d2','t-cr','t-dr'].forEach(id => { let i = document.getElementById(id); i.value = ""; i.disabled = true; i.classList.add('disabled-cell'); });
+                    u1 = r(7)+1; u2 = r(8-u1)+1;
+                    ['t-c1','t-d1','t-c2','t-d2','t-cr','t-dr'].forEach(id => { document.getElementById(id).disabled = true; document.getElementById(id).classList.add('disabled-cell'); });
                     document.getElementById('t-u1').focus();
                 } else if(nivelParaGenerar === 4) {
-                    // 2 Cifras
-                    let d1 = Math.floor(Math.random() * 8) + 1; let u1 = Math.floor(Math.random() * 9);
-                    let d2 = Math.floor(Math.random() * (9 - d1)) + 1; let u2 = Math.floor(Math.random() * (9 - u1));
-                    document.getElementById('target-suma').textContent = `${(d1*10)+u1} + ${(d2*10)+u2} = ?`;
-                    solucion = { c1:0, d1:d1, u1:u1, c2:0, d2:d2, u2:u2, cr:0, dr:d1+d2, ur:u1+u2 };
-                    ['t-c1','t-c2','t-cr'].forEach(id => { let i = document.getElementById(id); i.value = ""; i.disabled = true; i.classList.add('disabled-cell'); });
+                    d1 = r(7)+1; u1 = r(8); d2 = r(8-d1)+1; u2 = r(8-u1);
+                    ['t-c1','t-c2','t-cr'].forEach(id => { document.getElementById(id).disabled = true; document.getElementById(id).classList.add('disabled-cell'); });
                     document.getElementById('t-d1').focus();
                 } else if(nivelParaGenerar === 5) {
-                    // 3 Cifras
-                    let c1 = Math.floor(Math.random() * 8) + 1; let d1 = Math.floor(Math.random() * 9); let u1 = Math.floor(Math.random() * 9);
-                    let c2 = Math.floor(Math.random() * (9 - c1)) + 1; let d2 = Math.floor(Math.random() * (9 - d1)); let u2 = Math.floor(Math.random() * (9 - u1));
-                    document.getElementById('target-suma').textContent = `${(c1*100)+(d1*10)+u1} + ${(c2*100)+(d2*10)+u2} = ?`;
-                    solucion = { c1:c1, d1:d1, u1:u1, c2:c2, d2:d2, u2:u2, cr:c1+c2, dr:d1+d2, ur:u1+u2 };
+                    c1 = r(7)+1; d1 = r(8); u1 = r(8); c2 = r(8-c1)+1; d2 = r(8-d1); u2 = r(8-u1);
+                    document.getElementById('t-c1').focus();
+                } else if(nivelParaGenerar === 7) {
+                    // Llevando a Decenas (U1+U2 >= 10, D1+D2+1 < 10)
+                    do { u1=r(9); u2=r(9); } while(u1+u2 < 10);
+                    do { d1=r(9); d2=r(9); } while(d1+d2+1 >= 10);
+                    do { c1=r(7)+1; c2=r(7)+1; } while(c1+c2 >= 10);
+                    cd = 1; cc = 0;
+                    document.getElementById('t-c1').focus();
+                } else if(nivelParaGenerar === 8) {
+                    // Llevando a Centenas y Decenas (U>=10, D>=10)
+                    do { u1=r(9); u2=r(9); } while(u1+u2 < 10);
+                    do { d1=r(9); d2=r(9); } while(d1+d2+1 < 10);
+                    do { c1=r(7)+1; c2=r(7)+1; } while(c1+c2+1 >= 10);
+                    cd = 1; cc = 1;
                     document.getElementById('t-c1').focus();
                 }
+
+                let num1 = (c1*100)+(d1*10)+u1; let num2 = (c2*100)+(d2*10)+u2;
+                document.getElementById('target-suma').textContent = `${num1} + ${num2} = ?`;
+                
+                solucion = { c1:c1, d1:d1, u1:u1, c2:c2, d2:d2, u2:u2, cr:(c1+c2+cc), dr:((d1+d2+cd)%10), ur:((u1+u2)%10), cc:cc, cd:cd };
             }
         }
 
+        // Validador Estricto (Obliga a poner "1" en el circulito si se lleva)
         function checkValue(id, expected) {
             let input = document.getElementById(id);
             if(input.disabled && !input.classList.contains('disabled-cell')) return true;
-            if(input.classList.contains('disabled-cell')) return true;
+            if(input.classList.contains('disabled-cell') || input.classList.contains('hidden-cell')) return true;
             let val = input.value.trim();
-            if(val === "") { if(expected === 0) return true; return false; }
+            if(val === "") return (expected === 0);
             return parseInt(val) === expected;
         }
 
@@ -275,7 +303,14 @@
                 if(checkValue('po-3', solucion.p3)) { correctos++; document.getElementById('po-3').classList.add('correct-cell'); document.getElementById('po-3').disabled=true;} else document.getElementById('po-3').classList.add('error-cell');
                 if(checkValue('r-1', solucion.r)) { correctos++; document.getElementById('r-1').classList.add('correct-cell'); document.getElementById('r-1').disabled=true;} else document.getElementById('r-1').classList.add('error-cell');
             } else {
-                let req = ['t-c1','t-d1','t-u1','t-c2','t-d2','t-u2','t-cr','t-dr','t-ur'];
+                let req = [];
+                if(nivelParaGenerar === 3) req = ['t-u1','t-u2','t-ur'];
+                else if(nivelParaGenerar === 4) req = ['t-d1','t-u1','t-d2','t-u2','t-dr','t-ur'];
+                else req = ['t-c1','t-d1','t-u1','t-c2','t-d2','t-u2','t-cr','t-dr','t-ur'];
+
+                if(nivelParaGenerar >= 7) req.push('t-cd');
+                if(nivelParaGenerar === 8) req.push('t-cc');
+
                 total = req.length;
                 req.forEach(id => {
                     let key = id.replace("t-", "");
@@ -289,7 +324,7 @@
             } else {
                 intentosUsados++;
                 document.getElementById(tipoEjercicioActual==="visual" ? 'intentos-v' : 'intentos-t').textContent = (2 - intentosUsados);
-                if(intentosUsados < 2) mostrarPopup("⚠️", "Inténtalo de nuevo", "Revisa las casillas marcadas en rojo.", null);
+                if(intentosUsados < 2) mostrarPopup("⚠️", "Inténtalo de nuevo", "Revisa las casillas rojas. (Si llevas, no olvides poner el 1 en el círculo).", null);
                 else { fallos++; mostrarPopup("💔", "Sin intentos", "Pasemos al siguiente ejercicio.", avanzar); }
             }
         }
@@ -299,26 +334,22 @@
         function finalizarNivel() {
             guardarEnFirebase(`U2 - Nivel ${nivelActual}`, aciertos, fallos);
             if(aciertos >= 8) {
-                if(nivelActual < 6) {
+                if(nivelActual < 8) {
                     let sig = nivelActual + 1;
                     localStorage.setItem('esmate_u2_progreso_'+estudiante.nie, sig.toString());
-                    mostrarPopup("🏆", `¡Nivel ${nivelActual} Superado!`, `Aciertos: ${aciertos}/10. ¡Vamos al siguiente!`, () => { iniciarNivel(sig); });
+                    mostrarPopup("🏆", `¡Nivel ${nivelActual} Superado!`, `Vamos al siguiente nivel.`, () => { iniciarNivel(sig); });
                 } else {
-                    localStorage.setItem('esmate_u2_progreso_'+estudiante.nie, "7"); 
+                    localStorage.setItem('esmate_u2_progreso_'+estudiante.nie, "9"); 
                     localStorage.setItem('esmate_show_progress', 'true');
                     cambiarPantalla('screen-finale'); dispararConfeti();
                 }
             } else {
-                mostrarPopup("💪", "¡Casi lo logras!", `Tuviste ${aciertos}/10. Necesitas 8 para pasar. ¡Vuelve a intentarlo!`, () => { iniciarNivel(nivelActual); });
+                mostrarPopup("💪", "¡Casi lo logras!", `Tuviste ${aciertos}/10. Necesitas 8 para pasar.`, () => { iniciarNivel(nivelActual); });
             }
         }
 
         function dispararConfeti() {
-            for(let i=0; i<50; i++) {
-                let confeti = document.createElement('div'); confeti.classList.add('confetti');
-                confeti.style.left = Math.random() * 100 + 'vw'; confeti.style.backgroundColor = ['#ff0', '#f00', '#0f0', '#00f', '#f0f'][Math.floor(Math.random()*5)];
-                confeti.style.animationDuration = (Math.random() * 3 + 2) + 's'; document.body.appendChild(confeti); setTimeout(() => confeti.remove(), 5000);
-            }
+            for(let i=0; i<50; i++) { let confeti = document.createElement('div'); confeti.classList.add('confetti'); confeti.style.left = Math.random() * 100 + 'vw'; confeti.style.backgroundColor = ['#ff0', '#f00', '#0f0', '#00f', '#f0f'][Math.floor(Math.random()*5)]; confeti.style.animationDuration = (Math.random() * 3 + 2) + 's'; document.body.appendChild(confeti); setTimeout(() => confeti.remove(), 5000); }
         }
 
         function cambiarPantalla(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
