@@ -8,7 +8,7 @@
         :root {
             --esmate-blue: #4361ee; --bg-color: #f8f9fa; --text-dark: #2b2d42;
             --correct-color: #2d6a4f; --incorrect-color: #d90429;
-            --box-green: #81b29a; --d-color: #e63946; --u-color: #4361ee;
+            --box-green: #81b29a; --c-color: #2a9d8f; --d-color: #e63946; --u-color: #4361ee;
         }
 
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
@@ -30,9 +30,9 @@
 
         .correct-cell { background-color: #d8f3dc !important; border-color: var(--correct-color) !important; color: var(--correct-color) !important; }
         .error-cell { background-color: #ffccd5 !important; border-color: var(--incorrect-color) !important; color: var(--incorrect-color) !important; }
-        .disabled-cell { background-color: #e9ecef !important; border-color: #ccc !important; cursor: not-allowed; }
+        .disabled-cell { background-color: #e9ecef !important; border-color: #ccc !important; cursor: not-allowed; color: #aaa !important;}
 
-        /* NIVELES 1 Y 2: VISUALES */
+        /* VISUALES */
         .visual-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin: 20px 0; flex-wrap: wrap;}
         .emoji-box { border: 3px solid var(--box-green); border-radius: 15px; padding: 15px; min-width: 100px; min-height: 80px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 5px; font-size: 30px; background: #f4fcf8; max-width: 250px;}
         .arrow-sign { font-size: 30px; color: var(--box-green); font-weight: bold; }
@@ -40,19 +40,22 @@
         .math-input { width: 60px; height: 50px; text-align: center; font-size: 24px; font-weight: bold; border: 2px solid #ccc; border-radius: 10px; outline: none; transition: 0.3s; }
         .label-po { font-size: 28px; font-weight: 900; margin-right: 10px; color: var(--esmate-blue);}
 
-        /* NIVELES 3 Y 4: TABLA DE VALORES VERTICAL */
-        .grid-suma { display: grid; grid-template-columns: 40px 70px 70px; gap: 8px; align-items: center; justify-content: center; margin: 20px auto; width: fit-content;}
+        /* TABLA DE VALORES VERTICAL (C, D, U) */
+        .grid-suma { display: grid; grid-template-columns: 40px 70px 70px 70px; gap: 8px; align-items: center; justify-content: center; margin: 20px auto; width: fit-content;}
         .grid-header { text-align: center; color: white; padding: 8px; border-radius: 8px 8px 0 0; font-weight: bold; font-size: 22px; }
-        .bg-d { background-color: var(--d-color); } .bg-u { background-color: var(--u-color); }
+        .bg-c { background-color: var(--c-color); } .bg-d { background-color: var(--d-color); } .bg-u { background-color: var(--u-color); }
         .grid-cell { display: flex; justify-content: center; align-items: center; }
         .input-vertical { width: 100%; height: 60px; text-align: center; font-size: 30px; font-weight: bold; border: 2px solid #ccc; border-radius: 8px; outline: none; transition: 0.3s; }
         .signo-mas { font-size: 35px; font-weight: bold; color: var(--esmate-blue); text-align: right; padding-right: 10px;}
-        .linea-suma { grid-column: 1 / span 3; height: 5px; background: var(--text-dark); border-radius: 2px; margin: 5px 0; }
+        .linea-suma { grid-column: 1 / span 4; height: 5px; background: var(--text-dark); border-radius: 2px; margin: 5px 0; }
         .target-number { font-size: 35px; font-weight: bold; color: var(--text-dark); margin: 15px 0; background: #e0fbfc; border-radius: 10px; padding: 15px; border: 2px dashed #90e0ef; letter-spacing: 2px;}
 
         #feedback-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box;}
         #feedback-content { background: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 400px; width: 100%; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        
+        .confetti { position: fixed; width: 10px; height: 10px; background-color: #f00; z-index: 999; top: -10px; animation: fall linear forwards; }
+        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
     </style>
 </head>
 <body>
@@ -68,9 +71,11 @@
             
             <div id="save-menu" style="display: none; margin-top: 20px; background: #e0fbfc; padding: 15px; border-radius: 10px;">
                 <p style="color: var(--correct-color); font-weight: bold; margin-top: 0;">¡Progreso encontrado!</p>
-                <div id="btn-n2" style="display: none;"><button class="primary" onclick="iniciarNivel(2)">🚀 Nivel 2: Suma Visual (Hasta 20)</button></div>
+                <div id="btn-n2" style="display: none;"><button class="primary" onclick="iniciarNivel(2)">🚀 Nivel 2: Suma Visual</button></div>
                 <div id="btn-n3" style="display: none;"><button class="primary" style="background:#2a9d8f;" onclick="iniciarNivel(3)">📐 Nivel 3: Suma Vertical (1 Cifra)</button></div>
                 <div id="btn-n4" style="display: none;"><button class="primary" style="background:#e63946;" onclick="iniciarNivel(4)">🔥 Nivel 4: Suma Vertical (2 Cifras)</button></div>
+                <div id="btn-n5" style="display: none;"><button class="primary" style="background:#f4a261;" onclick="iniciarNivel(5)">⚡ Nivel 5: Suma Vertical (3 Cifras)</button></div>
+                <div id="btn-n6" style="display: none;"><button class="primary" style="background:#2b2d42;" onclick="iniciarNivel(6)">👑 Nivel 6: REPASO FINAL</button></div>
                 <button class="secondary" style="background: white; color: #555; border: 1px solid #ccc; font-size: 14px;" onclick="iniciarNivel(1)">🔄 Repasar Nivel 1</button>
             </div>
 
@@ -90,13 +95,11 @@
                 <span style="color: var(--incorrect-color)">Intentos: <span id="intentos-v">2</span> ❤️</span>
             </div>
             <h3 style="margin: 0; color: #555;">Cuenta y suma:</h3>
-            
             <div class="visual-container">
                 <div class="emoji-box" id="box-1"></div>
                 <div class="arrow-sign">→  ←</div>
                 <div class="emoji-box" id="box-2"></div>
             </div>
-
             <div class="math-row">
                 <span class="label-po">PO:</span>
                 <input type="tel" id="po-1" class="math-input" maxlength="2" autocomplete="off" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
@@ -110,7 +113,6 @@
                 <input type="tel" id="r-1" class="math-input" maxlength="2" autocomplete="off" oninput="this.value=this.value.replace(/[^0-9]/g,'')" style="border-color: var(--esmate-blue);">
                 <span id="obj-name" style="color: #666; font-size: 22px;">objetos.</span>
             </div>
-
             <button class="primary" onclick="revisarEjercicio()">✅ Revisar</button>
             <button class="btn-cheat cheat-element" onclick="autoGanar()">⏭️ GANAR NIVEL</button>
         </div>
@@ -128,15 +130,18 @@
             <div class="target-number" id="target-suma">0 + 0 = ?</div>
 
             <div class="grid-suma">
-                <div></div> <div class="grid-header bg-d">D</div> <div class="grid-header bg-u">U</div>
+                <div></div> <div class="grid-header bg-c">C</div> <div class="grid-header bg-d">D</div> <div class="grid-header bg-u">U</div>
                 <div></div> 
+                <div class="grid-cell"><input type="tel" id="t-c1" class="input-vertical" maxlength="1" autocomplete="off"></div> 
                 <div class="grid-cell"><input type="tel" id="t-d1" class="input-vertical" maxlength="1" autocomplete="off"></div> 
                 <div class="grid-cell"><input type="tel" id="t-u1" class="input-vertical" maxlength="1" autocomplete="off"></div>
                 <div class="signo-mas">＋</div> 
+                <div class="grid-cell"><input type="tel" id="t-c2" class="input-vertical" maxlength="1" autocomplete="off"></div> 
                 <div class="grid-cell"><input type="tel" id="t-d2" class="input-vertical" maxlength="1" autocomplete="off"></div> 
                 <div class="grid-cell"><input type="tel" id="t-u2" class="input-vertical" maxlength="1" autocomplete="off"></div>
                 <div class="linea-suma"></div>
                 <div></div> 
+                <div class="grid-cell"><input type="tel" id="t-cr" class="input-vertical" maxlength="1" autocomplete="off" style="border-color:var(--esmate-blue);"></div> 
                 <div class="grid-cell"><input type="tel" id="t-dr" class="input-vertical" maxlength="1" autocomplete="off" style="border-color:var(--esmate-blue);"></div> 
                 <div class="grid-cell"><input type="tel" id="t-ur" class="input-vertical" maxlength="1" autocomplete="off" style="border-color:var(--esmate-blue);"></div>
             </div>
@@ -148,9 +153,9 @@
 
     <div id="screen-finale" class="screen">
         <div class="game-card" style="background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%); color: white; border: none;">
-            <h1 style="font-size: 35px;">¡Felicidades!</h1>
-            <p>Has completado el nivel con éxito.</p>
-            <div style="font-size: 60px; margin: 20px 0;">🌟🏆🌟</div>
+            <h1 style="font-size: 35px;">¡Unidad 2 Completada!</h1>
+            <p>¡Dominaste las sumas sin llevar!</p>
+            <div style="font-size: 60px; margin: 20px 0;">🏆</div>
             <button class="primary" style="background: white; color: #2d6a4f;" onclick="window.location.href='../../index.html'">➡️ Volver al Salón de Trofeos</button>
         </div>
     </div>
@@ -161,6 +166,7 @@
         const URL_BASE = "https://esmate-2026-default-rtdb.firebaseio.com/";
         let estudiante = { nombre: "Estudiante", nie: "0000", grado: "2" };
         let nivelActual = 1, ronda = 1, aciertos = 0, fallos = 0, intentosUsados = 0;
+        let tipoEjercicioActual = "visual"; // "visual" o "tabla"
         let solucion = {};
         const objetos = [{ e: '🍎', n: 'manzanas' }, { e: '🍌', n: 'guineos' }, { e: '⚽', n: 'pelotas' }, { e: '🚗', n: 'carros' }];
 
@@ -178,21 +184,35 @@
                 if(niv >= 2) document.getElementById('btn-n2').style.display='block';
                 if(niv >= 3) document.getElementById('btn-n3').style.display='block';
                 if(niv >= 4) document.getElementById('btn-n4').style.display='block';
+                if(niv >= 5) document.getElementById('btn-n5').style.display='block';
+                if(niv >= 6) document.getElementById('btn-n6').style.display='block';
             }
         };
 
         function iniciarNivel(nivel) {
             nivelActual = nivel; ronda = 1; aciertos = 0; fallos = 0;
-            if(nivel === 1 || nivel === 2) { cambiarPantalla('screen-game-visual'); document.getElementById('label-nivel-v').textContent = "Nivel " + nivel; } 
-            else { cambiarPantalla('screen-game-tabla'); document.getElementById('label-nivel-t').textContent = "Nivel " + nivel; }
             generarEjercicio();
         }
 
         function generarEjercicio() {
             intentosUsados = 0;
-            if(nivelActual === 1 || nivelActual === 2) {
-                document.getElementById('intentos-v').textContent = (2 - intentosUsados);
-                let maxTotal = (nivelActual === 1) ? 10 : 20;
+            
+            // Lógica Nivel 6 (Mezcla de todo)
+            let nivelParaGenerar = nivelActual;
+            if (nivelActual === 6) {
+                nivelParaGenerar = Math.floor(Math.random() * 5) + 1; // Elige al azar del 1 al 5
+            }
+
+            // Detectar qué pantalla usar
+            tipoEjercicioActual = (nivelParaGenerar <= 2) ? "visual" : "tabla";
+            
+            if(tipoEjercicioActual === "visual") {
+                cambiarPantalla('screen-game-visual');
+                document.getElementById('label-nivel-v').textContent = (nivelActual === 6) ? "Nivel 6 (Repaso)" : "Nivel " + nivelActual;
+                document.getElementById('intentos-v').textContent = "2";
+                document.getElementById('ronda-v').textContent = ronda;
+
+                let maxTotal = (nivelParaGenerar === 1) ? 10 : 20;
                 let v1 = Math.floor(Math.random() * (maxTotal - 2)) + 1;
                 let v2 = Math.floor(Math.random() * (maxTotal - v1 - 1)) + 1;
                 let obj = objetos[Math.floor(Math.random()*objetos.length)];
@@ -200,59 +220,62 @@
                 document.getElementById('obj-name').textContent = obj.n + ".";
                 solucion = { p1: v1, p2: v2, p3: v1+v2, r: v1+v2 };
                 ['po-1','po-2','po-3','r-1'].forEach(id => { let i = document.getElementById(id); i.value = ""; i.disabled = false; i.classList.remove('correct-cell', 'error-cell'); });
-                document.getElementById('ronda-v').textContent = ronda; document.getElementById('po-1').focus();
+                document.getElementById('po-1').focus();
             } else {
-                document.getElementById('intentos-t').textContent = (2 - intentosUsados);
-                let inputs = ['t-d1','t-u1','t-d2','t-u2','t-dr','t-ur'];
+                cambiarPantalla('screen-game-tabla');
+                document.getElementById('label-nivel-t').textContent = (nivelActual === 6) ? "Nivel 6 (Repaso)" : "Nivel " + nivelActual;
+                document.getElementById('intentos-t').textContent = "2";
+                document.getElementById('ronda-t').textContent = ronda;
+                
+                let inputs = ['t-c1','t-d1','t-u1','t-c2','t-d2','t-u2','t-cr','t-dr','t-ur'];
                 inputs.forEach(id => { let i = document.getElementById(id); i.value = ""; i.disabled = false; i.classList.remove('correct-cell', 'error-cell', 'disabled-cell'); });
                 
-                if(nivelActual === 3) {
-                    // Nivel 3: Suma de 1 cifra (sin llevar, max 9)
-                    let v1 = Math.floor(Math.random() * 8) + 1; // 1 a 8
-                    let v2 = Math.floor(Math.random() * (9 - v1)) + 1; // Para que v1+v2 <= 9
+                if(nivelParaGenerar === 3) {
+                    // 1 Cifra
+                    let v1 = Math.floor(Math.random() * 8) + 1;
+                    let v2 = Math.floor(Math.random() * (9 - v1)) + 1;
                     document.getElementById('target-suma').textContent = `${v1} + ${v2} = ?`;
-                    solucion = { d1: 0, u1: v1, d2: 0, u2: v2, dr: 0, ur: v1+v2 };
-                    
-                    // Deshabilitamos visualmente las Decenas
-                    ['t-d1','t-d2','t-dr'].forEach(id => { let i = document.getElementById(id); i.value = ""; i.disabled = true; i.classList.add('disabled-cell'); });
+                    solucion = { c1:0, d1:0, u1:v1, c2:0, d2:0, u2:v2, cr:0, dr:0, ur:v1+v2 };
+                    ['t-c1','t-d1','t-c2','t-d2','t-cr','t-dr'].forEach(id => { let i = document.getElementById(id); i.value = ""; i.disabled = true; i.classList.add('disabled-cell'); });
                     document.getElementById('t-u1').focus();
-                } else if(nivelActual === 4) {
-                    // Nivel 4: Suma de 2 cifras (sin llevar, max 99)
+                } else if(nivelParaGenerar === 4) {
+                    // 2 Cifras
                     let d1 = Math.floor(Math.random() * 8) + 1; let u1 = Math.floor(Math.random() * 9);
-                    let d2 = Math.floor(Math.random() * (9 - d1)) + 1; let u2 = Math.floor(Math.random() * (9 - u1)); // Puede ser 0
-                    let num1 = (d1*10)+u1; let num2 = (d2*10)+u2;
-                    document.getElementById('target-suma').textContent = `${num1} + ${num2} = ?`;
-                    solucion = { d1: d1, u1: u1, d2: d2, u2: u2, dr: d1+d2, ur: u1+u2 };
+                    let d2 = Math.floor(Math.random() * (9 - d1)) + 1; let u2 = Math.floor(Math.random() * (9 - u1));
+                    document.getElementById('target-suma').textContent = `${(d1*10)+u1} + ${(d2*10)+u2} = ?`;
+                    solucion = { c1:0, d1:d1, u1:u1, c2:0, d2:d2, u2:u2, cr:0, dr:d1+d2, ur:u1+u2 };
+                    ['t-c1','t-c2','t-cr'].forEach(id => { let i = document.getElementById(id); i.value = ""; i.disabled = true; i.classList.add('disabled-cell'); });
                     document.getElementById('t-d1').focus();
+                } else if(nivelParaGenerar === 5) {
+                    // 3 Cifras
+                    let c1 = Math.floor(Math.random() * 8) + 1; let d1 = Math.floor(Math.random() * 9); let u1 = Math.floor(Math.random() * 9);
+                    let c2 = Math.floor(Math.random() * (9 - c1)) + 1; let d2 = Math.floor(Math.random() * (9 - d1)); let u2 = Math.floor(Math.random() * (9 - u1));
+                    document.getElementById('target-suma').textContent = `${(c1*100)+(d1*10)+u1} + ${(c2*100)+(d2*10)+u2} = ?`;
+                    solucion = { c1:c1, d1:d1, u1:u1, c2:c2, d2:d2, u2:u2, cr:c1+c2, dr:d1+d2, ur:u1+u2 };
+                    document.getElementById('t-c1').focus();
                 }
-                document.getElementById('ronda-t').textContent = ronda;
             }
         }
 
-        // Validación Inteligente que acepta casillas vacías si el valor esperado es 0
         function checkValue(id, expected) {
             let input = document.getElementById(id);
-            if(input.disabled && !input.classList.contains('disabled-cell')) return true; // Ya estaba correcta
-            if(input.classList.contains('disabled-cell')) return true; // Es decena en Nivel 3
-            
+            if(input.disabled && !input.classList.contains('disabled-cell')) return true;
+            if(input.classList.contains('disabled-cell')) return true;
             let val = input.value.trim();
-            if(val === "") {
-                if(expected === 0) return true; // Acepta vacío si esperaba 0 (ej. no puso decena)
-                return false;
-            }
+            if(val === "") { if(expected === 0) return true; return false; }
             return parseInt(val) === expected;
         }
 
         function revisarEjercicio() {
             let correctos = 0, total = 0;
-            if(nivelActual === 1 || nivelActual === 2) {
+            if(tipoEjercicioActual === "visual") {
                 total = 4;
                 if(checkValue('po-1', solucion.p1)) { correctos++; document.getElementById('po-1').classList.add('correct-cell'); document.getElementById('po-1').disabled=true;} else document.getElementById('po-1').classList.add('error-cell');
                 if(checkValue('po-2', solucion.p2)) { correctos++; document.getElementById('po-2').classList.add('correct-cell'); document.getElementById('po-2').disabled=true;} else document.getElementById('po-2').classList.add('error-cell');
                 if(checkValue('po-3', solucion.p3)) { correctos++; document.getElementById('po-3').classList.add('correct-cell'); document.getElementById('po-3').disabled=true;} else document.getElementById('po-3').classList.add('error-cell');
                 if(checkValue('r-1', solucion.r)) { correctos++; document.getElementById('r-1').classList.add('correct-cell'); document.getElementById('r-1').disabled=true;} else document.getElementById('r-1').classList.add('error-cell');
             } else {
-                let req = (nivelActual===3) ? ['t-u1','t-u2','t-ur'] : ['t-d1','t-u1','t-d2','t-u2','t-dr','t-ur'];
+                let req = ['t-c1','t-d1','t-u1','t-c2','t-d2','t-u2','t-cr','t-dr','t-ur'];
                 total = req.length;
                 req.forEach(id => {
                     let key = id.replace("t-", "");
@@ -262,11 +285,11 @@
             }
 
             if(correctos === total) {
-                aciertos++; mostrarPopup("🌟", "¡Excelente!", "Resolviste la suma.", avanzar);
+                aciertos++; mostrarPopup("🌟", "¡Excelente!", "Resolviste la suma correctamente.", avanzar);
             } else {
                 intentosUsados++;
-                document.getElementById(nivelActual<=2 ? 'intentos-v' : 'intentos-t').textContent = (2 - intentosUsados);
-                if(intentosUsados < 2) mostrarPopup("⚠️", "Inténtalo de nuevo", "Revisa las casillas en rojo.", null);
+                document.getElementById(tipoEjercicioActual==="visual" ? 'intentos-v' : 'intentos-t').textContent = (2 - intentosUsados);
+                if(intentosUsados < 2) mostrarPopup("⚠️", "Inténtalo de nuevo", "Revisa las casillas marcadas en rojo.", null);
                 else { fallos++; mostrarPopup("💔", "Sin intentos", "Pasemos al siguiente ejercicio.", avanzar); }
             }
         }
@@ -276,17 +299,25 @@
         function finalizarNivel() {
             guardarEnFirebase(`U2 - Nivel ${nivelActual}`, aciertos, fallos);
             if(aciertos >= 8) {
-                if(nivelActual < 4) {
+                if(nivelActual < 6) {
                     let sig = nivelActual + 1;
                     localStorage.setItem('esmate_u2_progreso_'+estudiante.nie, sig.toString());
-                    mostrarPopup("🏆", `¡Nivel ${nivelActual} Superado!`, `Vamos al Nivel ${sig}.`, () => { iniciarNivel(sig); });
+                    mostrarPopup("🏆", `¡Nivel ${nivelActual} Superado!`, `Aciertos: ${aciertos}/10. ¡Vamos al siguiente!`, () => { iniciarNivel(sig); });
                 } else {
-                    localStorage.setItem('esmate_u2_progreso_'+estudiante.nie, "5"); // Terminado
+                    localStorage.setItem('esmate_u2_progreso_'+estudiante.nie, "7"); 
                     localStorage.setItem('esmate_show_progress', 'true');
-                    cambiarPantalla('screen-finale');
+                    cambiarPantalla('screen-finale'); dispararConfeti();
                 }
             } else {
-                mostrarPopup("💪", "¡Casi!", `Tuviste ${aciertos}/10. Necesitas 8 para pasar.`, () => { iniciarNivel(nivelActual); });
+                mostrarPopup("💪", "¡Casi lo logras!", `Tuviste ${aciertos}/10. Necesitas 8 para pasar. ¡Vuelve a intentarlo!`, () => { iniciarNivel(nivelActual); });
+            }
+        }
+
+        function dispararConfeti() {
+            for(let i=0; i<50; i++) {
+                let confeti = document.createElement('div'); confeti.classList.add('confetti');
+                confeti.style.left = Math.random() * 100 + 'vw'; confeti.style.backgroundColor = ['#ff0', '#f00', '#0f0', '#00f', '#f0f'][Math.floor(Math.random()*5)];
+                confeti.style.animationDuration = (Math.random() * 3 + 2) + 's'; document.body.appendChild(confeti); setTimeout(() => confeti.remove(), 5000);
             }
         }
 
