@@ -73,7 +73,7 @@
 <body>
 
     <div class="header">
-        <a href="index.html" class="btn-back">⬅️ Menú</a>
+        <a href="../../index.html" class="btn-back">⬅️ Menú</a>
         <div style="font-weight: bold; color: var(--esmate-blue); cursor: pointer; user-select: none;" id="jugador-nombre" onclick="activarModoPrueba()">👤 Estudiante</div>
     </div>
 
@@ -158,7 +158,7 @@
             
             <p style="font-size: 20px; font-weight: bold; margin-bottom: 30px;">Esta es tu nota perfecta oficial 🏆</p>
             
-            <button class="primary" style="background: white; color: var(--esmate-blue);" onclick="window.location.href='index.html'">➡️ Ir a mi Salón de Trofeos</button>
+            <button class="primary" style="background: white; color: var(--esmate-blue);" onclick="window.location.href='../../index.html'">➡️ Ir a mi Salón de Trofeos</button>
         </div>
     </div>
 
@@ -176,9 +176,6 @@
         let estudiante = { nombre: "Estudiante", nie: "0000", grado: "2" };
         let nivelGuardado = 1;
 
-        // ==========================================
-        // TRUCO MODO DESARROLLADOR
-        // ==========================================
         let contadorClics = 0;
         function activarModoPrueba() {
             contadorClics++;
@@ -219,12 +216,8 @@
             }
         };
 
-        function cambiarPantalla(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
+        function cambiarPantalla(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 
-        // GENERADORES DE NÚMEROS
         function generarNumeroL1L2() {
             let cant = Math.floor(Math.random() * 4) + 1;
             if (cant === 1) return Math.floor(Math.random() * 9) + 1;
@@ -234,7 +227,7 @@
         }
 
         function generarNumeroL3L6() {
-            let cant = Math.floor(Math.random() * 3) + 2; // de 2 a 4 cifras
+            let cant = Math.floor(Math.random() * 3) + 2;
             if (cant === 2) return Math.floor(Math.random() * 90) + 10;
             if (cant === 3) return Math.floor(Math.random() * 900) + 100;
             return Math.floor(Math.random() * 9000) + 1000;
@@ -249,29 +242,14 @@
             return parts.join(" + ");
         }
 
-        // ==========================================
-        // LA REGLA DE ORO DEL CERO (Validación Pedagógica)
-        // ==========================================
-        // Si el valor esperado es 0 y es una posición "interna", el alumno DEBE escribir "0".
-        // Si es una posición a la izquierda que no existe (ej. UM para el número 34), puede dejarla en blanco ("").
         function chequearCasilla(inputId, expectedValue, isLeadingZero) {
             let input = document.getElementById(inputId);
-            if(input.disabled) return true; // Ya estaba buena
-
+            if(input.disabled) return true;
             let valText = input.value.trim();
-            
-            // Si el alumno no escribió nada
-            if (valText === "") {
-                // Solo perdonamos si es un cero a la izquierda que no sirve
-                if (expectedValue === 0 && isLeadingZero) return true; 
-                return false; // Si dejó vacía una casilla importante, es error
-            }
-
-            // Si escribió algo, lo comparamos
+            if (valText === "") { if (expectedValue === 0 && isLeadingZero) return true; return false; }
             return parseInt(valText) === expectedValue;
         }
 
-        // --- NIVELES 1 AL 4 RESUMIDOS (Para ahorrar espacio y que siga funcionando todo) ---
         let n1_ronda=1, n1_aciertos=0, n1_fallos=0, n1_sol={}, n1_intentos_actual=3;
         function iniciarNivel1() { n1_ronda=1; n1_aciertos=0; n1_fallos=0; cambiarPantalla('screen-nivel1'); generarEjercicioN1(); }
         function generarEjercicioN1() { n1_intentos_actual=3; document.getElementById('n1-intentos').textContent=n1_intentos_actual; let num=generarNumeroL1L2(); document.getElementById('n1-numero').textContent=num.toLocaleString('en-US'); n1_sol={um:Math.floor(num/1000),c:Math.floor((num%1000)/100),d:Math.floor((num%100)/10),u:num%10}; n1_sol.num=num; ['um','c','d','u'].forEach(id=>{let i=document.getElementById('n1-'+id); i.value=""; i.disabled=false; i.classList.remove('correct-cell','error-cell');}); document.getElementById('n1-ronda').textContent=n1_ronda; document.getElementById('n1-um').focus(); }
@@ -280,7 +258,6 @@
             if(chequearCasilla('n1-c', n1_sol.c, num<1000)) correctos++; else document.getElementById('n1-c').classList.add('error-cell');
             if(chequearCasilla('n1-d', n1_sol.d, num<100)) correctos++; else document.getElementById('n1-d').classList.add('error-cell');
             if(chequearCasilla('n1-u', n1_sol.u, false)) correctos++; else document.getElementById('n1-u').classList.add('error-cell');
-            
             if(correctos===4) { ['um','c','d','u'].forEach(id=>{document.getElementById('n1-'+id).classList.add('correct-cell'); document.getElementById('n1-'+id).classList.remove('error-cell'); document.getElementById('n1-'+id).disabled=true;}); n1_aciertos++; mostrarPopup("🌟", "¡Excelente!", "Correcto.", avanzarNivel1); } 
             else { n1_intentos_actual--; document.getElementById('n1-intentos').textContent=n1_intentos_actual; if(n1_intentos_actual>0) mostrarPopup("⚠️", "Hay errores", `Te quedan ${n1_intentos_actual} intentos.`, null); else { n1_fallos++; mostrarPopup("💔", "Fin de intentos", `Vamos al siguiente.`, avanzarNivel1); } }
         }
@@ -306,159 +283,84 @@
         function iniciarNivel4() { n4_intentos=3; n4_correctos=0; document.getElementById('n4-intentos').textContent=n4_intentos; cambiarPantalla('screen-nivel4'); n4_lista=[]; const tbody=document.getElementById('n4-tbody'); tbody.innerHTML=''; for(let i=0;i<10;i++){ let num=generarNumeroL3L6(); let numStr=num.toString(); let sol=[]; let rowHtml=`<div class="n4-row" id="n4-row-${i}"><span class="n4-label">${num.toLocaleString('en-US')} =</span>`; for(let d=0;d<numStr.length;d++){ sol.push(parseInt(numStr[d])*Math.pow(10,numStr.length-1-d)); rowHtml+=`<input type="tel" id="n4-r${i}-i${d}" class="n4-input" maxlength="4">`; if(d<numStr.length-1) rowHtml+=`<span>+</span>`; } rowHtml+=`</div>`; tbody.innerHTML+=rowHtml; n4_lista.push({valor:num, solucion:sol, correcto:false}); } }
         function revisarNivel4(auto=false) { if(!auto){ n4_correctos=0; n4_lista.forEach((item,i)=>{ if(item.correcto){n4_correctos++;return;} let inputs=document.querySelectorAll(`#n4-row-${i} input`); let tb=true; for(let d=0;d<item.solucion.length;d++){ let valText=document.getElementById(`n4-r${i}-i${d}`).value.trim(); let val=valText===""?-1:parseInt(valText); if(val!==item.solucion[d] && !(item.solucion[d]===0 && val===0)) tb=false; } if(tb){item.correcto=true; n4_correctos++; inputs.forEach(inp=>{inp.classList.add('correct-cell');inp.classList.remove('error-cell');inp.disabled=true;});} else inputs.forEach(inp=>inp.classList.add('error-cell')); }); } if(n4_correctos===10){ guardarEnFirebase("Nivel 4",10,0); localStorage.setItem('esmate_progreso_'+estudiante.nie,"5"); mostrarPopup("🔥", "¡Nivel 4 Superado!", "Vamos al Nivel 5.", iniciarNivel5); return; } n4_intentos--; document.getElementById('n4-intentos').textContent=n4_intentos; if(n4_intentos>0) mostrarPopup("⚠️", "Errores", `Intentos: ${n4_intentos}`, null); else{ let fallos=10-n4_correctos; guardarEnFirebase("Nivel 4", n4_correctos, fallos); mostrarPopup("💔", "Sin intentos", `Aciertos: ${n4_correctos}`, iniciarNivel4); } }
 
-        // ==========================================
-        // LÓGICA NIVEL 5 (NUEVO)
-        // ==========================================
         let n5_ronda = 1, n5_aciertos = 0, n5_fallos = 0, n5_solucion = {}, n5_intentos_actual = 3;
-
-        function iniciarNivel5() {
-            n5_ronda = 1; n5_aciertos = 0; n5_fallos = 0; cambiarPantalla('screen-nivel5'); generarEjercicioN5();
-        }
-
+        function iniciarNivel5() { n5_ronda = 1; n5_aciertos = 0; n5_fallos = 0; cambiarPantalla('screen-nivel5'); generarEjercicioN5(); }
         function generarEjercicioN5() {
             n5_intentos_actual = 3; document.getElementById('n5-intentos').textContent = n5_intentos_actual;
             let num = generarNumeroL3L6(); 
-            
             document.getElementById('n5-numero').textContent = obtenerFormaDesarrollada(num);
-            
             n5_solucion = { um: Math.floor(num/1000), c: Math.floor((num%1000)/100), d: Math.floor((num%100)/10), u: num%10, num: num };
-
             ['um', 'c', 'd', 'u'].forEach(id => { let input = document.getElementById('n5-'+id); input.value = ""; input.disabled = false; input.classList.remove('correct-cell', 'error-cell'); });
             document.getElementById('n5-ronda').textContent = n5_ronda; document.getElementById('n5-um').focus();
         }
-
         function revisarNivel5() {
             let correctos = 0; let num = n5_solucion.num;
-            
             if(chequearCasilla('n5-um', n5_solucion.um, true)) correctos++; else document.getElementById('n5-um').classList.add('error-cell');
             if(chequearCasilla('n5-c', n5_solucion.c, num<1000)) correctos++; else document.getElementById('n5-c').classList.add('error-cell');
             if(chequearCasilla('n5-d', n5_solucion.d, num<100)) correctos++; else document.getElementById('n5-d').classList.add('error-cell');
             if(chequearCasilla('n5-u', n5_solucion.u, false)) correctos++; else document.getElementById('n5-u').classList.add('error-cell');
-
-            if(correctos === 4) { 
-                ['um','c','d','u'].forEach(id=>{document.getElementById('n5-'+id).classList.add('correct-cell'); document.getElementById('n5-'+id).classList.remove('error-cell'); document.getElementById('n5-'+id).disabled=true;});
-                n5_aciertos++; mostrarPopup("🌟", "¡Excelente!", "Armaste el número perfecto.", avanzarNivel5); 
-            } else {
-                n5_intentos_actual--; document.getElementById('n5-intentos').textContent = n5_intentos_actual;
-                if (n5_intentos_actual > 0) mostrarPopup("⚠️", "Recuerda usar el 0", `Si falta una posición, pon un 0. Te quedan ${n5_intentos_actual} intentos.`, null);
-                else { n5_fallos++; mostrarPopup("💔", "Fin de intentos", `El número era ${n5_solucion.num.toLocaleString('en-US')}.`, avanzarNivel5); }
-            }
+            if(correctos === 4) { ['um','c','d','u'].forEach(id=>{document.getElementById('n5-'+id).classList.add('correct-cell'); document.getElementById('n5-'+id).classList.remove('error-cell'); document.getElementById('n5-'+id).disabled=true;}); n5_aciertos++; mostrarPopup("🌟", "¡Excelente!", "Armaste el número perfecto.", avanzarNivel5); } 
+            else { n5_intentos_actual--; document.getElementById('n5-intentos').textContent = n5_intentos_actual; if (n5_intentos_actual > 0) mostrarPopup("⚠️", "Recuerda usar el 0", `Si falta una posición, pon un 0. Te quedan ${n5_intentos_actual} intentos.`, null); else { n5_fallos++; mostrarPopup("💔", "Fin de intentos", `El número era ${n5_solucion.num.toLocaleString('en-US')}.`, avanzarNivel5); } }
         }
-
         function avanzarNivel5() { n5_ronda++; if(n5_ronda > 10) finalizarNivel5(); else generarEjercicioN5(); }
+        function finalizarNivel5() { guardarEnFirebase("Nivel 5", n5_aciertos, n5_fallos); if(n5_aciertos >= 8) { localStorage.setItem('esmate_progreso_'+estudiante.nie, "6"); mostrarPopup("🏆", "¡Nivel 5 Superado!", `Estás a un paso del final.`, iniciarNivel6); } else mostrarPopup("💪", "¡Casi!", `Tuviste ${n5_aciertos}/10. Necesitas 8.`, iniciarNivel5); }
 
-        function finalizarNivel5() {
-            guardarEnFirebase("Nivel 5: Forma Desarrollada a Tabla", n5_aciertos, n5_fallos);
-            if(n5_aciertos >= 8) { localStorage.setItem('esmate_progreso_'+estudiante.nie, "6"); mostrarPopup("🏆", "¡Nivel 5 Superado!", `Estás a un paso del final.`, iniciarNivel6); } 
-            else mostrarPopup("💪", "¡Casi!", `Tuviste ${n5_aciertos}/10. Necesitas 8.`, iniciarNivel5);
-        }
-
-        // ==========================================
-        // LÓGICA NIVEL 6 (JEFE FINAL)
-        // ==========================================
         let n6_intentos = 3, n6_lista = [], n6_correctos = 0;
-
         function iniciarNivel6() {
             n6_intentos = 3; n6_correctos = 0; document.getElementById('n6-intentos').textContent = n6_intentos; cambiarPantalla('screen-nivel6');
             n6_lista = []; const tbody = document.getElementById('n6-tbody'); tbody.innerHTML = '';
-            
             for(let i=0; i<10; i++) {
                 let num = generarNumeroL3L6();
                 n6_lista.push({ valor: num, um: Math.floor(num/1000), c: Math.floor((num%1000)/100), d: Math.floor((num%100)/10), u: num%10, correcto: false });
-                
-                tbody.innerHTML += `
-                    <tr id="r6-${i}">
-                        <td class="n2-num" style="font-size: 16px;">${obtenerFormaDesarrollada(num)}</td>
-                        <td><input type="tel" id="r6-${i}-um" autocomplete="off" class="n2-input"></td>
-                        <td><input type="tel" id="r6-${i}-c" autocomplete="off" class="n2-input"></td>
-                        <td><input type="tel" id="r6-${i}-d" autocomplete="off" class="n2-input"></td>
-                        <td><input type="tel" id="r6-${i}-u" autocomplete="off" class="n2-input"></td>
-                    </tr>`;
+                tbody.innerHTML += `<tr id="r6-${i}"><td class="n2-num" style="font-size: 16px;">${obtenerFormaDesarrollada(num)}</td><td><input type="tel" id="r6-${i}-um" autocomplete="off" class="n2-input"></td><td><input type="tel" id="r6-${i}-c" autocomplete="off" class="n2-input"></td><td><input type="tel" id="r6-${i}-d" autocomplete="off" class="n2-input"></td><td><input type="tel" id="r6-${i}-u" autocomplete="off" class="n2-input"></td></tr>`;
             }
         }
-
         function revisarNivel6(auto=false) {
             if(!auto) {
                 n6_correctos = 0;
                 n6_lista.forEach((item, i) => {
-                    if(item.correcto) { n6_correctos++; return; }
-                    let c = 0;
-                    if(chequearCasilla(`r6-${i}-um`, item.um, true)) c++; 
-                    if(chequearCasilla(`r6-${i}-c`, item.c, item.valor<1000)) c++; 
-                    if(chequearCasilla(`r6-${i}-d`, item.d, item.valor<100)) c++; 
-                    if(chequearCasilla(`r6-${i}-u`, item.u, false)) c++;
-                    
+                    if(item.correcto) { n6_correctos++; return; } let c = 0;
+                    if(chequearCasilla(`r6-${i}-um`, item.um, true)) c++; if(chequearCasilla(`r6-${i}-c`, item.c, item.valor<1000)) c++; if(chequearCasilla(`r6-${i}-d`, item.d, item.valor<100)) c++; if(chequearCasilla(`r6-${i}-u`, item.u, false)) c++;
                     let inputs = document.querySelectorAll(`#r6-${i} input`);
-                    if(c === 4) { item.correcto = true; n6_correctos++; inputs.forEach(inp => {inp.classList.add('correct-cell'); inp.classList.remove('error-cell'); inp.disabled = true;}); } 
-                    else inputs.forEach(inp => inp.classList.add('error-cell'));
+                    if(c === 4) { item.correcto = true; n6_correctos++; inputs.forEach(inp => {inp.classList.add('correct-cell'); inp.classList.remove('error-cell'); inp.disabled = true;}); } else inputs.forEach(inp => inp.classList.add('error-cell'));
                 });
             }
-
-            if (n6_correctos === 10) {
-                guardarEnFirebase("Nivel 6: Tabla Múltiple Final", 10, 0);
-                localStorage.setItem('esmate_progreso_' + estudiante.nie, "7"); // Terminado
-                localStorage.setItem('esmate_show_progress', 'true');
-                ejecutarGranFinal(); // LANZAMOS LA CELEBRACIÓN
-                return;
-            }
-
+            if (n6_correctos === 10) { guardarEnFirebase("Nivel 6", 10, 0); localStorage.setItem('esmate_progreso_' + estudiante.nie, "7"); localStorage.setItem('esmate_show_progress', 'true'); ejecutarGranFinal(); return; }
             n6_intentos--; document.getElementById('n6-intentos').textContent = n6_intentos;
             if (n6_intentos > 0) mostrarPopup("⚠️", "Cuidado con los ceros", `Te quedan ${n6_intentos} intentos.`, null);
-            else { let fallos = 10 - n6_correctos; guardarEnFirebase("Nivel 6: Tabla Múltiple Final", n6_correctos, fallos); mostrarPopup("💔", "Sin intentos", `Aciertos: ${n6_correctos}. Tienes que empezar de nuevo.`, iniciarNivel6); }
+            else { let fallos = 10 - n6_correctos; guardarEnFirebase("Nivel 6", n6_correctos, fallos); mostrarPopup("💔", "Sin intentos", `Aciertos: ${n6_correctos}. Empezar de nuevo.`, iniciarNivel6); }
         }
 
-        // ==========================================
-        // ANIMACIÓN DEL GRAN FINAL
-        // ==========================================
         function ejecutarGranFinal() {
-            cambiarPantalla('screen-finale');
-            dispararConfeti();
-            
-            // Calculamos la nota perfecta obteniendo los datos de Firebase en tiempo real
+            cambiarPantalla('screen-finale'); dispararConfeti();
             fetch(URL_BASE + "practicas.json").then(res => res.json()).then(datos => {
-                let m1=0, m2=0, m3=0, m4=0, m5=0, m6=10; // m6 es 10 porque acaba de ganar
+                let m1=0, m2=0, m3=0, m4=0, m5=0, m6=10; 
                 for(let id in datos) {
                     let p = datos[id];
                     if(p.nombre === estudiante.nombre) {
                         let a = parseInt(p.aciertos) || 0;
-                        if(p.tema.includes("Nivel 1") && a > m1) m1 = a;
-                        if(p.tema.includes("Nivel 2") && a > m2) m2 = a;
-                        if(p.tema.includes("Nivel 3") && a > m3) m3 = a;
-                        if(p.tema.includes("Nivel 4") && a > m4) m4 = a;
+                        if(p.tema.includes("Nivel 1") && a > m1) m1 = a; if(p.tema.includes("Nivel 2") && a > m2) m2 = a;
+                        if(p.tema.includes("Nivel 3") && a > m3) m3 = a; if(p.tema.includes("Nivel 4") && a > m4) m4 = a;
                         if(p.tema.includes("Nivel 5") && a > m5) m5 = a;
                     }
                 }
-                // Puntaje total (Base 60 convertido a Base 10)
-                let total = m1 + m2 + m3 + m4 + m5 + m6;
-                let notaFinal = ((total / 60) * 10).toFixed(1);
+                let total = m1 + m2 + m3 + m4 + m5 + m6; let notaFinal = ((total / 60) * 10).toFixed(1);
                 document.getElementById('final-nota').textContent = notaFinal;
             });
         }
 
         function dispararConfeti() {
             for(let i=0; i<50; i++) {
-                let confeti = document.createElement('div');
-                confeti.classList.add('confetti');
-                confeti.style.left = Math.random() * 100 + 'vw';
-                confeti.style.backgroundColor = ['#ff0', '#f00', '#0f0', '#00f', '#f0f'][Math.floor(Math.random()*5)];
-                confeti.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                document.body.appendChild(confeti);
-                setTimeout(() => confeti.remove(), 5000);
+                let confeti = document.createElement('div'); confeti.classList.add('confetti');
+                confeti.style.left = Math.random() * 100 + 'vw'; confeti.style.backgroundColor = ['#ff0', '#f00', '#0f0', '#00f', '#f0f'][Math.floor(Math.random()*5)];
+                confeti.style.animationDuration = (Math.random() * 3 + 2) + 's'; document.body.appendChild(confeti); setTimeout(() => confeti.remove(), 5000);
             }
         }
 
-        // POPUPS
         let accionAlCerrar = null;
-        function mostrarPopup(icono, titulo, texto, funcionAlCerrar) {
-            document.getElementById('fb-icon').textContent = icono; document.getElementById('fb-title').textContent = titulo;
-            document.getElementById('fb-text').textContent = texto; accionAlCerrar = funcionAlCerrar;
-            document.getElementById('feedback-overlay').style.display = 'flex';
-        }
+        function mostrarPopup(icono, titulo, texto, funcionAlCerrar) { document.getElementById('fb-icon').textContent = icono; document.getElementById('fb-title').textContent = titulo; document.getElementById('fb-text').textContent = texto; accionAlCerrar = funcionAlCerrar; document.getElementById('feedback-overlay').style.display = 'flex'; }
         function cerrarFeedback() { document.getElementById('feedback-overlay').style.display = 'none'; if(accionAlCerrar) accionAlCerrar(); }
-        function guardarEnFirebase(nombreTema, numAciertos, numFallos) {
-            const paquete = { nombre: estudiante.nombre, grado: estudiante.grado, tema: nombreTema, aciertos: numAciertos, fallos: numFallos, fecha: new Date().toLocaleString('es-SV') };
-            fetch(URL_BASE + "practicas.json", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(paquete) });
-        }
+        function guardarEnFirebase(nombreTema, numAciertos, numFallos) { const paquete = { nombre: estudiante.nombre, grado: estudiante.grado, tema: nombreTema, aciertos: numAciertos, fallos: numFallos, fecha: new Date().toLocaleString('es-SV') }; fetch(URL_BASE + "practicas.json", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(paquete) }); }
     </script>
 </body>
 </html>
