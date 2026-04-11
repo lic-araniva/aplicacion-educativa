@@ -134,27 +134,10 @@
         const URL_BASE = "https://esmate-2026-default-rtdb.firebaseio.com/";
         let estudianteActual = null;
 
-        // ==========================================
-        // DICCIONARIOS DE RUTAS (NUEVO SISTEMA)
-        // ==========================================
-        const mapaGrados = {
-            "1": "primero", "2": "segundo", "3": "tercero",
-            "4": "cuarto", "5": "quinto", "6": "sexto"
-        };
-
-        const mapaCarpetasMateria = {
-            "Lenguaje": "lenguaje",
-            "Matemática": "matematica",
-            "Ciencia": "ciencia",
-            "Ciudadanía y Valores": "ciudadania"
-        };
-
-        const mapaPrefijosArchivo = {
-            "Lenguaje": "lenguaje",
-            "Matemática": "mate",
-            "Ciencia": "ciencia",
-            "Ciudadanía y Valores": "ciudadania"
-        };
+        // Diccionarios de Rutas
+        const mapaGrados = { "1": "primero", "2": "segundo", "3": "tercero", "4": "cuarto", "5": "quinto", "6": "sexto" };
+        const mapaCarpetasMateria = { "Lenguaje": "lenguaje", "Matemática": "matematica", "Ciencia": "ciencia", "Ciudadanía y Valores": "ciudadania" };
+        const mapaPrefijosArchivo = { "Lenguaje": "lenguaje", "Matemática": "mate", "Ciencia": "ciencia", "Ciudadanía y Valores": "ciudadania" };
 
         window.onload = function() {
             let guardado = localStorage.getItem('estudiante_esmate');
@@ -286,10 +269,11 @@
         }
         
         // ==========================================
-        // ENRUTADOR DINÁMICO
+        // ENRUTADOR DINÁMICO (ACTUALIZADO, SIN CANDADO)
         // ==========================================
         function selectUnit(unitNumber) {
-            let gradoStr = currentGrade.toString(); // "2", "3", etc.
+            // Extraemos solo el número del grado (por si acaso viene con la palabra "Grado")
+            let gradoStr = currentGrade.toString().replace("º Grado", "").trim(); 
             
             // Calculamos los nombres de la ruta usando los diccionarios
             let carpetaGrado = mapaGrados[gradoStr] || "segundo";
@@ -299,17 +283,8 @@
             // Armamos la dirección final. Ejemplo: "segundo/ciencia/ciencia-2-u3.html"
             let rutaDestino = `${carpetaGrado}/${carpetaMateria}/${prefijoArchivo}-${gradoStr}-u${unitNumber}.html`;
 
-            // Si es la Unidad 1 de las materias que creaste, intentará abrirla.
-            // (Si no has creado el archivo de verdad, GitHub arrojará su error 404 de página no encontrada,
-            // pero para eso tú ya creaste las plantillas vacías).
-            if (unitNumber === 1) {
-                window.location.href = rutaDestino;
-            } else {
-                // Por protección, si eligen de la Unidad 2 en adelante, mostramos "En construcción"
-                // Hasta que tú me digas que ya creaste esos archivos.
-                document.getElementById('title-topics').textContent = `Unidad ${unitNumber}`;
-                goTo('screen-topics');
-            }
+            // Enviar directamente al archivo que corresponde (incluso si está vacío o en plantilla)
+            window.location.href = rutaDestino;
         }
     </script>
 </body>
