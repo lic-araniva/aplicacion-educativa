@@ -113,7 +113,7 @@
             </div>
             
             <h3 style="margin: 0; color: #333;">Agrupa las figuras</h3>
-            <p class="instruccion-mini">Toca una figura para seleccionarla y luego toca la caja donde pertenece. <b>No te guíes por colores</b>, observa sus características.</p>             
+            <p class="instruccion-mini">Toca una figura para seleccionarla y luego toca la caja donde pertenece.</p>             
             <div style="background: #e0fbfc; padding: 12px; border-radius: 8px; border-left: 5px solid var(--esmate-blue); font-size: 14px; text-align: left; margin-bottom: 15px; color: #333;">                 
                 <b>💡 Recuerda:</b> Un <b>polígono</b> es una figura <b>cerrada</b>, formada por 3 o más segmentos de línea <b>recta</b> unidos entre sí.
             </div>
@@ -160,7 +160,7 @@
             </div>
             
             <h3 style="margin: 0; color: #333;">Regulares e Irregulares</h3>
-            <p class="instruccion-mini">Observa con cuidado. Todas las figuras tienen el mismo color, debes buscar la simetría perfecta.</p>
+            <p class="instruccion-mini">Observa con cuidado y busca la simetría perfecta.</p>
             <div style="background: #fdf2f2; padding: 12px; border-radius: 8px; border-left: 5px solid var(--esmate-orange); font-size: 14px; text-align: left; margin: 10px 0 15px 0; color: #333;">
                 <b>📏 Regla de Oro:</b> Un polígono es <b>Regular</b> si TODOS sus lados miden lo mismo y TODOS sus ángulos son iguales. Si no, es <b>Irregular</b>.
             </div>
@@ -276,26 +276,17 @@
         let secuenciaN1 = []; 
         let secuenciaN2 = []; 
         let secuenciaN3 = [];
-        let secuenciaN4 = []; // Guarda si la ronda pedirá regular(true) o irregular(false)
+        let secuenciaN4 = []; 
 
         function iniciarNivel(nivel) {
             nivelActual = nivel; ronda = 1; aciertos = 0; fallos = 0;
             
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
 
-            if(nivel === 1) {
-                cambiarPantalla('screen-game-n1');
-                prepararSecuenciaN1();
-            } else if(nivel === 2) {
-                cambiarPantalla('screen-game-n2');
-                prepararSecuenciaN2();
-            } else if(nivel === 3) {
-                cambiarPantalla('screen-game-n3');
-                prepararSecuenciaN3();
-            } else if(nivel === 4) {
-                cambiarPantalla('screen-game-n4');
-                prepararSecuenciaN4();
-            }
+            if(nivel === 1) { cambiarPantalla('screen-game-n1'); prepararSecuenciaN1(); } 
+            else if(nivel === 2) { cambiarPantalla('screen-game-n2'); prepararSecuenciaN2(); } 
+            else if(nivel === 3) { cambiarPantalla('screen-game-n3'); prepararSecuenciaN3(); } 
+            else if(nivel === 4) { cambiarPantalla('screen-game-n4'); prepararSecuenciaN4(); }
             generarEjercicio();
         }
 
@@ -342,8 +333,10 @@
         }
 
         function prepararSecuenciaN4() {
-            // Mezcla de 5 regulares y 5 irregulares
-            secuenciaN4 = [true, true, true, true, true, false, false, false, false, false];
+            // 5 lados regulares y 5 índices de irregulares
+            let reg = [{esReg:true, val:3},{esReg:true, val:4},{esReg:true, val:5},{esReg:true, val:6},{esReg:true, val:7}];
+            let irreg = [{esReg:false, val:0},{esReg:false, val:1},{esReg:false, val:2},{esReg:false, val:3},{esReg:false, val:4}];
+            secuenciaN4 = reg.concat(irreg);
             secuenciaN4.sort(() => Math.random() - 0.5);
         }
 
@@ -404,14 +397,11 @@
                 inputPerim.style.borderColor = "#ccc";
                 inputPerim.disabled = false;
                 
-                // Mostrar calculadora solo en las primeras 5 rondas
                 document.getElementById('calculadora-magica').style.display = (ronda <= 5) ? "block" : "none";
                 calcClear();
 
-                let esRegular = secuenciaN4[ronda - 1];
-                let numLados = Math.floor(Math.random() * 5) + 3; // 3 a 7 lados para que el perímetro no sea enorme
-                
-                let figuraData = generarPoligonoPerimetroSVG(numLados, esRegular);
+                let f = secuenciaN4[ronda - 1];
+                let figuraData = generarPoligonoPerimetroSVG(f.val, f.esReg);
                 document.getElementById('figura-n4-container').innerHTML = figuraData.svg;
                 solucionPerimetro = figuraData.perimetro;
                 inputPerim.focus();
@@ -422,28 +412,18 @@
         // LÓGICA DE CALCULADORA
         // ==========================================
         let calcDisplay = "";
-        function calcInput(val) {
-            calcDisplay += val;
-            document.getElementById('calc-screen').textContent = calcDisplay;
-        }
-        function calcClear() {
-            calcDisplay = "";
-            document.getElementById('calc-screen').textContent = "0";
-        }
+        function calcInput(val) { calcDisplay += val; document.getElementById('calc-screen').textContent = calcDisplay; }
+        function calcClear() { calcDisplay = ""; document.getElementById('calc-screen').textContent = "0"; }
         function calcEval() {
             try {
-                // Reemplazar visuales por operadores matemáticos reales antes de evaluar
                 let exp = calcDisplay.replace(/x/g, '*').replace(/÷/g, '/');
                 calcDisplay = Function('"use strict";return (' + exp + ')')();
                 document.getElementById('calc-screen').textContent = calcDisplay;
-            } catch(e) {
-                document.getElementById('calc-screen').textContent = "Error";
-                calcDisplay = "";
-            }
+            } catch(e) { document.getElementById('calc-screen').textContent = "Error"; calcDisplay = ""; }
         }
 
         // ==========================================
-        // LÓGICA DE MOVIMIENTO (N1 Y N3)
+        // LÓGICA DE MOVIMIENTO
         // ==========================================
         function seleccionarFigura(elemento, evento) {
             elemento.classList.remove('error-shape');
@@ -472,7 +452,6 @@
         // ==========================================
         function revisarNivel1() {
             if(document.querySelectorAll('#pool-zone .shape-item').length > 0) return mostrarPopup("⚠️", "Faltan figuras", "Debes clasificar todo.", null);
-
             let errores = 0;
             document.querySelectorAll('#zone-poly .shape-item').forEach(el => { if(el.getAttribute('data-type') !== 'poly') { el.classList.add('error-shape'); errores++; }});
             document.querySelectorAll('#zone-nonpoly .shape-item').forEach(el => { if(el.getAttribute('data-type') !== 'nonpoly') { el.classList.add('error-shape'); errores++; }});
@@ -496,7 +475,6 @@
 
         function revisarNivel3() {
             if(document.querySelectorAll('#pool-zone-n3 .shape-item').length > 0) return mostrarPopup("⚠️", "Faltan figuras", "Debes clasificar todo.", null);
-
             let errores = 0;
             document.querySelectorAll('#zone-regular .shape-item').forEach(el => { if(el.dataset.type !== 'reg') { el.classList.add('error-shape'); errores++; }});
             document.querySelectorAll('#zone-irregular .shape-item').forEach(el => { if(el.dataset.type !== 'irreg') { el.classList.add('error-shape'); errores++; }});
@@ -512,7 +490,6 @@
         function revisarNivel4() {
             let inputPerim = document.getElementById('input-perimetro');
             let resp = parseInt(inputPerim.value.trim());
-
             if(isNaN(resp)) return mostrarPopup("⚠️", "Falta el resultado", "Escribe el perímetro total de la figura.", null);
 
             if(resp === solucionPerimetro) {
@@ -525,30 +502,23 @@
                 inputPerim.style.borderColor = "var(--incorrect-color)";
                 if(intentosUsados < 2) {
                     mostrarPopup("⚠️", "Revisa tu suma", "Vuelve a sumar la medida de todos los lados.", null);
-                    inputPerim.value = "";
-                    inputPerim.focus();
+                    inputPerim.value = ""; inputPerim.focus();
                 } else {
-                    fallos++; 
-                    inputPerim.disabled = true;
+                    fallos++; inputPerim.disabled = true;
                     mostrarPopup("💔", "Sin intentos", `El perímetro correcto era: ${solucionPerimetro} cm.`, avanzar);
                 }
             }
         }
 
         // ==========================================
-        // MOTORES DE DIBUJO SVG (AHORA SIN COLOR "PISTA")
+        // MOTORES DE DIBUJO SVG (GEOMETRÍA Y MATEMÁTICA PROPORCIONAL)
         // ==========================================
-        
-        // Colores base (Para no dar pistas con el color)
         const neutralStroke = "var(--shape-stroke)";
         const neutralFill = "var(--shape-fill)";
         const transparentFill = "none";
 
         function generarSVG(esPoligono, id, className) {
             let fillCol = neutralFill;
-            // Para que los estudiantes no adivinen por el relleno, 
-            // algunas figuras no cerradas tendrán fondo nulo, pero 
-            // todos los polígonos tienen fondo azul claro.
             if(!esPoligono && (id===2 || id===3 || id===4 || id===6 || id===8 || id===9)) fillCol = transparentFill; 
             
             let svgStr = `<svg class="${className}" viewBox="0 0 100 100">`;
@@ -601,8 +571,6 @@
 
         function generarSVG_N3(tipo, id) {
             let svg = `<svg class="shape-svg-small" viewBox="0 0 100 100">`;
-            // Ambos colores usan el mismo estilo base para que el niño use la lógica y no la vista
-            
             if(tipo === 'reg') {
                 const regs = [
                     `<polygon points="50,15 90,85 10,85" fill="${neutralFill}" stroke="${neutralStroke}" stroke-width="4"/>`, 
@@ -635,17 +603,17 @@
             return svg + `</svg>`;
         }
 
-        function generarPoligonoPerimetroSVG(lados, esRegular) {
-            let cx = 50, cy = 50, r = 38; // Radio más pequeño para que quepan los números
+        function generarPoligonoPerimetroSVG(idLadoOCurva, esRegular) {
+            let cx = 50, cy = 50, r = 38; 
             let puntos = [];
             let perimetroTotal = 0;
             let svg = `<svg class="shape-svg" viewBox="0 0 100 100" style="overflow: visible;">`;
 
             if (esRegular) {
-                let longitudLado = Math.floor(Math.random() * 6) + 3; // 3 a 8 cm
-                perimetroTotal = longitudLado * lados;
+                let lados = idLadoOCurva;
+                let baseCm = Math.floor(Math.random() * 4) + 2; // 2 a 5 cm por lado
+                perimetroTotal = baseCm * lados;
                 
-                // Crea puntos en círculo para regular
                 for (let i = 0; i < lados; i++) {
                     let angulo = -Math.PI / 2 + (i * 2 * Math.PI / lados);
                     puntos.push({x: cx + r * Math.cos(angulo), y: cy + r * Math.sin(angulo)});
@@ -653,40 +621,50 @@
                 
                 svg += `<polygon points="${puntos.map(p=>p.x+','+p.y).join(' ')}" fill="${neutralFill}" stroke="${neutralStroke}" stroke-width="3"/>`;
                 
-                // Dibuja los números en cada lado
                 for (let i = 0; i < lados; i++) {
                     let p1 = puntos[i]; let p2 = puntos[(i+1)%lados];
                     let mx = (p1.x + p2.x)/2; let my = (p1.y + p2.y)/2;
                     let dx = p2.x - p1.x; let dy = p2.y - p1.y;
                     let len = Math.hypot(dx, dy);
-                    let nx = dy / len; let ny = -dx / len; // Vector perpendicular hacia afuera
-                    svg += `<text x="${mx + nx*12}" y="${my + ny*12 + 4}" font-size="8" text-anchor="middle" font-weight="bold" fill="#333">${longitudLado}</text>`;
+                    let nx = dy / len; let ny = -dx / len; 
+                    svg += `<text x="${mx + nx*12}" y="${my + ny*12 + 4}" font-size="8" text-anchor="middle" font-weight="bold" fill="#333">${baseCm}</text>`;
                 }
             } else {
-                // Polígonos irregulares seguros predefinidos
+                // Cálculo proporcional estricto para irregulares
                 const formasIrreg = [
-                    [{x:20,y:20}, {x:80,y:20}, {x:90,y:80}, {x:10,y:90}], // Trapecio
-                    [{x:50,y:10}, {x:90,y:40}, {x:70,y:90}, {x:30,y:90}, {x:10,y:40}], // Pentágono
-                    [{x:20,y:10}, {x:80,y:20}, {x:90,y:90}], // Triángulo escaleno
-                    [{x:20,y:20}, {x:80,y:20}, {x:80,y:50}, {x:50,y:50}, {x:50,y:80}, {x:20,y:80}] // L
+                    [{x:20,y:20}, {x:80,y:20}, {x:90,y:80}, {x:10,y:90}], // Trapecio (id 0)
+                    [{x:50,y:10}, {x:90,y:50}, {x:70,y:90}, {x:30,y:90}, {x:10,y:50}], // Pentágono (id 1)
+                    [{x:20,y:10}, {x:90,y:40}, {x:50,y:90}], // Triángulo (id 2)
+                    [{x:20,y:20}, {x:80,y:20}, {x:80,y:50}, {x:50,y:50}, {x:50,y:80}, {x:20,y:80}], // L (id 3)
+                    [{x:10,y:50}, {x:50,y:10}, {x:90,y:50}, {x:50,y:90}] // Romboide (id 4)
                 ];
-                let pts = formasIrreg[Math.floor(Math.random() * formasIrreg.length)];
+                let pts = formasIrreg[idLadoOCurva % 5];
                 svg += `<polygon points="${pts.map(p=>p.x+','+p.y).join(' ')}" fill="${neutralFill}" stroke="${neutralStroke}" stroke-width="3"/>`;
 
+                // 1. Calculamos la longitud real de cada línea en el dibujo
+                let distancias = [];
                 for (let i = 0; i < pts.length; i++) {
-                    let val = Math.floor(Math.random() * 6) + 2; // Valores aleatorios por lado
-                    perimetroTotal += val;
-                    
+                    let p1 = pts[i]; let p2 = pts[(i+1)%pts.length];
+                    distancias.push(Math.hypot(p2.x - p1.x, p2.y - p1.y));
+                }
+
+                // 2. Escogemos la línea más corta como nuestra unidad base (ej. 2 cm o 3 cm)
+                let minDist = Math.min(...distancias);
+                let baseCm = Math.floor(Math.random() * 3) + 2; 
+
+                // 3. Asignamos los números matemáticamente proporcionales a lo dibujado
+                for (let i = 0; i < pts.length; i++) {
                     let p1 = pts[i]; let p2 = pts[(i+1)%pts.length];
                     let mx = (p1.x + p2.x)/2; let my = (p1.y + p2.y)/2;
                     let dx = p2.x - p1.x; let dy = p2.y - p1.y;
-                    let len = Math.hypot(dx, dy);
-                    let nx = dy / len; let ny = -dx / len;
+                    let nx = dy / distancias[i]; let ny = -dx / distancias[i];
                     
-                    // Ajuste de vector para que siempre apunte afuera del centro (aprox)
-                    if (nx * (mx - 50) + ny * (my - 50) < 0) { nx = -nx; ny = -ny; }
+                    if (nx * (mx - cx) + ny * (my - cy) < 0) { nx = -nx; ny = -ny; }
                     
-                    svg += `<text x="${mx + nx*10}" y="${my + ny*10 + 4}" font-size="8" text-anchor="middle" font-weight="bold" fill="#333">${val}</text>`;
+                    let valProporcional = Math.round((distancias[i] / minDist) * baseCm);
+                    perimetroTotal += valProporcional;
+                    
+                    svg += `<text x="${mx + nx*12}" y="${my + ny*12 + 4}" font-size="8" text-anchor="middle" font-weight="bold" fill="#333">${valProporcional}</text>`;
                 }
             }
             svg += `</svg>`;
