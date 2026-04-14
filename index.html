@@ -307,6 +307,15 @@
             let rutaDestino = `${carpetaGrado}/${carpetaMateria}/${prefijoArchivo}-${gradoStr}-u${unitNumber}.html`;
             window.location.href = rutaDestino;
         }
+        function ajustarMateriasPorGrado() {
+            let grado = estudianteActual.grado.toString();
+            // Si el grado es 4 o 5, usamos "none" para ocultar. Si no, lo dejamos vacío ("") para que se vea normal.
+            let visibilidad = (grado === "4" || grado === "5") ? "none" : ""; 
+            
+            document.querySelector('.card.lenguaje').style.display = visibilidad;
+            document.querySelector('.card.ciencia').style.display = visibilidad;
+            document.querySelector('.card.valores').style.display = visibilidad;
+        }
     </script>
 </body>
 </html>
