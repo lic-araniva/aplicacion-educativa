@@ -113,7 +113,7 @@
             </div>
             
             <h3 style="margin: 0; color: #333;">Agrupa las figuras</h3>
-            <p class="instruccion-mini">Toca una figura para seleccionarla y luego toca la caja donde pertenece.</p>             
+            <p class="instruccion-mini">Toca una figura para seleccionarla y luego toca la caja donde pertenece. <b>No te guíes por colores</b>, observa sus características.</p>             
             <div style="background: #e0fbfc; padding: 12px; border-radius: 8px; border-left: 5px solid var(--esmate-blue); font-size: 14px; text-align: left; margin-bottom: 15px; color: #333;">                 
                 <b>💡 Recuerda:</b> Un <b>polígono</b> es una figura <b>cerrada</b>, formada por 3 o más segmentos de línea <b>recta</b> unidos entre sí.
             </div>
@@ -333,7 +333,6 @@
         }
 
         function prepararSecuenciaN4() {
-            // 5 lados regulares y 5 índices de irregulares
             let reg = [{esReg:true, val:3},{esReg:true, val:4},{esReg:true, val:5},{esReg:true, val:6},{esReg:true, val:7}];
             let irreg = [{esReg:false, val:0},{esReg:false, val:1},{esReg:false, val:2},{esReg:false, val:3},{esReg:false, val:4}];
             secuenciaN4 = reg.concat(irreg);
@@ -423,7 +422,7 @@
         }
 
         // ==========================================
-        // LÓGICA DE MOVIMIENTO
+        // LÓGICA DE SELECCIÓN Y MOVIMIENTO
         // ==========================================
         function seleccionarFigura(elemento, evento) {
             elemento.classList.remove('error-shape');
@@ -445,6 +444,13 @@
             document.getElementById(id).appendChild(figuraSeleccionada);
             figuraSeleccionada.classList.remove('selected-shape');
             figuraSeleccionada = null;
+        }
+
+        function seleccionarOpcionN2(nombre, elemento) {
+            seleccionUsuarioN2 = nombre;
+            document.querySelectorAll('#opciones-n2 .btn-choice').forEach(b => b.classList.remove('selected'));
+            elemento.classList.add('selected');
+            document.getElementById('btn-revisar-n2').style.display = "block"; 
         }
 
         // ==========================================
@@ -511,7 +517,7 @@
         }
 
         // ==========================================
-        // MOTORES DE DIBUJO SVG (GEOMETRÍA Y MATEMÁTICA PROPORCIONAL)
+        // MOTORES DE DIBUJO SVG 
         // ==========================================
         const neutralStroke = "var(--shape-stroke)";
         const neutralFill = "var(--shape-fill)";
@@ -630,29 +636,25 @@
                     svg += `<text x="${mx + nx*12}" y="${my + ny*12 + 4}" font-size="8" text-anchor="middle" font-weight="bold" fill="#333">${baseCm}</text>`;
                 }
             } else {
-                // Cálculo proporcional estricto para irregulares
                 const formasIrreg = [
-                    [{x:20,y:20}, {x:80,y:20}, {x:90,y:80}, {x:10,y:90}], // Trapecio (id 0)
-                    [{x:50,y:10}, {x:90,y:50}, {x:70,y:90}, {x:30,y:90}, {x:10,y:50}], // Pentágono (id 1)
-                    [{x:20,y:10}, {x:90,y:40}, {x:50,y:90}], // Triángulo (id 2)
-                    [{x:20,y:20}, {x:80,y:20}, {x:80,y:50}, {x:50,y:50}, {x:50,y:80}, {x:20,y:80}], // L (id 3)
-                    [{x:10,y:50}, {x:50,y:10}, {x:90,y:50}, {x:50,y:90}] // Romboide (id 4)
+                    [{x:20,y:20}, {x:80,y:20}, {x:90,y:80}, {x:10,y:90}], 
+                    [{x:50,y:10}, {x:90,y:50}, {x:70,y:90}, {x:30,y:90}, {x:10,y:50}], 
+                    [{x:20,y:10}, {x:90,y:40}, {x:50,y:90}], 
+                    [{x:20,y:20}, {x:80,y:20}, {x:80,y:50}, {x:50,y:50}, {x:50,y:80}, {x:20,y:80}], 
+                    [{x:10,y:50}, {x:50,y:10}, {x:90,y:50}, {x:50,y:90}] 
                 ];
                 let pts = formasIrreg[idLadoOCurva % 5];
                 svg += `<polygon points="${pts.map(p=>p.x+','+p.y).join(' ')}" fill="${neutralFill}" stroke="${neutralStroke}" stroke-width="3"/>`;
 
-                // 1. Calculamos la longitud real de cada línea en el dibujo
                 let distancias = [];
                 for (let i = 0; i < pts.length; i++) {
                     let p1 = pts[i]; let p2 = pts[(i+1)%pts.length];
                     distancias.push(Math.hypot(p2.x - p1.x, p2.y - p1.y));
                 }
 
-                // 2. Escogemos la línea más corta como nuestra unidad base (ej. 2 cm o 3 cm)
                 let minDist = Math.min(...distancias);
                 let baseCm = Math.floor(Math.random() * 3) + 2; 
 
-                // 3. Asignamos los números matemáticamente proporcionales a lo dibujado
                 for (let i = 0; i < pts.length; i++) {
                     let p1 = pts[i]; let p2 = pts[(i+1)%pts.length];
                     let mx = (p1.x + p2.x)/2; let my = (p1.y + p2.y)/2;
