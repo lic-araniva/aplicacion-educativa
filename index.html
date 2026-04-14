@@ -12,6 +12,7 @@
             --color-lenguaje: #e63946; --color-mate: #4361ee;
             --color-ciencia: #2a9d8f; --color-valores: #f4a261;
             --bg-color: #f8f9fa; --text-dark: #2b2d42;
+            --gold: #ffbf00;
         }
 
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -49,6 +50,13 @@
         .card.ciencia { border-color: var(--color-ciencia); color: var(--color-ciencia); }
         .card.valores { border-color: var(--color-valores); color: var(--color-valores); }
 
+        /* ESTILOS PARA ASIGNACIONES */
+        .assignment-box { width: 100%; background: #fff9db; border: 3px solid var(--gold); border-radius: 15px; padding: 20px; margin-bottom: 30px; box-sizing: border-box; display: none; }
+        .assignment-title { display: flex; align-items: center; gap: 10px; color: #856404; font-weight: bold; margin-bottom: 15px; font-size: 18px; }
+        .grid-assign { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+        .btn-task { background: white; border: 2px solid var(--gold); padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
+        .btn-task:hover { background: var(--gold); color: white; }
+
         .grid-small { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; width: 100%; }
         .card-small { background: white; padding: 20px; border-radius: 10px; text-align: center; font-weight: bold; cursor: pointer; border: 2px solid #e9ecef;}
         .card-small:hover { border-color: var(--text-dark); background: #f1f3f5; }
@@ -56,7 +64,6 @@
         .student-table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-top: 10px; }
         .student-table th, .student-table td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; }
         .student-table th { background: var(--color-mate); color: white; }
-        .student-table tr:hover { background: #f1f3f5; }
         
         .unit-summary { background: #e0fbfc; border-left: 5px solid var(--color-mate); padding: 15px; border-radius: 8px; margin-bottom: 20px; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center;}
     </style>
@@ -66,15 +73,15 @@
     <div id="screen-login" class="screen active">
         <div class="card-login">
             <h1 style="margin-top: 0; color: var(--text-dark);">🎒 Acceso Estudiantes</h1>
-            <p style="color: #666;">Ingresa tu código NIE para entrar a tu cuenta.</p>
+            <p style="color: #666;">Ingresa tu código NIE para entrar.</p>
             <input type="number" id="nie-input" placeholder="Ej. 12345" autocomplete="off">
             <button class="primary" id="btn-buscar" onclick="buscarEstudiante()">🔍 Buscar mi nombre</button>
-            <p id="nie-error" style="color: var(--color-lenguaje); display: none; margin-top: 15px; font-weight: bold;">❌ NIE incorrecto o no registrado.</p>
+            <p id="nie-error" style="color: var(--color-lenguaje); display: none; margin-top: 15px; font-weight: bold;">❌ NIE no registrado.</p>
             <div id="confirmation-box" class="confirm-box">
                 <h3>¿Eres <span id="student-name-confirm"></span>?</h3>
                 <div style="display: flex; justify-content: space-between;">
                     <button class="btn-yes" onclick="confirmarLogin()">✅ Sí, soy yo</button>
-                    <button class="btn-no" onclick="cancelarLogin()">❌ No, me equivoqué</button>
+                    <button class="btn-no" onclick="cancelarLogin()">❌ No</button>
                 </div>
             </div>
         </div>
@@ -88,56 +95,40 @@
                 <button onclick="cerrarSesion()" style="background: white; border: 1px solid #ccc; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; color: #555;">Salir</button>
             </div>
         </div>
+
+        <div id="assignment-container" class="assignment-box">
+            <div class="assignment-title">📌 Tareas asignadas por tu Licenciado:</div>
+            <div id="assignment-list" class="grid-assign"></div>
+        </div>
+
         <h1 style="margin-bottom: 30px;">📚 Elige tu Materia</h1>
         <div class="grid-menu">
             <div class="card lenguaje" onclick="selectSubject('Lenguaje', 'lenguaje')"><div class="card-icon">📖</div><h2>Lenguaje</h2></div>
             <div class="card mate" onclick="selectSubject('Matemática', 'mate')"><div class="card-icon">📐</div><h2>Matemática</h2></div>
             <div class="card ciencia" onclick="selectSubject('Ciencia', 'ciencia')"><div class="card-icon">🔬</div><h2>Ciencia</h2></div>
-            <div class="card valores" onclick="selectSubject('Ciudadanía y Valores', 'valores')"><div class="card-icon">🤝</div><h2>Ciudadanía y Valores</h2></div>
+            <div class="card valores" onclick="selectSubject('Ciudadanía y Valores', 'valores')"><div class="card-icon">🤝</div><h2>Valores</h2></div>
         </div>
     </div>
 
     <div id="screen-progress" class="screen">
-        <div class="header">
-            <button class="btn-back" onclick="goTo('screen-subjects')">⬅️ Volver al Menú</button>
-            <h1 style="color: var(--color-valores);">🏆 Mi Salón de Trofeos</h1>
-        </div>
+        <div class="header"><button class="btn-back" onclick="goTo('screen-subjects')">⬅️ Volver</button><h1>🏆 Mi Salón de Trofeos</h1></div>
         <div id="progress-content" style="width: 100%;"></div>
     </div>
 
     <div id="screen-grades" class="screen">
-        <div class="header">
-            <button class="btn-back" onclick="goTo('screen-subjects')">⬅️ Volver</button>
-            <h1 id="title-grades">Materia</h1>
-        </div>
+        <div class="header"><button class="btn-back" onclick="goTo('screen-subjects')">⬅️ Volver</button><h1 id="title-grades">Materia</h1></div>
         <div class="grid-menu" id="grades-container" style="max-width: 300px;"></div>
     </div>
 
     <div id="screen-units" class="screen">
-        <div class="header">
-            <button class="btn-back" onclick="goTo('screen-grades')">⬅️ Volver</button>
-            <h1 id="title-units">Grado</h1>
-        </div>
+        <div class="header"><button class="btn-back" onclick="goTo('screen-grades')">⬅️ Volver</button><h1 id="title-units">Grado</h1></div>
         <div class="grid-small" id="units-container"></div>
-    </div>
-
-    <div id="screen-topics" class="screen">
-        <div class="header">
-            <button class="btn-back" onclick="goTo('screen-units')">⬅️ Volver</button>
-            <h1 id="title-topics">Unidad X</h1>
-        </div>
-        <div style="background: white; width: 100%; padding: 40px; border-radius: 15px; text-align: center;">
-            <div style="font-size: 50px; margin-bottom: 10px;">🚧</div>
-            <h2>¡Aquí irán los temas!</h2>
-            <p>Aún estamos construyendo este módulo. ¡Vuelve pronto!</p>
-        </div>
     </div>
 
     <script>
         const URL_BASE = "https://esmate-2026-default-rtdb.firebaseio.com/";
         let estudianteActual = null;
 
-        // Diccionarios de Rutas
         const mapaGrados = { "1": "primero", "2": "segundo", "3": "tercero", "4": "cuarto", "5": "quinto", "6": "sexto" };
         const mapaCarpetasMateria = { "Lenguaje": "lenguaje", "Matemática": "matematica", "Ciencia": "ciencia", "Ciudadanía y Valores": "ciudadania" };
         const mapaPrefijosArchivo = { "Lenguaje": "lenguaje", "Matemática": "mate", "Ciencia": "ciencia", "Ciudadanía y Valores": "ciudadania" };
@@ -147,193 +138,115 @@
             if(guardado) {
                 estudianteActual = JSON.parse(guardado);
                 document.getElementById('user-greeting').textContent = `👤 Hola, ${estudianteActual.nombre}`;
-               
                 ajustarMateriasPorGrado();
-
+                buscarAsignaciones(); // 🎯 Buscar tareas al cargar
                 if(localStorage.getItem('esmate_show_progress') === 'true') {
                     localStorage.removeItem('esmate_show_progress');
                     verMiProgreso(); 
-                } else {
-                    goTo('screen-subjects');
-                }
+                } else { goTo('screen-subjects'); }
             }
         };
 
         function buscarEstudiante() {
             const nie = document.getElementById('nie-input').value.trim();
             if (!nie) return;
-            document.getElementById('btn-buscar').innerHTML = "⏳ Buscando...";
-            
             fetch(URL_BASE + `estudiantes/${nie}.json`).then(res => res.json()).then(datos => {
-                document.getElementById('btn-buscar').innerHTML = "🔍 Buscar mi nombre";
                 if (datos) {
                     estudianteActual = datos; estudianteActual.nie = nie;
                     document.getElementById('student-name-confirm').textContent = estudianteActual.nombre;
                     document.getElementById('confirmation-box').style.display = 'block';
                     document.getElementById('btn-buscar').style.display = 'none'; 
-                    document.getElementById('nie-input').disabled = true;
                 } else { document.getElementById('nie-error').style.display = 'block'; }
             });
         }
-        document.getElementById('nie-input').addEventListener("keypress", e => { if (e.key === "Enter") buscarEstudiante(); });
-        function cancelarLogin() { estudianteActual = null; document.getElementById('confirmation-box').style.display = 'none'; document.getElementById('btn-buscar').style.display = 'block'; document.getElementById('nie-input').disabled = false; document.getElementById('nie-input').value = ""; }
-        
+
         function confirmarLogin() { 
             localStorage.setItem('estudiante_esmate', JSON.stringify(estudianteActual)); 
             document.getElementById('user-greeting').textContent = `👤 Hola, ${estudianteActual.nombre}`; 
             ajustarMateriasPorGrado(); 
+            buscarAsignaciones(); // 🎯 Buscar tareas al confirmar
             goTo('screen-subjects'); 
         }
-        
-        function cerrarSesion() { localStorage.removeItem('estudiante_esmate'); cancelarLogin(); goTo('screen-login'); }
 
-        function verMiProgreso() {
-            goTo('screen-progress');
-            document.getElementById('progress-content').innerHTML = "<h3 style='text-align:center;'>Buscando tus medallas... ⏳</h3>";
-
-            fetch(URL_BASE + "practicas.json").then(res => res.json()).then(datos => {
-                let misPracticas = [];
-                for (let id in datos) { if (datos[id].nombre === estudianteActual.nombre) misPracticas.push(datos[id]); }
-                misPracticas.reverse(); 
-                renderizarProgreso(misPracticas);
-            });
-        }
+        function cerrarSesion() { localStorage.removeItem('estudiante_esmate'); location.reload(); }
 
         // ==========================================
-        // CEREBRO DE LAS NOTAS ACTUALIZADO
+        // MOTOR DE ASIGNACIONES (CLIENTE)
         // ==========================================
-        function generarTarjetaUnidad(titulo, subtitulo, nota) {
-            let mensaje = nota >= 8 ? "¡Excelente dominio! 🥇" : "¡Sigue practicando! 💪";
-            return `
-                <div class="unit-summary" style="margin-top: 15px;">
-                    <div>
-                        <h2 style="margin:0; color: var(--color-mate); font-size: 20px;">${titulo}</h2>
-                        <p style="margin:5px 0 0 0; color: #555;">${subtitulo}</p>
-                    </div>
-                    <div style="text-align: right;">
-                        <span style="font-size: 24px; font-weight: bold; color: var(--correct-color);">${nota} <span style="font-size: 16px;">/ 10</span></span>
-                        <div style="font-size: 12px; color: #777;">${mensaje}</div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderizarProgreso(practicas) {
-            if (practicas.length === 0) {
-                document.getElementById('progress-content').innerHTML = `<div style="text-align:center; padding: 40px; background: white; border-radius: 15px;"><h2>¡Aún no tienes prácticas!</h2></div>`;
-                return;
-            }
-
-            let totalAciertos = 0; 
-            
-            // Contenedores para las notas más altas de cada nivel
-            let u1_max = { n1:0, n2:0, n3:0, n4:0, n5:0, n6:0 };
-            let u2_max = { n1:0, n2:0, n3:0, n4:0, n5:0, n6:0, n7:0, n8:0, n9:0 };
-            
-            let tablaHTML = `<table class="student-table"><tr><th>Fecha</th><th>Tema</th><th>Tu Nota</th></tr>`;
-
-            practicas.forEach(p => {
-                let a = parseInt(p.aciertos) || 0;
-                totalAciertos += a;
-                let t = p.tema;
+        function buscarAsignaciones() {
+            if(!estudianteActual) return;
+            fetch(URL_BASE + `asignaciones/${estudianteActual.nie}.json`).then(res => res.json()).then(datos => {
+                const container = document.getElementById('assignment-container');
+                const list = document.getElementById('assignment-list');
                 
-                // Lógica para detectar a qué Unidad pertenece
-                if(t.includes("U2") || t.includes("Unidad 2")) {
-                    if(t.includes("Nivel 1") && a > u2_max.n1) u2_max.n1 = a;
-                    if(t.includes("Nivel 2") && a > u2_max.n2) u2_max.n2 = a;
-                    if(t.includes("Nivel 3") && a > u2_max.n3) u2_max.n3 = a;
-                    if(t.includes("Nivel 4") && a > u2_max.n4) u2_max.n4 = a;
-                    if(t.includes("Nivel 5") && a > u2_max.n5) u2_max.n5 = a;
-                    if(t.includes("Nivel 6") && a > u2_max.n6) u2_max.n6 = a;
-                    if(t.includes("Nivel 7") && a > u2_max.n7) u2_max.n7 = a;
-                    if(t.includes("Nivel 8") && a > u2_max.n8) u2_max.n8 = a;
-                    if(t.includes("Nivel 9") && a > u2_max.n9) u2_max.n9 = a;
-                } else if(t.includes("Nivel")) {
-                    // Si no dice U2, asume que es de la Unidad 1
-                    if(t.includes("Nivel 1") && a > u1_max.n1) u1_max.n1 = a;
-                    if(t.includes("Nivel 2") && a > u1_max.n2) u1_max.n2 = a;
-                    if(t.includes("Nivel 3") && a > u1_max.n3) u1_max.n3 = a;
-                    if(t.includes("Nivel 4") && a > u1_max.n4) u1_max.n4 = a;
-                    if(t.includes("Nivel 5") && a > u1_max.n5) u1_max.n5 = a;
-                    if(t.includes("Nivel 6") && a > u1_max.n6) u1_max.n6 = a;
+                if(datos) {
+                    container.style.display = 'block';
+                    let html = "";
+                    for(let id in datos) {
+                        let a = datos[id];
+                        let ruta = `${mapaGrados[a.grado]}/${mapaCarpetasMateria[a.materia]}/${mapaPrefijosArchivo[a.materia]}-${a.grado}-u${a.unidad}.html`;
+                        html += `
+                            <div class="btn-task" onclick="window.location.href='${ruta}'">
+                                <div style="font-size:30px;">⭐</div>
+                                <div>
+                                    <div style="font-size:12px; color:#666;">${a.grado}º Grado</div>
+                                    <div style="color:var(--color-mate)">${a.materia} - Unidad ${a.unidad}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    list.innerHTML = html;
+                } else {
+                    container.style.display = 'none';
                 }
-                
-                let estrellita = (a >= 8) ? "🌟" : (a >= 6 ? "👍" : "💪");
-                let colorNota = (a >= 6) ? "var(--correct-color)" : "var(--incorrect-color)";
-                // Excepción visual para el nivel 9 que es de 20 preguntas (se guarda sobre 10 en la base, pero lo mostramos con el texto correcto si fue de 20)
-                let notaTexto = (t.includes("Nivel 9") && a > 10) ? `${a} / 20` : `${a} / 10`;
-                
-                tablaHTML += `<tr><td style="font-size: 13px; color: #555;">${(p.fecha || "").split(',')[0]}</td><td>${t}</td><td style="color: ${colorNota}; font-weight: bold; font-size: 16px;">${notaTexto} ${estrellita}</td></tr>`;
             });
-            tablaHTML += `</table>`;
-
-            // Calculamos los promedios reales
-            let totalU1 = u1_max.n1 + u1_max.n2 + u1_max.n3 + u1_max.n4 + u1_max.n5 + u1_max.n6;
-            let notaU1 = ((totalU1 / 60) * 10).toFixed(1);
-
-            let totalU2 = u2_max.n1 + u2_max.n2 + u2_max.n3 + u2_max.n4 + u2_max.n5 + u2_max.n6 + u2_max.n7 + u2_max.n8 + u2_max.n9;
-            let notaU2 = ((totalU2 / 90) * 10).toFixed(1); // Sobre 90 puntos porque hay 9 niveles
-
-            let resumenUnidadHTML = `<h3 style="color: var(--text-dark); margin-top: 25px;">Resumen por Unidades</h3>`;
-            let mostroAlMenosUna = false;
-
-            if(totalU1 > 0) {
-                resumenUnidadHTML += generarTarjetaUnidad("📘 Matemática - Unidad 1", "Conozcamos los números", notaU1);
-                mostroAlMenosUna = true;
-            }
-            if(totalU2 > 0) {
-                resumenUnidadHTML += generarTarjetaUnidad("📘 Matemática - Unidad 2", "Aprendamos más sobre la suma", notaU2);
-                mostroAlMenosUna = true;
-            }
-            if(!mostroAlMenosUna) resumenUnidadHTML = "";
-
-            let medallas = totalAciertos >= 50 ? "🏆👑🌟" : (totalAciertos >= 20 ? "🏅🌟" : (totalAciertos >= 1 ? "🎖️" : "🌱"));
-
-            document.getElementById('progress-content').innerHTML = `
-                <div class="grid-menu" style="margin-bottom: 20px;">
-                    <div class="card" style="border-top-color: #f4a261; padding: 15px;"><h2 style="font-size: 35px; color: #f4a261;">${practicas.length}</h2><p style="margin:5px 0; font-weight: bold; color:#666;">Prácticas</p></div>
-                    <div class="card" style="border-top-color: #2a9d8f; padding: 15px;"><h2 style="font-size: 35px; color: #2a9d8f;">${totalAciertos}</h2><p style="margin:5px 0; font-weight: bold; color:#666;">Aciertos</p></div>
-                    <div class="card" style="border-top-color: #e63946; padding: 15px;"><h2 style="font-size: 35px;">${medallas}</h2><p style="margin:5px 0; font-weight: bold; color:#666;">Medallas</p></div>
-                </div>
-                ${resumenUnidadHTML}
-                <h3 style="color: var(--text-dark);">Últimos Ejercicios</h3>
-                ${tablaHTML}
-            `;
-        }
-
-        let currentSubjectName = "", currentGrade = "";
-        
-        function goTo(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(screenId).classList.add('active'); }
-        
-        function selectSubject(name, colorClass) {
-            currentSubjectName = name; document.getElementById('title-grades').textContent = name;
-            document.getElementById('grades-container').innerHTML = `<div class="card ${colorClass}" onclick="selectGrade(${estudianteActual.grado})"><div class="card-icon">🎓</div><h2>${estudianteActual.grado}º Grado</h2></div>`;
-            goTo('screen-grades');
-        }
-        
-        function selectGrade(grade) {
-            currentGrade = grade; document.getElementById('title-units').textContent = `${currentSubjectName} - ${grade}º Grado`;
-            document.getElementById('units-container').innerHTML = ""; 
-            for(let i = 1; i <= 10; i++) document.getElementById('units-container').innerHTML += `<div class="card-small" onclick="selectUnit(${i})">Unidad ${i}</div>`;
-            goTo('screen-units');
-        }
-        
-        function selectUnit(unitNumber) {
-            let gradoStr = currentGrade.toString().replace("º Grado", "").trim(); 
-            let carpetaGrado = mapaGrados[gradoStr] || "segundo";
-            let carpetaMateria = mapaCarpetasMateria[currentSubjectName];
-            let prefijoArchivo = mapaPrefijosArchivo[currentSubjectName];
-            let rutaDestino = `${carpetaGrado}/${carpetaMateria}/${prefijoArchivo}-${gradoStr}-u${unitNumber}.html`;
-            window.location.href = rutaDestino;
         }
 
         function ajustarMateriasPorGrado() {
             let grado = estudianteActual.grado.toString();
             let visibilidad = (grado === "4" || grado === "5") ? "none" : ""; 
-            
             document.querySelector('.card.lenguaje').style.display = visibilidad;
             document.querySelector('.card.ciencia').style.display = visibilidad;
             document.querySelector('.card.valores').style.display = visibilidad;
+        }
+
+        // --- NAVEGACIÓN NORMAL ---
+        function selectSubject(name, colorClass) {
+            document.getElementById('title-grades').textContent = name;
+            document.getElementById('grades-container').innerHTML = `<div class="card ${colorClass}" onclick="selectGrade(${estudianteActual.grado})"><div class="card-icon">🎓</div><h2>${estudianteActual.grado}º Grado</h2></div>`;
+            goTo('screen-grades');
+        }
+        function selectGrade(grade) {
+            document.getElementById('title-units').textContent = grade + "º Grado";
+            let html = "";
+            for(let i=1; i<=10; i++) html += `<div class="card-small" onclick="selectUnit(${i}, ${grade})">Unidad ${i}</div>`;
+            document.getElementById('units-container').innerHTML = html;
+            goTo('screen-units');
+        }
+        function selectUnit(u, g) {
+            let mat = document.getElementById('title-grades').textContent;
+            window.location.href = `${mapaGrados[g]}/${mapaCarpetasMateria[mat]}/${mapaPrefijosArchivo[mat]}-${g}-u${u}.html`;
+        }
+        function goTo(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+        // --- PROGRESO (SIN CAMBIOS) ---
+        function verMiProgreso() {
+            goTo('screen-progress');
+            document.getElementById('progress-content').innerHTML = "Cargando...";
+            fetch(URL_BASE + "practicas.json").then(res => res.json()).then(datos => {
+                let misPracticas = [];
+                for (let id in datos) { if (datos[id].nombre === estudianteActual.nombre) misPracticas.push(datos[id]); }
+                renderizarProgreso(misPracticas.reverse());
+            });
+        }
+        function renderizarProgreso(practicas) {
+            if(practicas.length === 0) { document.getElementById('progress-content').innerHTML = "<h3>No hay prácticas aún.</h3>"; return; }
+            let html = `<table class="student-table"><tr><th>Fecha</th><th>Tema</th><th>Nota</th></tr>`;
+            practicas.forEach(p => {
+                let color = parseInt(p.aciertos) >= 6 ? "green" : "red";
+                html += `<tr><td>${p.fecha.split(',')[0]}</td><td>${p.tema}</td><td style="color:${color}; font-weight:bold;">${p.aciertos}/10</td></tr>`;
+            });
+            document.getElementById('progress-content').innerHTML = html + "</table>";
         }
     </script>
 </body>
