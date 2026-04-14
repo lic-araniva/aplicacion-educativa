@@ -175,7 +175,7 @@
         }
         document.getElementById('nie-input').addEventListener("keypress", e => { if (e.key === "Enter") buscarEstudiante(); });
         function cancelarLogin() { estudianteActual = null; document.getElementById('confirmation-box').style.display = 'none'; document.getElementById('btn-buscar').style.display = 'block'; document.getElementById('nie-input').disabled = false; document.getElementById('nie-input').value = ""; }
-        function confirmarLogin() { localStorage.setItem('estudiante_esmate', JSON.stringify(estudianteActual)); document.getElementById('user-greeting').textContent = `👤 Hola, ${estudianteActual.nombre}`; goTo('screen-subjects'); }
+        function confirmarLogin() function confirmarLogin() { localStorage.setItem('estudiante_esmate', JSON.stringify(estudianteActual)); document.getElementById('user-greeting').textContent = `👤 Hola, ${estudianteActual.nombre}`; ajustarMateriasPorGrado(); goTo('screen-subjects'); }
         function cerrarSesion() { localStorage.removeItem('estudiante_esmate'); cancelarLogin(); goTo('screen-login'); }
 
         function verMiProgreso() {
