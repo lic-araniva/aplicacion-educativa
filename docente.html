@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Docente - ESMATE</title>
     <style>
-        :root { --esmate-blue: #4361ee; --esmate-green: #2a9d8f; --esmate-red: #d90429; --bg-color: #f8f9fa; }
+        :root { --esmate-blue: #4361ee; --esmate-green: #2a9d8f; --esmate-red: #d90429; --esmate-orange: #f4a261; --bg-color: #f8f9fa; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; color: #333; }
         .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         h1 { color: var(--esmate-blue); text-align: center; margin-top: 0;}
@@ -33,12 +33,16 @@
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background-color: var(--esmate-blue); color: white; }
         tr:hover { background-color: #f1f1f1; }
-        .badge-perfect { background-color: #2d6a4f; color: white; padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 12px; }
-        .badge-good { background-color: #f4a261; color: white; padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 12px; }
+        
+        /* BOTONES DE ACCIÓN */
         .btn-delete { background: var(--esmate-red); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold;}
         .btn-delete:hover { background: #9d0208; }
-        .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; }
-        .filter-bar input, .filter-bar select { padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; }
+        .btn-edit { background: var(--esmate-orange); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; margin-right: 5px;}
+        .btn-edit:hover { background: #e76f51; }
+        
+        .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;}
+        .filter-bar input, .filter-bar select { padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; flex: 1;}
+        .btn-update { background: var(--esmate-blue); color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;}
     </style>
 </head>
 <body>
@@ -58,7 +62,7 @@
         </div>
 
         <div id="tab-estudiantes" class="tab-content active">
-            <h3>Agregar Nuevo Estudiante</h3>
+            <h3 id="form-titulo">Agregar Nuevo Estudiante</h3>
             <div class="add-student-form">
                 <input type="number" id="new-nie" placeholder="NIE (Ej. 12345)">
                 <input type="text" id="new-nombre" placeholder="Nombre completo">
@@ -70,10 +74,20 @@
                     <option value="5">5º Grado</option>
                     <option value="6">6º Grado</option>
                 </select>
-                <button class="btn-add" onclick="agregarEstudiante()">➕ Registrar</button>
+                <button class="btn-add" id="btn-guardar-est" onclick="guardarEstudiante()">➕ Registrar</button>
+                <button class="btn-delete" id="btn-cancelar-est" style="display: none;" onclick="cancelarEdicion()">❌ Cancelar</button>
             </div>
 
-            <h3>Lista de Estudiantes Activos</h3>
+            <div class="filter-bar">
+                <input type="text" id="filtro-est-nombre" placeholder="🔍 Buscar estudiante..." onkeyup="filtrarEstudiantes()">
+                <select id="filtro-est-grado" onchange="filtrarEstudiantes()">
+                    <option value="">🎓 Todos los Grados</option>
+                    <option value="1">1º Grado</option><option value="2">2º Grado</option>
+                    <option value="3">3º Grado</option><option value="4">4º Grado</option>
+                    <option value="5">5º Grado</option><option value="6">6º Grado</option>
+                </select>
+            </div>
+
             <table>
                 <thead><tr><th>NIE</th><th>Nombre</th><th>Grado</th><th>Acción</th></tr></thead>
                 <tbody id="tabla-estudiantes-body"><tr><td colspan="4" style="text-align: center;">Cargando estudiantes...</td></tr></tbody>
@@ -88,13 +102,17 @@
             </div>
 
             <div class="filter-bar">
-                <input type="text" id="filtro-nombre" placeholder="🔍 Buscar estudiante..." onkeyup="filtrarTablaPracticas()" style="flex: 1;">
-                <select id="filtro-tema" onchange="filtrarTablaPracticas()" style="flex: 1;">
-                    <option value="">📚 Todos los temas</option>
-                    <option value="U1">Unidad 1</option>
-                    <option value="U2">Unidad 2</option>
+                <input type="text" id="filtro-prac-nombre" placeholder="🔍 Buscar estudiante..." onkeyup="filtrarTablaPracticas()">
+                <select id="filtro-prac-grado" onchange="filtrarTablaPracticas()">
+                    <option value="">🎓 Todos los Grados</option>
+                    <option value="1">1º Grado</option><option value="2">2º Grado</option>
+                    <option value="3">3º Grado</option><option value="4">4º Grado</option>
+                    <option value="5">5º Grado</option><option value="6">6º Grado</option>
                 </select>
-                <button onclick="cargarPracticas()" style="background: var(--esmate-blue); color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">🔄 Actualizar</button>
+                <select id="filtro-tema" onchange="filtrarTablaPracticas()">
+                    <option value="">📚 Cargando temas...</option>
+                </select>
+                <button class="btn-update" onclick="cargarPracticas()">🔄 Actualizar</button>
             </div>
 
             <table>
@@ -108,8 +126,8 @@
     <script>
         const URL_BASE = "https://esmate-2026-default-rtdb.firebaseio.com/";
         let datosPracticas = [];
+        let datosEstudiantes = [];
 
-        // Lógica de Acceso y Pestañas
         function verificarPIN() {
             if(document.getElementById('pin-input').value === "profe2026") {
                 document.getElementById('login-screen').style.display = 'none';
@@ -118,8 +136,7 @@
                 cargarPracticas();
             } else { alert("PIN Incorrecto."); }
         }
-
-        document.getElementById('pin-input').addEventListener("keypress", function(e) { if(e.key === "Enter") verificarPIN(); });
+        document.getElementById('pin-input').addEventListener("keypress", e => { if(e.key === "Enter") verificarPIN(); });
 
         function cambiarPestana(pestana) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -129,46 +146,87 @@
         }
 
         // ==========================================
-        // MÓDULO 1: ESTUDIANTES
+        // MÓDULO 1: ESTUDIANTES (CON LÁPIZ Y FILTROS)
         // ==========================================
         function cargarEstudiantes() {
             fetch(URL_BASE + "estudiantes.json").then(res => res.json()).then(datos => {
-                let tbody = document.getElementById('tabla-estudiantes-body');
-                if(!datos) { tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No hay estudiantes registrados.</td></tr>"; return; }
+                if(!datos) { document.getElementById('tabla-estudiantes-body').innerHTML = "<tr><td colspan='4' style='text-align:center;'>No hay estudiantes registrados.</td></tr>"; return; }
                 
-                let html = "";
-                for(let nie in datos) {
-                    html += `<tr>
-                        <td style="font-weight: bold; color: var(--esmate-blue);">${nie}</td>
-                        <td>${datos[nie].nombre}</td>
-                        <td>${datos[nie].grado}º</td>
-                        <td><button class="btn-delete" onclick="borrarEstudiante('${nie}')">🗑️ Borrar</button></td>
-                    </tr>`;
-                }
-                tbody.innerHTML = html;
+                datosEstudiantes = Object.keys(datos).map(key => ({ nie: key, ...datos[key] }));
+                // Ordenar alfabéticamente por nombre
+                datosEstudiantes.sort((a,b) => a.nombre.localeCompare(b.nombre));
+                dibujarTablaEstudiantes(datosEstudiantes);
             });
         }
 
-        function agregarEstudiante() {
+        function dibujarTablaEstudiantes(lista) {
+            let tbody = document.getElementById('tabla-estudiantes-body');
+            let html = "";
+            lista.forEach(e => {
+                html += `<tr>
+                    <td style="font-weight: bold; color: var(--esmate-blue);">${e.nie}</td>
+                    <td>${e.nombre}</td>
+                    <td>${e.grado}º</td>
+                    <td>
+                        <button class="btn-edit" onclick="prepararEdicion('${e.nie}', '${e.nombre}', '${e.grado}')">✏️ Editar</button>
+                        <button class="btn-delete" onclick="borrarEstudiante('${e.nie}')">🗑️ Borrar</button>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function filtrarEstudiantes() {
+            let txt = document.getElementById('filtro-est-nombre').value.toLowerCase();
+            let grado = document.getElementById('filtro-est-grado').value;
+            
+            let filtrados = datosEstudiantes.filter(e => {
+                let matchNombre = e.nombre.toLowerCase().includes(txt) || e.nie.includes(txt);
+                let matchGrado = grado === "" || e.grado === grado;
+                return matchNombre && matchGrado;
+            });
+            dibujarTablaEstudiantes(filtrados);
+        }
+
+        function guardarEstudiante() {
             let nie = document.getElementById('new-nie').value.trim();
             let nombre = document.getElementById('new-nombre').value.trim();
             let grado = document.getElementById('new-grado').value;
 
             if(!nie || !nombre) { alert("Por favor, ingresa el NIE y el Nombre."); return; }
 
-            let btn = document.querySelector('.btn-add');
+            let btn = document.getElementById('btn-guardar-est');
             btn.innerHTML = "⏳ Guardando...";
 
             fetch(URL_BASE + `estudiantes/${nie}.json`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                method: "PUT", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ nombre: nombre, grado: grado })
             }).then(() => {
-                btn.innerHTML = "➕ Registrar";
-                document.getElementById('new-nie').value = "";
-                document.getElementById('new-nombre').value = "";
+                cancelarEdicion();
                 cargarEstudiantes();
             });
+        }
+
+        function prepararEdicion(nie, nombre, grado) {
+            document.getElementById('form-titulo').textContent = "Editar Estudiante";
+            document.getElementById('new-nie').value = nie;
+            document.getElementById('new-nie').disabled = true; // El NIE no se debe cambiar porque es la llave
+            document.getElementById('new-nombre').value = nombre;
+            document.getElementById('new-grado').value = grado;
+            
+            document.getElementById('btn-guardar-est').innerHTML = "💾 Guardar Cambios";
+            document.getElementById('btn-cancelar-est').style.display = "inline-block";
+        }
+
+        function cancelarEdicion() {
+            document.getElementById('form-titulo').textContent = "Agregar Nuevo Estudiante";
+            document.getElementById('new-nie').value = "";
+            document.getElementById('new-nie').disabled = false;
+            document.getElementById('new-nombre').value = "";
+            document.getElementById('new-grado').value = "2";
+            
+            document.getElementById('btn-guardar-est').innerHTML = "➕ Registrar";
+            document.getElementById('btn-cancelar-est').style.display = "none";
         }
 
         function borrarEstudiante(nie) {
@@ -178,24 +236,38 @@
         }
 
         // ==========================================
-        // MÓDULO 2: PRÁCTICAS Y RENDIMIENTO
+        // MÓDULO 2: PRÁCTICAS Y RENDIMIENTO (FILTROS INTELIGENTES)
         // ==========================================
         function cargarPracticas() {
             fetch(URL_BASE + "practicas.json").then(res => res.json()).then(datos => {
                 let tbody = document.getElementById('tabla-practicas-body');
-                if(!datos) { tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;'>No hay prácticas registradas.</td></tr>"; document.getElementById('total-practicas').textContent = "0"; return; }
+                if(!datos) { tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;'>No hay prácticas registradas.</td></tr>"; return; }
                 
                 datosPracticas = Object.keys(datos).map(key => ({ id: key, ...datos[key] }));
                 datosPracticas.reverse(); 
                 
+                extraerTemasDinamicos(datosPracticas); // 🪄 La magia automática
                 actualizarEstadisticas();
                 dibujarTablaPracticas(datosPracticas);
             });
         }
 
+        function extraerTemasDinamicos(lista) {
+            // Busca todos los temas únicos en la base de datos
+            let temasUnicos = [...new Set(lista.map(p => p.tema))];
+            temasUnicos.sort(); // Los ordena alfabéticamente
+            
+            let select = document.getElementById('filtro-tema');
+            let html = '<option value="">📚 Todos los temas</option>';
+            temasUnicos.forEach(tema => {
+                html += `<option value="${tema}">${tema}</option>`;
+            });
+            select.innerHTML = html;
+        }
+
         function actualizarEstadisticas() {
             document.getElementById('total-practicas').textContent = datosPracticas.length;
-            document.getElementById('total-perfectas').textContent = datosPracticas.filter(p => parseInt(p.aciertos) === 10 || (p.tema.includes("Nivel 9") && parseInt(p.aciertos) >= 18)).length; // Ajuste para el nivel 9 de 20 ptos
+            document.getElementById('total-perfectas').textContent = datosPracticas.filter(p => parseInt(p.aciertos) === 10 || (p.tema.includes("Nivel 9") && parseInt(p.aciertos) >= 18)).length; 
             let alumnosUnicos = new Set(datosPracticas.map(p => p.nombre));
             document.getElementById('total-alumnos').textContent = alumnosUnicos.size;
         }
@@ -203,13 +275,12 @@
         function dibujarTablaPracticas(lista) {
             let html = "";
             lista.forEach(p => {
-                let notaStr = `${p.aciertos}`;
                 html += `<tr>
                     <td style="font-size: 12px; color: #555;">${p.fecha || "-"}</td>
                     <td style="font-weight: bold;">${p.nombre}</td>
                     <td>${p.grado}º</td>
                     <td>${p.tema}</td>
-                    <td style="font-weight: bold; color: #2d6a4f;">${notaStr}</td>
+                    <td style="font-weight: bold; color: #2d6a4f;">${p.aciertos}</td>
                     <td style="color: #d90429;">${p.fallos}</td>
                     <td><button class="btn-delete" onclick="borrarPractica('${p.id}')">🗑️ Borrar</button></td>
                 </tr>`;
@@ -218,13 +289,15 @@
         }
 
         function filtrarTablaPracticas() {
-            let txt = document.getElementById('filtro-nombre').value.toLowerCase();
+            let txt = document.getElementById('filtro-prac-nombre').value.toLowerCase();
+            let grado = document.getElementById('filtro-prac-grado').value;
             let tema = document.getElementById('filtro-tema').value;
             
             let filtrados = datosPracticas.filter(p => {
                 let matchNombre = p.nombre.toLowerCase().includes(txt);
-                let matchTema = tema === "" || p.tema.includes(tema) || p.tema.includes("Unidad " + tema.replace("U",""));
-                return matchNombre && matchTema;
+                let matchGrado = grado === "" || p.grado == grado; // Permite filtrar por grado
+                let matchTema = tema === "" || p.tema === tema;    // Filtro exacto generado dinámicamente
+                return matchNombre && matchGrado && matchTema;
             });
             dibujarTablaPracticas(filtrados);
         }
