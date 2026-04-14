@@ -1,1 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ángulos y Polígonos - ESMATE 5º</title>
+    <style>
+        :root {
+            --esmate-blue: #4361ee; --bg-color: #f8f9fa; --text-dark: #2b2d42;
+            --correct-color: #2d6a4f; --incorrect-color: #d90429;
+            --poly-color: #3a86ff; --nonpoly-color: #e63946;
+        }
 
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        
+        .header { width: 100%; max-width: 800px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; z-index: 10; }
+        .btn-back { background: white; border: 1px solid #ccc; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; color: #555; text-decoration: none; font-size: 14px;}
+        
+        .screen { display: none; width: 100%; max-width: 700px; flex-direction: column; align-items: center; animation: fadeIn 0.4s; z-index: 10;}
+        .screen.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .game-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); width: 100%; text-align: center; box-sizing: border-box; }
+        
+        button.primary { background-color: var(--esmate-blue); color: white; border: none; padding: 12px 24px; font-weight: bold; font-size: 18px; border-radius: 10px; cursor: pointer; width: 100%; transition: 0.2s; margin-top: 10px;}
+        button.primary:hover { background-color: #3f37c9; }
+        button.secondary { background-color: #f4a261; color: white; border: none; padding: 12px 24px; font-weight: bold; font-size: 18px; border-radius: 10px; cursor: pointer; width: 100%; margin-top: 10px; }
+        
+        .btn-cheat { background-color: #2b2d42; color: #00ff00; border: 2px dashed #00ff00; padding: 10px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 15px; cursor: pointer; display: none; }
+
+        /* Estilos Geometría */
+        .canvas-container { background: #fff; border: 3px dashed #ccc; border-radius: 15px; padding: 20px; margin: 20px auto; display: flex; justify-content: center; align-items: center; height: 180px; width: 100%; max-width: 300px; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);}
+        .shape-svg { width: 150px; height: 150px; }
+        
+        .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; width: 100%; }
+        .btn-choice { background: white; border: 2px solid var(--esmate-blue); color: var(--esmate-blue); padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-choice:hover { background: var(--esmate-blue); color: white; }
+        .btn-choice.selected { background: var(--esmate-blue); color: white; box-shadow: 0 4px 10px rgba(67, 97, 238, 0.4); transform: scale(1.05);}
+
+        /* Popups */
+        #feedback-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box;}
+        #feedback-content { background: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 400px; width: 100%; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .confetti { position: fixed; width: 10px; height: 10px; background-color: #f00; z-index: 999; top: -10px; animation: fall linear forwards; }
+        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="../../index.html" class="btn-back">⬅️ Menú</a>
+        <div style="font-weight: bold; color: var(--esmate-blue); cursor: pointer; user-select: none;" id="jugador-nombre" onclick="activarModoPrueba()">👤 Estudiante</div>
+    </div>
+
+    <div id="screen-start" class="screen active">
+        <div class="game-card">
+            <h1 style="color: var(--esmate-blue); margin-top:0;">Unidad 2: Ángulos y Polígonos</h1>
+            
+            <div id="save-menu" style="display: none; margin-top: 20px; background: #e0fbfc; padding: 15px; border-radius: 10px;">
+                <p style="color: var(--correct-color); font-weight: bold; margin-top: 0;">¡Progreso encontrado!</p>
+                <div id="btn-n2" style="display: none;"><button class="primary" onclick="iniciarNivel(2)">🚀 Nivel 2: Clasificación de Polígonos</button></div>
+                <button class="secondary" style="background: white; color: #555; border: 1px solid #ccc; font-size: 14px;" onclick="iniciarNivel(1)">🔄 Repasar Nivel 1</button>
+            </div>
+
+            <div id="new-menu">
+                <p>Descubre los secretos de las figuras geométricas cerradas.</p>
+                <button class="primary" onclick="iniciarNivel(1)">▶ Comenzar Nivel 1</button>
+            </div>
+            <button class="btn-cheat cheat-element" onclick="localStorage.removeItem('esmate_m5_u2_progreso_'+estudiante.nie); location.reload();">🗑️ Borrar progreso</button>
+        </div>
+    </div>
+
+    <div id="screen-game" class="screen">
+        <div class="game-card">
+            <div style="display: flex; justify-content: space-between; font-weight: bold; color: #666; margin-bottom: 10px;">
+                <span id="label-nivel">Nivel X</span>
+                <span>Ejercicio <span id="ronda">1</span>/10</span>
+                <span style="color: var(--incorrect-color)">Intentos: <span id="intentos">2</span> ❤️</span>
+            </div>
+            
+            <h3 style="margin: 0; color: #333;" id="instruccion">¿Es esta figura un polígono?</h3>
+            
+            <div class="canvas-container" id="figura-container"></div>
+
+            <div id="opciones-n1" class="choice-grid" style="display: none;">
+                <button class="btn-choice" onclick="seleccionarOpcion(true, this)">✅ Es un Polígono</button>
+                <button class="btn-choice" onclick="seleccionarOpcion(false, this)" style="border-color: #e63946; color: #e63946;">❌ NO es Polígono</button>
+            </div>
+
+            <div id="opciones-n2" class="choice-grid" style="display: none;">
+                </div>
+
+            <button class="primary" id="btn-revisar" onclick="revisarEjercicio()" style="display: none; margin-top: 25px;">Comprobar</button>
+            <button class="btn-cheat cheat-element" onclick="autoGanar()">⏭️ GANAR NIVEL</button>
+        </div>
+    </div>
+
+    <div id="screen-finale" class="screen">
+        <div class="game-card" style="background: linear-gradient(135deg, #2a9d8f 0%, #21867a 100%); color: white; border: none;">
+            <h1 style="font-size: 35px;">¡Felicidades!</h1>
+            <p>Has dominado el inicio de la Geometría.</p>
+            <div style="font-size: 60px; margin: 20px 0;">📐📏🏆</div>
+            <button class="primary" style="background: white; color: #2a9d8f;" onclick="window.location.href='../../index.html'">➡️ Volver al Salón de Trofeos</button>
+        </div>
+    </div>
+
+    <div id="feedback-overlay"><div id="feedback-content"><div id="fb-icon" style="font-size: 60px; margin-bottom: 10px;">🏆</div><h2 id="fb-title" style="margin: 0; color: var(--text-dark);">¡Bien hecho!</h2><p id="fb-text" style="color: #555;"></p><button class="primary" onclick="cerrarFeedback()">Continuar</button></div></div>
+
+    <script>
+        const URL_BASE = "https://esmate-2026-default-rtdb.firebaseio.com/";
+        let estudiante = { nombre: "Estudiante", nie: "0000", grado: "5" };
+        let nivelActual = 1, ronda = 1, aciertos = 0, fallos = 0, intentosUsados = 0;
+        let solucionCorrecta = null;
+        let seleccionUsuario = null;
+
+        const nombresPoligonos = {
+            3: "Triángulo", 4: "Cuadrilátero", 5: "Pentágono", 6: "Hexágono", 7: "Heptágono",
+            8: "Octágono", 9: "Eneágono", 10: "Decágono", 11: "Endecágono", 12: "Dodecágono",
+            13: "Tridecágono", 14: "Tetradecágono", 15: "Pentadecágono", 16: "Hexadecágono",
+            17: "Heptadecágono", 18: "Octadecágono", 19: "Eneadecágono", 20: "Icoságono"
+        };
+
+        let clics = 0;
+        function activarModoPrueba() { clics++; if(clics===5) { let p=prompt("Clave:"); if(p==="rive2593") document.querySelectorAll('.cheat-element').forEach(b=>b.style.display='block'); } }
+        function autoGanar() { aciertos = 10; finalizarNivel(); }
+
+        window.onload = function() {
+            let info = localStorage.getItem('estudiante_esmate');
+            if(info) { estudiante = JSON.parse(info); document.getElementById('jugador-nombre').textContent = `👤 ${estudiante.nombre}`; }
+            let progreso = localStorage.getItem('esmate_m5_u2_progreso_' + estudiante.nie);
+            if(progreso) {
+                let niv = parseInt(progreso);
+                document.getElementById('save-menu').style.display='block'; document.getElementById('new-menu').style.display='none';
+                if(niv >= 2) document.getElementById('btn-n2').style.display='block';
+            }
+        };
+
+        function iniciarNivel(nivel) {
+            nivelActual = nivel; ronda = 1; aciertos = 0; fallos = 0;
+            cambiarPantalla('screen-game');
+            document.getElementById('label-nivel').textContent = "Nivel " + nivel;
+            document.getElementById('opciones-n1').style.display = (nivel === 1) ? "grid" : "none";
+            document.getElementById('opciones-n2').style.display = (nivel === 2) ? "grid" : "none";
+            generarEjercicio();
+        }
+
+        function generarEjercicio() {
+            intentosUsados = 0;
+            seleccionUsuario = null;
+            document.getElementById('intentos').textContent = "2";
+            document.getElementById('ronda').textContent = ronda;
+            document.getElementById('btn-revisar').style.display = "none";
+            document.querySelectorAll('.btn-choice').forEach(b => b.classList.remove('selected'));
+
+            let container = document.getElementById('figura-container');
+
+            if(nivelActual === 1) {
+                document.getElementById('instruccion').textContent = "¿Es esta figura un polígono?";
+                // 50% probabilidad de Polígono o No Polígono
+                let esPoligono = Math.random() > 0.5;
+                solucionCorrecta = esPoligono;
+                container.innerHTML = generarFiguraSVG(esPoligono);
+            } else {
+                let numLados = Math.floor(Math.random() * 18) + 3; // De 3 a 20 lados
+                document.getElementById('instruccion').textContent = "¿Cómo se llama este polígono?";
+                solucionCorrecta = nombresPoligonos[numLados];
+                container.innerHTML = generarPoligonoRegularSVG(numLados);
+                generarBotonesNivel2(numLados);
+            }
+        }
+
+        // MOTOR DE DIBUJO SVG
+        function generarFiguraSVG(esPoligono) {
+            let svgStr = `<svg class="shape-svg" viewBox="0 0 100 100">`;
+            if(esPoligono) {
+                // Genera un polígono (líneas rectas y cerrado)
+                let tipo = Math.floor(Math.random() * 3);
+                if(tipo === 0) svgStr += `<polygon points="50,10 90,90 10,90" fill="#e0fbfc" stroke="#4361ee" stroke-width="4"/>`; // Triángulo
+                else if(tipo === 1) svgStr += `<polygon points="20,20 80,10 90,80 10,90" fill="#e0fbfc" stroke="#4361ee" stroke-width="4"/>`; // Cuadrilátero Irregular
+                else svgStr += `<polygon points="50,10 65,40 95,45 70,65 80,95 50,75 20,95 30,65 5,45 35,40" fill="#e0fbfc" stroke="#4361ee" stroke-width="4"/>`; // Estrella (Cóncavo)
+            } else {
+                // Genera NO polígonos (curvas o líneas abiertas)
+                let tipo = Math.floor(Math.random() * 3);
+                if(tipo === 0) svgStr += `<polyline points="10,90 50,10 90,90" fill="none" stroke="#e63946" stroke-width="5" stroke-linecap="round"/>`; // Abierto
+                else if(tipo === 1) svgStr += `<circle cx="50" cy="50" r="40" fill="#ffccd5" stroke="#e63946" stroke-width="4"/>`; // Curvo (Círculo)
+                else svgStr += `<path d="M10,50 Q50,10 90,50 T10,50" fill="none" stroke="#e63946" stroke-width="5"/>`; // Curvo irregular
+            }
+            svgStr += `</svg>`;
+            return svgStr;
+        }
+
+        function generarPoligonoRegularSVG(lados) {
+            let puntos = [];
+            let cx = 50, cy = 50, r = 45;
+            for (let i = 0; i < lados; i++) {
+                let angulo = -Math.PI / 2 + (i * 2 * Math.PI / lados);
+                let x = cx + r * Math.cos(angulo);
+                let y = cy + r * Math.sin(angulo);
+                puntos.push(`${x},${y}`);
+            }
+            return `<svg class="shape-svg" viewBox="0 0 100 100"><polygon points="${puntos.join(' ')}" fill="#e0fbfc" stroke="#2a9d8f" stroke-width="3"/></svg>`;
+        }
+
+        // Lógica de Opciones Múltiples para Nivel 2
+        function generarBotonesNivel2(ladosCorrectos) {
+            let opciones = new Set([ladosCorrectos]);
+            // Agregar 3 opciones incorrectas aleatorias
+            while(opciones.size < 4) {
+                let falsoLado = Math.floor(Math.random() * 18) + 3;
+                opciones.add(falsoLado);
+            }
+            
+            // Mezclar opciones
+            let arrayOpciones = Array.from(opciones).sort(() => Math.random() - 0.5);
+            
+            let html = "";
+            arrayOpciones.forEach(l => {
+                html += `<button class="btn-choice" onclick="seleccionarOpcion('${nombresPoligonos[l]}', this)">${nombresPoligonos[l]}</button>`;
+            });
+            document.getElementById('opciones-n2').innerHTML = html;
+        }
+
+        function seleccionarOpcion(valor, botonElemento) {
+            seleccionUsuario = valor;
+            document.querySelectorAll('.btn-choice').forEach(b => b.classList.remove('selected'));
+            botonElemento.classList.add('selected');
+            document.getElementById('btn-revisar').style.display = "block";
+        }
+
+        function revisarEjercicio() {
+            if(seleccionUsuario === solucionCorrecta) {
+                aciertos++; 
+                mostrarPopup("🌟", "¡Excelente!", "Tu respuesta es correcta.", avanzar);
+            } else {
+                intentosUsados++;
+                document.getElementById('intentos').textContent = (2 - intentosUsados);
+                if(intentosUsados < 2) {
+                    mostrarPopup("⚠️", "Inténtalo de nuevo", "Esa no es la respuesta correcta.", null);
+                    document.querySelectorAll('.btn-choice').forEach(b => b.classList.remove('selected'));
+                    seleccionUsuario = null;
+                    document.getElementById('btn-revisar').style.display = "none";
+                } else {
+                    fallos++; 
+                    let mensajeFinal = (nivelActual === 1) ? (solucionCorrecta ? "Sí era un polígono." : "No era un polígono.") : `El nombre correcto era: ${solucionCorrecta}.`;
+                    mostrarPopup("💔", "Sin intentos", mensajeFinal, avanzar);
+                }
+            }
+        }
+
+        function avanzar() { ronda++; if(ronda > 10) finalizarNivel(); else generarEjercicio(); }
+
+        function finalizarNivel() {
+            guardarEnFirebase(`5º - U2 - Nivel ${nivelActual}`, aciertos, fallos);
+            
+            if(aciertos >= 8) {
+                if(nivelActual === 1) {
+                    localStorage.setItem('esmate_m5_u2_progreso_'+estudiante.nie, "2");
+                    mostrarPopup("🏆", `¡Nivel 1 Superado!`, `Ya sabes qué es un polígono. ¡Vamos al nivel 2!`, () => { iniciarNivel(2); });
+                } else {
+                    localStorage.setItem('esmate_m5_u2_progreso_'+estudiante.nie, "3"); 
+                    localStorage.setItem('esmate_show_progress', 'true');
+                    cambiarPantalla('screen-finale'); dispararConfeti();
+                }
+            } else {
+                mostrarPopup("💪", "¡Casi lo logras!", `Tuviste ${aciertos}/10. Necesitas 8 para pasar. ¡Tú puedes!`, () => { iniciarNivel(nivelActual); });
+            }
+        }
+
+        function dispararConfeti() {
+            for(let i=0; i<50; i++) { let confeti = document.createElement('div'); confeti.classList.add('confetti'); confeti.style.left = Math.random() * 100 + 'vw'; confeti.style.backgroundColor = ['#ff0', '#f00', '#0f0', '#00f', '#f0f'][Math.floor(Math.random()*5)]; confeti.style.animationDuration = (Math.random() * 3 + 2) + 's'; document.body.appendChild(confeti); setTimeout(() => confeti.remove(), 5000); }
+        }
+
+        function cambiarPantalla(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        let accionAlCerrar = null;
+        function mostrarPopup(i, t, txt, f) { document.getElementById('fb-icon').textContent = i; document.getElementById('fb-title').textContent = t; document.getElementById('fb-text').textContent = txt; accionAlCerrar = f; document.getElementById('feedback-overlay').style.display = 'flex'; }
+        function cerrarFeedback() { document.getElementById('feedback-overlay').style.display = 'none'; if(accionAlCerrar) accionAlCerrar(); }
+        function guardarEnFirebase(tema, a, f) { const p = { nombre: estudiante.nombre, grado: estudiante.grado, tema: tema, aciertos: a, fallos: f, fecha: new Date().toLocaleString('es-SV') }; fetch(URL_BASE + "practicas.json", { method: "POST", body: JSON.stringify(p) }); }
+    </script>
+</body>
+</html>
