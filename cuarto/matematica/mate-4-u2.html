@@ -28,14 +28,31 @@
         
         .btn-cheat { background-color: #2b2d42; color: #00ff00; border: 2px dashed #00ff00; padding: 10px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 15px; cursor: pointer; display: none; }
 
-        /* Estilos Geometría */
+        /* Estilos Geometría Nivel 1 (Clasificación) */
+        .instruccion-mini { font-size: 14px; color: #666; margin: 0 0 10px 0; font-style: italic; }
+        .pool-zone { min-height: 90px; border: 2px dashed #aaa; border-radius: 10px; padding: 10px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; background: #fff; margin-bottom: 20px;}
+        .group-zones { display: flex; gap: 10px; width: 100%; justify-content: space-between; }
+        .drop-zone { flex: 1; min-height: 180px; border: 3px solid #ccc; border-radius: 10px; padding: 10px; display: flex; flex-wrap: wrap; align-content: flex-start; justify-content: center; gap: 8px; background: #f8f9fa; cursor: pointer; transition: 0.2s;}
+        .drop-zone.poly-zone { border-color: var(--esmate-blue); background: #e0fbfc;}
+        .drop-zone.nonpoly-zone { border-color: var(--incorrect-color); background: #ffccd5;}
+        .drop-zone:hover { transform: scale(1.02); }
+        
+        .shape-item { width: 70px; height: 70px; cursor: pointer; transition: 0.2s; border-radius: 8px; border: 3px solid transparent; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: center; align-items: center;}
+        .shape-item.selected-shape { border-color: #ffbf00; transform: scale(1.15); background: #fff3cd; box-shadow: 0 6px 12px rgba(0,0,0,0.2); z-index: 5;}
+        .shape-item.error-shape { border-color: var(--incorrect-color); background: #ffccd5; animation: shake 0.3s; }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+        .shape-svg-small { width: 60px; height: 60px; }
+
+        /* Estilos Geometría Nivel 2 (Nombres) */
         .canvas-container { background: #fff; border: 3px dashed #ccc; border-radius: 15px; padding: 20px; margin: 20px auto; display: flex; justify-content: center; align-items: center; height: 180px; width: 100%; max-width: 300px; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);}
         .shape-svg { width: 150px; height: 150px; }
-        
         .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; width: 100%; }
-        .btn-choice { background: white; border: 2px solid var(--esmate-blue); color: var(--esmate-blue); padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-choice { background: white; border: 2px solid var(--esmate-blue); color: var(--esmate-blue); padding: 12px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center;}
+        .btn-choice span { font-size: 14px; font-weight: normal; margin-top: 5px; color: #555;}
         .btn-choice:hover { background: var(--esmate-blue); color: white; }
+        .btn-choice:hover span { color: #e0fbfc; }
         .btn-choice.selected { background: var(--esmate-blue); color: white; box-shadow: 0 4px 10px rgba(67, 97, 238, 0.4); transform: scale(1.05);}
+        .btn-choice.selected span { color: #e0fbfc; }
 
         /* Popups */
         #feedback-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box;}
@@ -58,7 +75,7 @@
             
             <div id="save-menu" style="display: none; margin-top: 20px; background: #e0fbfc; padding: 15px; border-radius: 10px;">
                 <p style="color: var(--correct-color); font-weight: bold; margin-top: 0;">¡Progreso encontrado!</p>
-                <div id="btn-n2" style="display: none;"><button class="primary" onclick="iniciarNivel(2)">🚀 Nivel 2: Clasificación de Polígonos</button></div>
+                <div id="btn-n2" style="display: none;"><button class="primary" onclick="iniciarNivel(2)">🚀 Nivel 2: Nombres de Polígonos</button></div>
                 <button class="secondary" style="background: white; color: #555; border: 1px solid #ccc; font-size: 14px;" onclick="iniciarNivel(1)">🔄 Repasar Nivel 1</button>
             </div>
 
@@ -70,27 +87,48 @@
         </div>
     </div>
 
-    <div id="screen-game" class="screen">
+    <div id="screen-game-n1" class="screen">
+        <div class="game-card">
+            <div style="display: flex; justify-content: space-between; font-weight: bold; color: #666; margin-bottom: 5px;">
+                <span>Nivel 1</span>
+                <span>Ronda <span id="ronda-n1">1</span>/5</span>
+                <span style="color: var(--incorrect-color)">Intentos: <span id="intentos-n1">2</span> ❤️</span>
+            </div>
+            
+            <h3 style="margin: 0; color: #333;">Agrupa las figuras</h3>
+            <p class="instruccion-mini">Toca una figura para seleccionarla y luego toca la caja donde pertenece.</p>
+            
+            <div id="pool-zone" class="pool-zone" onclick="moverAlGrupo('pool-zone')"></div>
+
+            <div class="group-zones">
+                <div id="zone-poly" class="drop-zone poly-zone" onclick="moverAlGrupo('zone-poly')">
+                    <h4 style="width:100%; margin:0 0 5px 0; color:var(--esmate-blue);">✅ Polígonos</h4>
+                </div>
+                <div id="zone-nonpoly" class="drop-zone nonpoly-zone" onclick="moverAlGrupo('zone-nonpoly')">
+                    <h4 style="width:100%; margin:0 0 5px 0; color:var(--incorrect-color);">❌ NO Polígonos</h4>
+                </div>
+            </div>
+
+            <button class="primary" id="btn-revisar-n1" onclick="revisarNivel1()" style="margin-top: 20px;">✅ Comprobar Grupos</button>
+            <button class="btn-cheat cheat-element" onclick="autoGanar()">⏭️ GANAR NIVEL</button>
+        </div>
+    </div>
+
+    <div id="screen-game-n2" class="screen">
         <div class="game-card">
             <div style="display: flex; justify-content: space-between; font-weight: bold; color: #666; margin-bottom: 10px;">
-                <span id="label-nivel">Nivel X</span>
-                <span>Ejercicio <span id="ronda">1</span>/10</span>
-                <span style="color: var(--incorrect-color)">Intentos: <span id="intentos">2</span> ❤️</span>
+                <span>Nivel 2</span>
+                <span>Ejercicio <span id="ronda-n2">1</span>/10</span>
+                <span style="color: var(--incorrect-color)">Intentos: <span id="intentos-n2">2</span> ❤️</span>
             </div>
             
-            <h3 style="margin: 0; color: #333;" id="instruccion">¿Es esta figura un polígono?</h3>
+            <h3 style="margin: 0; color: #333;">¿Cómo se llama este polígono?</h3>
             
-            <div class="canvas-container" id="figura-container"></div>
+            <div class="canvas-container" id="figura-n2-container"></div>
 
-            <div id="opciones-n1" class="choice-grid" style="display: none;">
-                <button class="btn-choice" onclick="seleccionarOpcion(true, this)">✅ Es un Polígono</button>
-                <button class="btn-choice" onclick="seleccionarOpcion(false, this)" style="border-color: #e63946; color: #e63946;">❌ NO es Polígono</button>
-            </div>
+            <div id="opciones-n2" class="choice-grid"></div>
 
-            <div id="opciones-n2" class="choice-grid" style="display: none;">
-                </div>
-
-            <button class="primary" id="btn-revisar" onclick="revisarEjercicio()" style="display: none; margin-top: 25px;">Comprobar</button>
+            <button class="primary" id="btn-revisar-n2" onclick="revisarNivel2()" style="display: none; margin-top: 25px;">✅ Comprobar</button>
             <button class="btn-cheat cheat-element" onclick="autoGanar()">⏭️ GANAR NIVEL</button>
         </div>
     </div>
@@ -110,9 +148,13 @@
         const URL_BASE = "https://esmate-2026-default-rtdb.firebaseio.com/";
         let estudiante = { nombre: "Estudiante", nie: "0000", grado: "5" };
         let nivelActual = 1, ronda = 1, aciertos = 0, fallos = 0, intentosUsados = 0;
-        let solucionCorrecta = null;
-        let seleccionUsuario = null;
+        
+        // Nivel 1 Variables
+        let figuraSeleccionada = null;
 
+        // Nivel 2 Variables
+        let solucionCorrectaN2 = null;
+        let seleccionUsuarioN2 = null;
         const nombresPoligonos = {
             3: "Triángulo", 4: "Cuadrilátero", 5: "Pentágono", 6: "Hexágono", 7: "Heptágono",
             8: "Octágono", 9: "Eneágono", 10: "Decágono", 11: "Endecágono", 12: "Dodecágono",
@@ -120,6 +162,7 @@
             17: "Heptadecágono", 18: "Octadecágono", 19: "Eneadecágono", 20: "Icoságono"
         };
 
+        // Utilidades y Trucos
         let clics = 0;
         function activarModoPrueba() { clics++; if(clics===5) { let p=prompt("Clave:"); if(p==="rive2593") document.querySelectorAll('.cheat-element').forEach(b=>b.style.display='block'); } }
         function autoGanar() { aciertos = 10; finalizarNivel(); }
@@ -137,144 +180,15 @@
 
         function iniciarNivel(nivel) {
             nivelActual = nivel; ronda = 1; aciertos = 0; fallos = 0;
-            cambiarPantalla('screen-game');
-            document.getElementById('label-nivel').textContent = "Nivel " + nivel;
-            document.getElementById('opciones-n1').style.display = (nivel === 1) ? "grid" : "none";
-            document.getElementById('opciones-n2').style.display = (nivel === 2) ? "grid" : "none";
+            if(nivel === 1) cambiarPantalla('screen-game-n1');
+            else cambiarPantalla('screen-game-n2');
             generarEjercicio();
         }
 
         function generarEjercicio() {
             intentosUsados = 0;
-            seleccionUsuario = null;
-            document.getElementById('intentos').textContent = "2";
-            document.getElementById('ronda').textContent = ronda;
-            document.getElementById('btn-revisar').style.display = "none";
-            document.querySelectorAll('.btn-choice').forEach(b => b.classList.remove('selected'));
-
-            let container = document.getElementById('figura-container');
-
+            
             if(nivelActual === 1) {
-                document.getElementById('instruccion').textContent = "¿Es esta figura un polígono?";
-                // 50% probabilidad de Polígono o No Polígono
-                let esPoligono = Math.random() > 0.5;
-                solucionCorrecta = esPoligono;
-                container.innerHTML = generarFiguraSVG(esPoligono);
-            } else {
-                let numLados = Math.floor(Math.random() * 18) + 3; // De 3 a 20 lados
-                document.getElementById('instruccion').textContent = "¿Cómo se llama este polígono?";
-                solucionCorrecta = nombresPoligonos[numLados];
-                container.innerHTML = generarPoligonoRegularSVG(numLados);
-                generarBotonesNivel2(numLados);
-            }
-        }
-
-        // MOTOR DE DIBUJO SVG
-        function generarFiguraSVG(esPoligono) {
-            let svgStr = `<svg class="shape-svg" viewBox="0 0 100 100">`;
-            if(esPoligono) {
-                // Genera un polígono (líneas rectas y cerrado)
-                let tipo = Math.floor(Math.random() * 3);
-                if(tipo === 0) svgStr += `<polygon points="50,10 90,90 10,90" fill="#e0fbfc" stroke="#4361ee" stroke-width="4"/>`; // Triángulo
-                else if(tipo === 1) svgStr += `<polygon points="20,20 80,10 90,80 10,90" fill="#e0fbfc" stroke="#4361ee" stroke-width="4"/>`; // Cuadrilátero Irregular
-                else svgStr += `<polygon points="50,10 65,40 95,45 70,65 80,95 50,75 20,95 30,65 5,45 35,40" fill="#e0fbfc" stroke="#4361ee" stroke-width="4"/>`; // Estrella (Cóncavo)
-            } else {
-                // Genera NO polígonos (curvas o líneas abiertas)
-                let tipo = Math.floor(Math.random() * 3);
-                if(tipo === 0) svgStr += `<polyline points="10,90 50,10 90,90" fill="none" stroke="#e63946" stroke-width="5" stroke-linecap="round"/>`; // Abierto
-                else if(tipo === 1) svgStr += `<circle cx="50" cy="50" r="40" fill="#ffccd5" stroke="#e63946" stroke-width="4"/>`; // Curvo (Círculo)
-                else svgStr += `<path d="M10,50 Q50,10 90,50 T10,50" fill="none" stroke="#e63946" stroke-width="5"/>`; // Curvo irregular
-            }
-            svgStr += `</svg>`;
-            return svgStr;
-        }
-
-        function generarPoligonoRegularSVG(lados) {
-            let puntos = [];
-            let cx = 50, cy = 50, r = 45;
-            for (let i = 0; i < lados; i++) {
-                let angulo = -Math.PI / 2 + (i * 2 * Math.PI / lados);
-                let x = cx + r * Math.cos(angulo);
-                let y = cy + r * Math.sin(angulo);
-                puntos.push(`${x},${y}`);
-            }
-            return `<svg class="shape-svg" viewBox="0 0 100 100"><polygon points="${puntos.join(' ')}" fill="#e0fbfc" stroke="#2a9d8f" stroke-width="3"/></svg>`;
-        }
-
-        // Lógica de Opciones Múltiples para Nivel 2
-        function generarBotonesNivel2(ladosCorrectos) {
-            let opciones = new Set([ladosCorrectos]);
-            // Agregar 3 opciones incorrectas aleatorias
-            while(opciones.size < 4) {
-                let falsoLado = Math.floor(Math.random() * 18) + 3;
-                opciones.add(falsoLado);
-            }
-            
-            // Mezclar opciones
-            let arrayOpciones = Array.from(opciones).sort(() => Math.random() - 0.5);
-            
-            let html = "";
-            arrayOpciones.forEach(l => {
-                html += `<button class="btn-choice" onclick="seleccionarOpcion('${nombresPoligonos[l]}', this)">${nombresPoligonos[l]}</button>`;
-            });
-            document.getElementById('opciones-n2').innerHTML = html;
-        }
-
-        function seleccionarOpcion(valor, botonElemento) {
-            seleccionUsuario = valor;
-            document.querySelectorAll('.btn-choice').forEach(b => b.classList.remove('selected'));
-            botonElemento.classList.add('selected');
-            document.getElementById('btn-revisar').style.display = "block";
-        }
-
-        function revisarEjercicio() {
-            if(seleccionUsuario === solucionCorrecta) {
-                aciertos++; 
-                mostrarPopup("🌟", "¡Excelente!", "Tu respuesta es correcta.", avanzar);
-            } else {
-                intentosUsados++;
-                document.getElementById('intentos').textContent = (2 - intentosUsados);
-                if(intentosUsados < 2) {
-                    mostrarPopup("⚠️", "Inténtalo de nuevo", "Esa no es la respuesta correcta.", null);
-                    document.querySelectorAll('.btn-choice').forEach(b => b.classList.remove('selected'));
-                    seleccionUsuario = null;
-                    document.getElementById('btn-revisar').style.display = "none";
-                } else {
-                    fallos++; 
-                    let mensajeFinal = (nivelActual === 1) ? (solucionCorrecta ? "Sí era un polígono." : "No era un polígono.") : `El nombre correcto era: ${solucionCorrecta}.`;
-                    mostrarPopup("💔", "Sin intentos", mensajeFinal, avanzar);
-                }
-            }
-        }
-
-        function avanzar() { ronda++; if(ronda > 10) finalizarNivel(); else generarEjercicio(); }
-
-        function finalizarNivel() {
-            guardarEnFirebase(`5º - U2 - Nivel ${nivelActual}`, aciertos, fallos);
-            
-            if(aciertos >= 8) {
-                if(nivelActual === 1) {
-                    localStorage.setItem('esmate_m5_u2_progreso_'+estudiante.nie, "2");
-                    mostrarPopup("🏆", `¡Nivel 1 Superado!`, `Ya sabes qué es un polígono. ¡Vamos al nivel 2!`, () => { iniciarNivel(2); });
-                } else {
-                    localStorage.setItem('esmate_m5_u2_progreso_'+estudiante.nie, "3"); 
-                    localStorage.setItem('esmate_show_progress', 'true');
-                    cambiarPantalla('screen-finale'); dispararConfeti();
-                }
-            } else {
-                mostrarPopup("💪", "¡Casi lo logras!", `Tuviste ${aciertos}/10. Necesitas 8 para pasar. ¡Tú puedes!`, () => { iniciarNivel(nivelActual); });
-            }
-        }
-
-        function dispararConfeti() {
-            for(let i=0; i<50; i++) { let confeti = document.createElement('div'); confeti.classList.add('confetti'); confeti.style.left = Math.random() * 100 + 'vw'; confeti.style.backgroundColor = ['#ff0', '#f00', '#0f0', '#00f', '#f0f'][Math.floor(Math.random()*5)]; confeti.style.animationDuration = (Math.random() * 3 + 2) + 's'; document.body.appendChild(confeti); setTimeout(() => confeti.remove(), 5000); }
-        }
-
-        function cambiarPantalla(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-        let accionAlCerrar = null;
-        function mostrarPopup(i, t, txt, f) { document.getElementById('fb-icon').textContent = i; document.getElementById('fb-title').textContent = t; document.getElementById('fb-text').textContent = txt; accionAlCerrar = f; document.getElementById('feedback-overlay').style.display = 'flex'; }
-        function cerrarFeedback() { document.getElementById('feedback-overlay').style.display = 'none'; if(accionAlCerrar) accionAlCerrar(); }
-        function guardarEnFirebase(tema, a, f) { const p = { nombre: estudiante.nombre, grado: estudiante.grado, tema: tema, aciertos: a, fallos: f, fecha: new Date().toLocaleString('es-SV') }; fetch(URL_BASE + "practicas.json", { method: "POST", body: JSON.stringify(p) }); }
-    </script>
-</body>
-</html>
+                // Nivel 1: 5 rondas, 4 figuras por ronda = 20 figuras totales (2 puntos por ronda perfecta)
+                document.getElementById('intentos-n1').textContent = "2";
+                document.getElementById('r
