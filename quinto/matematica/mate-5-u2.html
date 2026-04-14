@@ -96,8 +96,12 @@
             </div>
             
             <h3 style="margin: 0; color: #333;">Agrupa las figuras</h3>
-            <p class="instruccion-mini">Toca una figura para seleccionarla y luego toca la caja donde pertenece.</p>
-            
+            <p class="instruccion-mini">Toca una figura para seleccionarla y luego toca la caja donde pertenece.</p>             
+            <div style="background: #e0fbfc; padding: 12px; border-radius: 8px; border-left: 5px solid var(--esmate-blue); font-size: 14px; text-align: left; margin-bottom: 15px; color: #333;">                 
+                <b>💡 Recuerda:</b> Un <b>polígono</b> es una figura cerrada, formada por 3 o más segmentos de línea recta unidos entre sí.             </div>
+           
+            </div>
+        
             <div id="pool-zone" class="pool-zone" onclick="moverAlGrupo('pool-zone')"></div>
 
             <div class="group-zones">
@@ -178,44 +182,73 @@
             }
         };
 
+        let secuenciaN1 = []; // Guarda las rondas de figuras
+        let secuenciaN2 = []; // Guarda los lados sin repetir
+
         function iniciarNivel(nivel) {
             nivelActual = nivel; ronda = 1; aciertos = 0; fallos = 0;
-            if(nivel === 1) cambiarPantalla('screen-game-n1');
-            else cambiarPantalla('screen-game-n2');
+            if(nivel === 1) {
+                cambiarPantalla('screen-game-n1');
+                prepararSecuenciaN1();
+            } else {
+                cambiarPantalla('screen-game-n2');
+                prepararSecuenciaN2();
+            }
             generarEjercicio();
+        }
+
+        function prepararSecuenciaN1() {
+            let poly = [0,1,2,3,4,5,6,7,8,9]; // 10 diseños únicos
+            let nonpoly = [0,1,2,3,4,5,6,7,8,9]; // 10 diseños únicos
+            poly.sort(() => Math.random() - 0.5); // Mezclar
+            nonpoly.sort(() => Math.random() - 0.5); // Mezclar
+            
+            secuenciaN1 = [];
+            for(let r=0; r<5; r++) { // 5 rondas, 4 figuras por ronda
+                let figurasRonda = [
+                    { esPoly: true, id: poly[r*2] }, { esPoly: true, id: poly[r*2 + 1] },
+                    { esPoly: false, id: nonpoly[r*2] }, { esPoly: false, id: nonpoly[r*2 + 1] }
+                ];
+                figurasRonda.sort(() => Math.random() - 0.5); // Mezclar posiciones
+                secuenciaN1.push(figurasRonda);
+            }
+        }
+
+        function prepararSecuenciaN2() {
+            let opciones = [];
+            for(let i=3; i<=20; i++) opciones.push(i);
+            opciones.sort(() => Math.random() - 0.5); // Mezclar
+            secuenciaN2 = opciones.slice(0, 10); // Tomar 10 sin que se repitan
         }
 
         function generarEjercicio() {
             intentosUsados = 0;
             
             if(nivelActual === 1) {
-                // Nivel 1: 5 rondas, 4 figuras por ronda = 20 figuras totales (2 puntos por ronda perfecta)
                 document.getElementById('intentos-n1').textContent = "2";
                 document.getElementById('ronda-n1').textContent = ronda;
                 figuraSeleccionada = null;
                 
-                // Limpiar zonas
                 document.getElementById('pool-zone').innerHTML = "";
                 document.querySelectorAll('#zone-poly .shape-item, #zone-nonpoly .shape-item').forEach(el => el.remove());
 
-                // Generar 4 figuras aleatorias (mezcla de poly y non-poly)
                 let figurasHtml = "";
-                for(let i=0; i<4; i++) {
-                    let esPoly = Math.random() > 0.5;
-                    let typeAttr = esPoly ? "poly" : "nonpoly";
-                    let svg = generarSVG(esPoly, "shape-svg-small");
+                let figurasDeEstaRonda = secuenciaN1[ronda - 1]; // Toma las de la memoria
+                
+                figurasDeEstaRonda.forEach(f => {
+                    let typeAttr = f.esPoly ? "poly" : "nonpoly";
+                    let svg = generarSVG(f.esPoly, f.id, "shape-svg-small"); // Pide la figura exacta
                     figurasHtml += `<div class="shape-item" data-type="${typeAttr}" onclick="seleccionarFigura(this, event)">${svg}</div>`;
-                }
+                });
                 document.getElementById('pool-zone').innerHTML = figurasHtml;
                 
             } else {
-                // Nivel 2: 10 ejercicios, 1 figura por ronda = 10 puntos
                 document.getElementById('intentos-n2').textContent = "2";
                 document.getElementById('ronda-n2').textContent = ronda;
                 seleccionUsuarioN2 = null;
                 document.getElementById('btn-revisar-n2').style.display = "none";
                 
-                let numLados = Math.floor(Math.random() * 18) + 3; // 3 a 20 lados
+                let numLados = secuenciaN2[ronda - 1]; // Toma el lado exacto sin repetir
                 solucionCorrectaN2 = nombresPoligonos[numLados];
                 document.getElementById('figura-n2-container').innerHTML = generarPoligonoRegularSVG(numLados);
                 generarBotonesNivel2(numLados);
@@ -320,22 +353,43 @@
         // ==========================================
         // MOTORES DE DIBUJO SVG
         // ==========================================
-        function generarSVG(esPoligono, className) {
+       function generarSVG(esPoligono, id, className) {
             let strokeCol = esPoligono ? "#4361ee" : "#e63946";
             let fillCol = esPoligono ? "#e0fbfc" : "none";
-            if(!esPoligono && Math.random() > 0.5) fillCol = "#ffccd5"; // A veces rellena los NO polígonos curvos
+            if(!esPoligono && (id===0 || id===1 || id===5 || id===7)) fillCol = "#ffccd5"; // Rellena algunas curvas cerradas
             
             let svgStr = `<svg class="${className}" viewBox="0 0 100 100">`;
+            
             if(esPoligono) {
-                let tipo = Math.floor(Math.random() * 3);
-                if(tipo === 0) svgStr += `<polygon points="50,10 90,90 10,90" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`; 
-                else if(tipo === 1) svgStr += `<polygon points="20,20 80,10 90,80 10,90" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`; 
-                else svgStr += `<polygon points="50,10 65,40 95,45 70,65 80,95 50,75 20,95 30,65 5,45 35,40" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`; 
+                // 10 Polígonos Diferentes (Cerrados, solo líneas rectas)
+                const formas = [
+                    `<polygon points="50,10 90,90 10,90" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`, // Triángulo
+                    `<polygon points="10,30 90,30 90,70 10,70" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`, // Rectángulo
+                    `<polygon points="30,20 70,20 90,80 10,80" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`, // Trapecio
+                    `<polygon points="50,10 90,40 75,90 25,90 10,40" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`, // Pentágono
+                    `<polygon points="50,10 90,30 90,70 50,90 10,70 10,30" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`, // Hexágono
+                    `<polygon points="50,10 90,50 50,90 10,50" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`, // Rombo
+                    `<polygon points="20,20 50,20 50,60 80,60 80,90 20,90" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`, // Forma L
+                    `<polygon points="40,10 60,10 60,40 90,40 90,60 60,60 60,90 40,90 40,60 10,60 10,40 40,40" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`, // Cruz
+                    `<polygon points="50,10 65,40 95,45 70,65 80,95 50,75 20,95 30,65 5,45 35,40" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`, // Estrella
+                    `<polygon points="20,20 80,10 90,80 10,90" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>` // Cuadrilátero Irregular
+                ];
+                svgStr += formas[id];
             } else {
-                let tipo = Math.floor(Math.random() * 3);
-                if(tipo === 0) svgStr += `<polyline points="10,90 50,10 90,90" fill="none" stroke="${strokeCol}" stroke-width="5" stroke-linecap="round"/>`; 
-                else if(tipo === 1) svgStr += `<circle cx="50" cy="50" r="40" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`; 
-                else svgStr += `<path d="M10,50 Q50,10 90,50 T10,50" fill="none" stroke="${strokeCol}" stroke-width="5"/>`; 
+                // 10 NO Polígonos (Curvas o abiertos)
+                const formasNoPoly = [
+                    `<circle cx="50" cy="50" r="40" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`, // Círculo (Curva cerrada)
+                    `<path d="M10,50 A40,40 0 0,1 90,50 Z" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`, // Semicírculo (Tiene curva)
+                    `<polyline points="10,90 50,10 90,90" fill="none" stroke="${strokeCol}" stroke-width="5" stroke-linecap="round"/>`, // Triángulo abierto
+                    `<polyline points="20,20 80,20 80,80 20,80" fill="none" stroke="${strokeCol}" stroke-width="5"/>`, // Cuadrado abierto
+                    `<path d="M20,20 C80,20 20,80 80,80" fill="none" stroke="${strokeCol}" stroke-width="5"/>`, // Curva en S
+                    `<ellipse cx="50" cy="50" rx="40" ry="25" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`, // Óvalo
+                    `<path d="M10,50 Q25,10 50,50 T90,50" fill="none" stroke="${strokeCol}" stroke-width="5"/>`, // Onda
+                    `<path d="M50,10 C90,50 90,90 50,90 C10,90 10,50 50,10" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`, // Gota (Curva cerrada)
+                    `<line x1="20" y1="20" x2="80" y2="80" stroke="${strokeCol}" stroke-width="5"/><line x1="20" y1="80" x2="80" y2="20" stroke="${strokeCol}" stroke-width="5"/>`, // Dos líneas separadas
+                    `<path d="M20,20 L20,60 A30,30 0 0,0 80,60 L80,20" fill="none" stroke="${strokeCol}" stroke-width="5"/>` // Forma de U (Líneas + Curva)
+                ];
+                svgStr += formasNoPoly[id];
             }
             svgStr += `</svg>`;
             return svgStr;
