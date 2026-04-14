@@ -147,6 +147,10 @@
             if(guardado) {
                 estudianteActual = JSON.parse(guardado);
                 document.getElementById('user-greeting').textContent = `👤 Hola, ${estudianteActual.nombre}`;
+               
+ajustarMateriasPorGrado();
+
+                if(localStorage.getItem('esmate_show_progress') === 'true') {
                 
                 if(localStorage.getItem('esmate_show_progress') === 'true') {
                     localStorage.removeItem('esmate_show_progress');
