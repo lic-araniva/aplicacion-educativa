@@ -1,1 +1,49 @@
+🏗️ MANUAL DE ARQUITECTURA - PLATAFORMA ESMATE (ABRIL 2026)
+1. TECNOLOGÍAS UTILIZADAS
+Frontend: HTML5, CSS3, JavaScript (Vanilla/Puro). No se usan frameworks externos para mantener la carga rápida.
 
+Backend / Base de Datos: Google Firebase Realtime Database.
+
+Hosting: GitHub Pages.
+
+2. ESTRUCTURA DE LA BASE DE DATOS (FIREBASE)
+La base de datos tiene 3 "Ramas" o "Nodos" principales:
+
+/estudiantes: Guarda el registro de alumnos.
+
+Llave: NIE (Ej. 12345) -> Valores: { nombre: "Juan", grado: "2" }
+
+/practicas: Guarda el historial de notas.
+
+Llave: ID Automático -> Valores: { aciertos: 8, fallos: 2, fecha: "14/4/2026", grado: "2", nombre: "Juan", tema: "5º - U2 - Nivel 1" }
+
+/asignaciones: Guarda las tareas enviadas por el docente (Motor de Nivelación).
+
+Llave: NIE -> ID Automático -> Valores: { grado: "2", materia: "Matemática", unidad: "1", fecha: "..." }
+
+3. MAPA DE ARCHIVOS (RUTAS)
+/index.html: Menú del estudiante (Login, Salón de Trofeos, Mochila de Asignaciones, Menú de Materias).
+
+/docente.html: Panel de control (Registrar, Asignar Tareas, Ver Rendimiento, Borrar registros).
+
+Estructura de Juegos: /[grado_letras]/[materia_letras]/[prefijo]-[grado_numero]-u[unidad].html
+
+Ejemplo 2º Grado U2: /segundo/matematica/mate-2-u2.html
+
+Ejemplo 5º Grado U2: /quinto/matematica/mate-5-u2.html
+
+4. VARIABLES LOCALES CLAVE (LocalStorage)
+El navegador del estudiante guarda estos datos para no pedir login a cada rato:
+
+estudiante_esmate: Guarda el JSON con el NIE, nombre y grado del alumno activo.
+
+esmate_show_progress: Una bandera (true) que se activa cuando un niño termina una unidad para que el menú abra directamente el Salón de Trofeos y tire confeti.
+
+esmate_m5_u2_progreso_[NIE]: Guarda hasta qué nivel ha desbloqueado un alumno en una unidad específica (ej. "3" significa que va por el nivel 3).
+
+5. REGLAS CORE DE PROGRAMACIÓN
+Seguridad Docente: El PIN actual de acceso es profe2026.
+
+Filtro de Materias: En index.html, la función ajustarMateriasPorGrado() oculta las materias de Lenguaje, Ciencia y Valores si el estudiante es de 4º o 5º grado.
+
+Modo Pruebas (Cheat Mode): En los juegos, al dar 5 clics rápidos sobre el nombre del estudiante e ingresar la clave rive2593, se activan los botones para saltar niveles o borrar progreso.
