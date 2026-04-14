@@ -3,238 +3,390 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Docente - ESMATE</title>
+    <title>Ángulos y Polígonos - ESMATE 5º</title>
     <style>
-        :root { --esmate-blue: #4361ee; --esmate-green: #2a9d8f; --esmate-red: #d90429; --bg-color: #f8f9fa; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h1 { color: var(--esmate-blue); text-align: center; margin-top: 0;}
+        :root {
+            --esmate-blue: #4361ee; --bg-color: #f8f9fa; --text-dark: #2b2d42;
+            --correct-color: #2d6a4f; --incorrect-color: #d90429;
+            --poly-color: #3a86ff; --nonpoly-color: #e63946;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
         
-        /* PESTAÑAS (TABS) */
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ccc; padding-bottom: 10px; }
-        .tab-btn { background: #e9ecef; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; color: #555; transition: 0.3s; }
-        .tab-btn:hover { background: #dee2e6; }
-        .tab-btn.active { background: var(--esmate-blue); color: white; }
-        .tab-content { display: none; animation: fadeIn 0.3s; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .header { width: 100%; max-width: 800px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; z-index: 10; }
+        .btn-back { background: white; border: 1px solid #ccc; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; color: #555; text-decoration: none; font-size: 14px;}
+        
+        .screen { display: none; width: 100%; max-width: 700px; flex-direction: column; align-items: center; animation: fadeIn 0.4s; z-index: 10;}
+        .screen.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* FORMULARIO ESTUDIANTES */
-        .add-student-form { background: #e0fbfc; padding: 20px; border-radius: 10px; display: flex; gap: 10px; margin-bottom: 20px; align-items: center; flex-wrap: wrap;}
-        .add-student-form input, .add-student-form select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; flex: 1; min-width: 150px;}
-        .btn-add { background: var(--esmate-green); color: white; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px;}
-        .btn-add:hover { background: #21867a; }
+        .game-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); width: 100%; text-align: center; box-sizing: border-box; }
+        
+        button.primary { background-color: var(--esmate-blue); color: white; border: none; padding: 12px 24px; font-weight: bold; font-size: 18px; border-radius: 10px; cursor: pointer; width: 100%; transition: 0.2s; margin-top: 10px;}
+        button.primary:hover { background-color: #3f37c9; }
+        button.secondary { background-color: #f4a261; color: white; border: none; padding: 12px 24px; font-weight: bold; font-size: 18px; border-radius: 10px; cursor: pointer; width: 100%; margin-top: 10px; }
+        
+        .btn-cheat { background-color: #2b2d42; color: #00ff00; border: 2px dashed #00ff00; padding: 10px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 15px; cursor: pointer; display: none; }
 
-        /* ESTADÍSTICAS Y TABLAS */
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-        .stat-card { background: #f4fcf8; padding: 20px; border-radius: 10px; text-align: center; border-left: 5px solid var(--esmate-green); }
-        .stat-card h2 { margin: 0; font-size: 36px; color: var(--esmate-green); }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: var(--esmate-blue); color: white; }
-        tr:hover { background-color: #f1f1f1; }
-        .badge-perfect { background-color: #2d6a4f; color: white; padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 12px; }
-        .badge-good { background-color: #f4a261; color: white; padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 12px; }
-        .btn-delete { background: var(--esmate-red); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold;}
-        .btn-delete:hover { background: #9d0208; }
-        .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; }
-        .filter-bar input, .filter-bar select { padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; }
+        /* Estilos Geometría Nivel 1 (Clasificación) */
+        .instruccion-mini { font-size: 14px; color: #666; margin: 0 0 10px 0; font-style: italic; }
+        .pool-zone { min-height: 90px; border: 2px dashed #aaa; border-radius: 10px; padding: 10px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; background: #fff; margin-bottom: 20px;}
+        .group-zones { display: flex; gap: 10px; width: 100%; justify-content: space-between; }
+        .drop-zone { flex: 1; min-height: 180px; border: 3px solid #ccc; border-radius: 10px; padding: 10px; display: flex; flex-wrap: wrap; align-content: flex-start; justify-content: center; gap: 8px; background: #f8f9fa; cursor: pointer; transition: 0.2s;}
+        .drop-zone.poly-zone { border-color: var(--esmate-blue); background: #e0fbfc;}
+        .drop-zone.nonpoly-zone { border-color: var(--incorrect-color); background: #ffccd5;}
+        .drop-zone:hover { transform: scale(1.02); }
+        
+        .shape-item { width: 70px; height: 70px; cursor: pointer; transition: 0.2s; border-radius: 8px; border: 3px solid transparent; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: center; align-items: center;}
+        .shape-item.selected-shape { border-color: #ffbf00; transform: scale(1.15); background: #fff3cd; box-shadow: 0 6px 12px rgba(0,0,0,0.2); z-index: 5;}
+        .shape-item.error-shape { border-color: var(--incorrect-color); background: #ffccd5; animation: shake 0.3s; }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+        .shape-svg-small { width: 60px; height: 60px; }
+
+        /* Estilos Geometría Nivel 2 (Nombres) */
+        .canvas-container { background: #fff; border: 3px dashed #ccc; border-radius: 15px; padding: 20px; margin: 20px auto; display: flex; justify-content: center; align-items: center; height: 180px; width: 100%; max-width: 300px; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);}
+        .shape-svg { width: 150px; height: 150px; }
+        .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; width: 100%; }
+        .btn-choice { background: white; border: 2px solid var(--esmate-blue); color: var(--esmate-blue); padding: 12px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center;}
+        .btn-choice span { font-size: 14px; font-weight: normal; margin-top: 5px; color: #555;}
+        .btn-choice:hover { background: var(--esmate-blue); color: white; }
+        .btn-choice:hover span { color: #e0fbfc; }
+        .btn-choice.selected { background: var(--esmate-blue); color: white; box-shadow: 0 4px 10px rgba(67, 97, 238, 0.4); transform: scale(1.05);}
+        .btn-choice.selected span { color: #e0fbfc; }
+
+        /* Popups */
+        #feedback-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box;}
+        #feedback-content { background: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 400px; width: 100%; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .confetti { position: fixed; width: 10px; height: 10px; background-color: #f00; z-index: 999; top: -10px; animation: fall linear forwards; }
+        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
     </style>
 </head>
 <body>
 
-    <div id="login-screen" style="text-align:center; margin-top: 100px;">
-        <h2>Acceso para Docentes</h2>
-        <input type="password" id="pin-input" placeholder="PIN de Seguridad" style="padding: 10px; font-size: 16px;">
-        <button onclick="verificarPIN()" style="padding: 10px 20px; font-size: 16px; background: #4361ee; color: white; border: none; cursor: pointer; border-radius: 5px;">Entrar</button>
+    <div class="header">
+        <a href="../../index.html" class="btn-back">⬅️ Menú</a>
+        <div style="font-weight: bold; color: var(--esmate-blue); cursor: pointer; user-select: none;" id="jugador-nombre" onclick="activarModoPrueba()">👤 Estudiante</div>
     </div>
 
-    <div id="dashboard" class="container" style="display: none;">
-        <h1>Panel de Administración Docente</h1>
-        
-        <div class="tabs">
-            <button class="tab-btn active" id="btn-tab-estudiantes" onclick="cambiarPestana('estudiantes')">👥 Mis Estudiantes</button>
-            <button class="tab-btn" id="btn-tab-practicas" onclick="cambiarPestana('practicas')">📊 Rendimiento y Notas</button>
-        </div>
-
-        <div id="tab-estudiantes" class="tab-content active">
-            <h3>Agregar Nuevo Estudiante</h3>
-            <div class="add-student-form">
-                <input type="number" id="new-nie" placeholder="NIE (Ej. 12345)">
-                <input type="text" id="new-nombre" placeholder="Nombre completo">
-                <select id="new-grado">
-                    <option value="1">1º Grado</option>
-                    <option value="2" selected>2º Grado</option>
-                    <option value="3">3º Grado</option>
-                    <option value="4">4º Grado</option>
-                    <option value="5">5º Grado</option>
-                    <option value="6">6º Grado</option>
-                </select>
-                <button class="btn-add" onclick="agregarEstudiante()">➕ Registrar</button>
+    <div id="screen-start" class="screen active">
+        <div class="game-card">
+            <h1 style="color: var(--esmate-blue); margin-top:0;">Unidad 2: Ángulos y Polígonos</h1>
+            
+            <div id="save-menu" style="display: none; margin-top: 20px; background: #e0fbfc; padding: 15px; border-radius: 10px;">
+                <p style="color: var(--correct-color); font-weight: bold; margin-top: 0;">¡Progreso encontrado!</p>
+                <div id="btn-n2" style="display: none;"><button class="primary" onclick="iniciarNivel(2)">🚀 Nivel 2: Nombres de Polígonos</button></div>
+                <button class="secondary" style="background: white; color: #555; border: 1px solid #ccc; font-size: 14px;" onclick="iniciarNivel(1)">🔄 Repasar Nivel 1</button>
             </div>
 
-            <h3>Lista de Estudiantes Activos</h3>
-            <table>
-                <thead><tr><th>NIE</th><th>Nombre</th><th>Grado</th><th>Acción</th></tr></thead>
-                <tbody id="tabla-estudiantes-body"><tr><td colspan="4" style="text-align: center;">Cargando estudiantes...</td></tr></tbody>
-            </table>
-        </div>
-
-        <div id="tab-practicas" class="tab-content">
-            <div class="stats-grid">
-                <div class="stat-card"><h3>Total Prácticas</h3><h2 id="total-practicas">0</h2></div>
-                <div class="stat-card"><h3>Notas Perfectas</h3><h2 id="total-perfectas">0</h2></div>
-                <div class="stat-card"><h3>Alumnos Evaluados</h3><h2 id="total-alumnos">0</h2></div>
+            <div id="new-menu">
+                <p>Descubre los secretos de las figuras geométricas cerradas.</p>
+                <button class="primary" onclick="iniciarNivel(1)">▶ Comenzar Nivel 1</button>
             </div>
-
-            <div class="filter-bar">
-                <input type="text" id="filtro-nombre" placeholder="🔍 Buscar estudiante..." onkeyup="filtrarTablaPracticas()" style="flex: 1;">
-                <select id="filtro-tema" onchange="filtrarTablaPracticas()" style="flex: 1;">
-                    <option value="">📚 Todos los temas</option>
-                    <option value="U1">Unidad 1</option>
-                    <option value="U2">Unidad 2</option>
-                </select>
-                <button onclick="cargarPracticas()" style="background: var(--esmate-blue); color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">🔄 Actualizar</button>
-            </div>
-
-            <table>
-                <thead><tr><th>Fecha</th><th>Nombre</th><th>Grado</th><th>Tema / Nivel</th><th>Aciertos</th><th>Fallos</th><th>Acción</th></tr></thead>
-                <tbody id="tabla-practicas-body"><tr><td colspan="7" style="text-align: center;">Cargando datos...</td></tr></tbody>
-            </table>
+            <button class="btn-cheat cheat-element" onclick="localStorage.removeItem('esmate_m5_u2_progreso_'+estudiante.nie); location.reload();">🗑️ Borrar progreso</button>
         </div>
-
     </div>
+
+    <div id="screen-game-n1" class="screen">
+        <div class="game-card">
+            <div style="display: flex; justify-content: space-between; font-weight: bold; color: #666; margin-bottom: 5px;">
+                <span>Nivel 1</span>
+                <span>Ronda <span id="ronda-n1">1</span>/5</span>
+                <span style="color: var(--incorrect-color)">Intentos: <span id="intentos-n1">2</span> ❤️</span>
+            </div>
+            
+            <h3 style="margin: 0; color: #333;">Agrupa las figuras</h3>
+            <p class="instruccion-mini">Toca una figura para seleccionarla y luego toca la caja donde pertenece.</p>
+            
+            <div id="pool-zone" class="pool-zone" onclick="moverAlGrupo('pool-zone')"></div>
+
+            <div class="group-zones">
+                <div id="zone-poly" class="drop-zone poly-zone" onclick="moverAlGrupo('zone-poly')">
+                    <h4 style="width:100%; margin:0 0 5px 0; color:var(--esmate-blue);">✅ Polígonos</h4>
+                </div>
+                <div id="zone-nonpoly" class="drop-zone nonpoly-zone" onclick="moverAlGrupo('zone-nonpoly')">
+                    <h4 style="width:100%; margin:0 0 5px 0; color:var(--incorrect-color);">❌ NO Polígonos</h4>
+                </div>
+            </div>
+
+            <button class="primary" id="btn-revisar-n1" onclick="revisarNivel1()" style="margin-top: 20px;">✅ Comprobar Grupos</button>
+            <button class="btn-cheat cheat-element" onclick="autoGanar()">⏭️ GANAR NIVEL</button>
+        </div>
+    </div>
+
+    <div id="screen-game-n2" class="screen">
+        <div class="game-card">
+            <div style="display: flex; justify-content: space-between; font-weight: bold; color: #666; margin-bottom: 10px;">
+                <span>Nivel 2</span>
+                <span>Ejercicio <span id="ronda-n2">1</span>/10</span>
+                <span style="color: var(--incorrect-color)">Intentos: <span id="intentos-n2">2</span> ❤️</span>
+            </div>
+            
+            <h3 style="margin: 0; color: #333;">¿Cómo se llama este polígono?</h3>
+            
+            <div class="canvas-container" id="figura-n2-container"></div>
+
+            <div id="opciones-n2" class="choice-grid"></div>
+
+            <button class="primary" id="btn-revisar-n2" onclick="revisarNivel2()" style="display: none; margin-top: 25px;">✅ Comprobar</button>
+            <button class="btn-cheat cheat-element" onclick="autoGanar()">⏭️ GANAR NIVEL</button>
+        </div>
+    </div>
+
+    <div id="screen-finale" class="screen">
+        <div class="game-card" style="background: linear-gradient(135deg, #2a9d8f 0%, #21867a 100%); color: white; border: none;">
+            <h1 style="font-size: 35px;">¡Felicidades!</h1>
+            <p>Has dominado el inicio de la Geometría.</p>
+            <div style="font-size: 60px; margin: 20px 0;">📐📏🏆</div>
+            <button class="primary" style="background: white; color: #2a9d8f;" onclick="window.location.href='../../index.html'">➡️ Volver al Salón de Trofeos</button>
+        </div>
+    </div>
+
+    <div id="feedback-overlay"><div id="feedback-content"><div id="fb-icon" style="font-size: 60px; margin-bottom: 10px;">🏆</div><h2 id="fb-title" style="margin: 0; color: var(--text-dark);">¡Bien hecho!</h2><p id="fb-text" style="color: #555;"></p><button class="primary" onclick="cerrarFeedback()">Continuar</button></div></div>
 
     <script>
         const URL_BASE = "https://esmate-2026-default-rtdb.firebaseio.com/";
-        let datosPracticas = [];
+        let estudiante = { nombre: "Estudiante", nie: "0000", grado: "5" };
+        let nivelActual = 1, ronda = 1, aciertos = 0, fallos = 0, intentosUsados = 0;
+        
+        // Nivel 1 Variables
+        let figuraSeleccionada = null;
 
-        // Lógica de Acceso y Pestañas
-        function verificarPIN() {
-            if(document.getElementById('pin-input').value === "profe2026") {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                cargarEstudiantes();
-                cargarPracticas();
-            } else { alert("PIN Incorrecto."); }
-        }
+        // Nivel 2 Variables
+        let solucionCorrectaN2 = null;
+        let seleccionUsuarioN2 = null;
+        const nombresPoligonos = {
+            3: "Triángulo", 4: "Cuadrilátero", 5: "Pentágono", 6: "Hexágono", 7: "Heptágono",
+            8: "Octágono", 9: "Eneágono", 10: "Decágono", 11: "Endecágono", 12: "Dodecágono",
+            13: "Tridecágono", 14: "Tetradecágono", 15: "Pentadecágono", 16: "Hexadecágono",
+            17: "Heptadecágono", 18: "Octadecágono", 19: "Eneadecágono", 20: "Icoságono"
+        };
 
-        document.getElementById('pin-input').addEventListener("keypress", function(e) { if(e.key === "Enter") verificarPIN(); });
+        // Utilidades y Trucos
+        let clics = 0;
+        function activarModoPrueba() { clics++; if(clics===5) { let p=prompt("Clave:"); if(p==="rive2593") document.querySelectorAll('.cheat-element').forEach(b=>b.style.display='block'); } }
+        function autoGanar() { aciertos = 10; finalizarNivel(); }
 
-        function cambiarPestana(pestana) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + pestana).classList.add('active');
-            document.getElementById('btn-tab-' + pestana).classList.add('active');
-        }
-
-        // ==========================================
-        // MÓDULO 1: ESTUDIANTES
-        // ==========================================
-        function cargarEstudiantes() {
-            fetch(URL_BASE + "estudiantes.json").then(res => res.json()).then(datos => {
-                let tbody = document.getElementById('tabla-estudiantes-body');
-                if(!datos) { tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No hay estudiantes registrados.</td></tr>"; return; }
-                
-                let html = "";
-                for(let nie in datos) {
-                    html += `<tr>
-                        <td style="font-weight: bold; color: var(--esmate-blue);">${nie}</td>
-                        <td>${datos[nie].nombre}</td>
-                        <td>${datos[nie].grado}º</td>
-                        <td><button class="btn-delete" onclick="borrarEstudiante('${nie}')">🗑️ Borrar</button></td>
-                    </tr>`;
-                }
-                tbody.innerHTML = html;
-            });
-        }
-
-        function agregarEstudiante() {
-            let nie = document.getElementById('new-nie').value.trim();
-            let nombre = document.getElementById('new-nombre').value.trim();
-            let grado = document.getElementById('new-grado').value;
-
-            if(!nie || !nombre) { alert("Por favor, ingresa el NIE y el Nombre."); return; }
-
-            let btn = document.querySelector('.btn-add');
-            btn.innerHTML = "⏳ Guardando...";
-
-            fetch(URL_BASE + `estudiantes/${nie}.json`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ nombre: nombre, grado: grado })
-            }).then(() => {
-                btn.innerHTML = "➕ Registrar";
-                document.getElementById('new-nie').value = "";
-                document.getElementById('new-nombre').value = "";
-                cargarEstudiantes();
-            });
-        }
-
-        function borrarEstudiante(nie) {
-            if(confirm(`¿Seguro que deseas eliminar al estudiante con NIE ${nie}?`)) {
-                fetch(URL_BASE + `estudiantes/${nie}.json`, { method: "DELETE" }).then(() => cargarEstudiantes());
+        window.onload = function() {
+            let info = localStorage.getItem('estudiante_esmate');
+            if(info) { estudiante = JSON.parse(info); document.getElementById('jugador-nombre').textContent = `👤 ${estudiante.nombre}`; }
+            let progreso = localStorage.getItem('esmate_m5_u2_progreso_' + estudiante.nie);
+            if(progreso) {
+                let niv = parseInt(progreso);
+                document.getElementById('save-menu').style.display='block'; document.getElementById('new-menu').style.display='none';
+                if(niv >= 2) document.getElementById('btn-n2').style.display='block';
             }
+        };
+
+        function iniciarNivel(nivel) {
+            nivelActual = nivel; ronda = 1; aciertos = 0; fallos = 0;
+            if(nivel === 1) cambiarPantalla('screen-game-n1');
+            else cambiarPantalla('screen-game-n2');
+            generarEjercicio();
         }
 
-        // ==========================================
-        // MÓDULO 2: PRÁCTICAS Y RENDIMIENTO
-        // ==========================================
-        function cargarPracticas() {
-            fetch(URL_BASE + "practicas.json").then(res => res.json()).then(datos => {
-                let tbody = document.getElementById('tabla-practicas-body');
-                if(!datos) { tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;'>No hay prácticas registradas.</td></tr>"; document.getElementById('total-practicas').textContent = "0"; return; }
-                
-                datosPracticas = Object.keys(datos).map(key => ({ id: key, ...datos[key] }));
-                datosPracticas.reverse(); 
-                
-                actualizarEstadisticas();
-                dibujarTablaPracticas(datosPracticas);
-            });
-        }
-
-        function actualizarEstadisticas() {
-            document.getElementById('total-practicas').textContent = datosPracticas.length;
-            document.getElementById('total-perfectas').textContent = datosPracticas.filter(p => parseInt(p.aciertos) === 10 || (p.tema.includes("Nivel 9") && parseInt(p.aciertos) >= 18)).length; // Ajuste para el nivel 9 de 20 ptos
-            let alumnosUnicos = new Set(datosPracticas.map(p => p.nombre));
-            document.getElementById('total-alumnos').textContent = alumnosUnicos.size;
-        }
-
-        function dibujarTablaPracticas(lista) {
-            let html = "";
-            lista.forEach(p => {
-                let notaStr = `${p.aciertos}`;
-                html += `<tr>
-                    <td style="font-size: 12px; color: #555;">${p.fecha || "-"}</td>
-                    <td style="font-weight: bold;">${p.nombre}</td>
-                    <td>${p.grado}º</td>
-                    <td>${p.tema}</td>
-                    <td style="font-weight: bold; color: #2d6a4f;">${notaStr}</td>
-                    <td style="color: #d90429;">${p.fallos}</td>
-                    <td><button class="btn-delete" onclick="borrarPractica('${p.id}')">🗑️ Borrar</button></td>
-                </tr>`;
-            });
-            document.getElementById('tabla-practicas-body').innerHTML = html;
-        }
-
-        function filtrarTablaPracticas() {
-            let txt = document.getElementById('filtro-nombre').value.toLowerCase();
-            let tema = document.getElementById('filtro-tema').value;
+        function generarEjercicio() {
+            intentosUsados = 0;
             
-            let filtrados = datosPracticas.filter(p => {
-                let matchNombre = p.nombre.toLowerCase().includes(txt);
-                let matchTema = tema === "" || p.tema.includes(tema) || p.tema.includes("Unidad " + tema.replace("U",""));
-                return matchNombre && matchTema;
-            });
-            dibujarTablaPracticas(filtrados);
-        }
+            if(nivelActual === 1) {
+                // Nivel 1: 5 rondas, 4 figuras por ronda = 20 figuras totales (2 puntos por ronda perfecta)
+                document.getElementById('intentos-n1').textContent = "2";
+                document.getElementById('ronda-n1').textContent = ronda;
+                figuraSeleccionada = null;
+                
+                // Limpiar zonas
+                document.getElementById('pool-zone').innerHTML = "";
+                document.querySelectorAll('#zone-poly .shape-item, #zone-nonpoly .shape-item').forEach(el => el.remove());
 
-        function borrarPractica(idRegistro) {
-            if(confirm("¿Estás seguro de que deseas borrar este registro de práctica?")) {
-                fetch(URL_BASE + `practicas/${idRegistro}.json`, { method: "DELETE" }).then(() => cargarPracticas());
+                // Generar 4 figuras aleatorias (mezcla de poly y non-poly)
+                let figurasHtml = "";
+                for(let i=0; i<4; i++) {
+                    let esPoly = Math.random() > 0.5;
+                    let typeAttr = esPoly ? "poly" : "nonpoly";
+                    let svg = generarSVG(esPoly, "shape-svg-small");
+                    figurasHtml += `<div class="shape-item" data-type="${typeAttr}" onclick="seleccionarFigura(this, event)">${svg}</div>`;
+                }
+                document.getElementById('pool-zone').innerHTML = figurasHtml;
+                
+            } else {
+                // Nivel 2: 10 ejercicios, 1 figura por ronda = 10 puntos
+                document.getElementById('intentos-n2').textContent = "2";
+                document.getElementById('ronda-n2').textContent = ronda;
+                seleccionUsuarioN2 = null;
+                document.getElementById('btn-revisar-n2').style.display = "none";
+                
+                let numLados = Math.floor(Math.random() * 18) + 3; // 3 a 20 lados
+                solucionCorrectaN2 = nombresPoligonos[numLados];
+                document.getElementById('figura-n2-container').innerHTML = generarPoligonoRegularSVG(numLados);
+                generarBotonesNivel2(numLados);
             }
         }
+
+        // ==========================================
+        // LÓGICA NIVEL 1 (TOCAR Y ENVIAR)
+        // ==========================================
+        function seleccionarFigura(elemento, evento) {
+            elemento.classList.remove('error-shape');
+            if(figuraSeleccionada) figuraSeleccionada.classList.remove('selected-shape');
+            figuraSeleccionada = elemento;
+            figuraSeleccionada.classList.add('selected-shape');
+            evento.stopPropagation(); // Evita que se active el click de la caja contenedora
+        }
+
+        function moverAlGrupo(idZona) {
+            if(!figuraSeleccionada) return; // Si no ha tocado una figura, no hace nada
+            document.getElementById(idZona).appendChild(figuraSeleccionada);
+            figuraSeleccionada.classList.remove('selected-shape');
+            figuraSeleccionada = null;
+        }
+
+        function revisarNivel1() {
+            let poolItems = document.querySelectorAll('#pool-zone .shape-item');
+            if(poolItems.length > 0) {
+                mostrarPopup("⚠️", "Aún faltan figuras", "Debes clasificar todas las figuras antes de comprobar.", null);
+                return;
+            }
+
+            let errores = 0;
+            
+            // Revisar caja Polígonos
+            document.querySelectorAll('#zone-poly .shape-item').forEach(el => {
+                if(el.getAttribute('data-type') !== 'poly') { el.classList.add('error-shape'); errores++; }
+            });
+            // Revisar caja NO Polígonos
+            document.querySelectorAll('#zone-nonpoly .shape-item').forEach(el => {
+                if(el.getAttribute('data-type') !== 'nonpoly') { el.classList.add('error-shape'); errores++; }
+            });
+
+            if(errores === 0) {
+                aciertos += 2; // Gana 2 puntos por ronda perfecta (5 rondas = 10 ptos)
+                mostrarPopup("🌟", "¡Excelente!", "Clasificaste todo correctamente.", avanzar);
+            } else {
+                intentosUsados++;
+                document.getElementById('intentos-n1').textContent = (2 - intentosUsados);
+                if(intentosUsados < 2) {
+                    mostrarPopup("⚠️", "Hay errores", "Las figuras marcadas en rojo están en la caja equivocada. Tócalas y muévelas.", null);
+                } else {
+                    fallos++;
+                    mostrarPopup("💔", "Sin intentos", "Pasemos a la siguiente ronda.", avanzar);
+                }
+            }
+        }
+
+        // ==========================================
+        // LÓGICA NIVEL 2 (NOMBRES DE POLÍGONOS)
+        // ==========================================
+        function generarBotonesNivel2(ladosCorrectos) {
+            let opciones = new Set([ladosCorrectos]);
+            while(opciones.size < 4) { opciones.add(Math.floor(Math.random() * 18) + 3); }
+            let arrayOpciones = Array.from(opciones).sort(() => Math.random() - 0.5);
+            
+            let html = "";
+            arrayOpciones.forEach(l => {
+                // AHORA MUESTRA EL NÚMERO DE LADOS JUNTO AL NOMBRE
+                html += `<button class="btn-choice" onclick="seleccionarOpcionN2('${nombresPoligonos[l]}', this)">
+                            ${nombresPoligonos[l]} <span>(${l} lados)</span>
+                         </button>`;
+            });
+            document.getElementById('opciones-n2').innerHTML = html;
+        }
+
+        function seleccionarOpcionN2(valor, botonElemento) {
+            seleccionUsuarioN2 = valor;
+            document.querySelectorAll('#opciones-n2 .btn-choice').forEach(b => b.classList.remove('selected'));
+            botonElemento.classList.add('selected');
+            document.getElementById('btn-revisar-n2').style.display = "block";
+        }
+
+        function revisarNivel2() {
+            if(seleccionUsuarioN2 === solucionCorrectaN2) {
+                aciertos++; 
+                mostrarPopup("🌟", "¡Excelente!", "Ese es el nombre correcto.", avanzar);
+            } else {
+                intentosUsados++;
+                document.getElementById('intentos-n2').textContent = (2 - intentosUsados);
+                if(intentosUsados < 2) {
+                    mostrarPopup("⚠️", "Ese no es", "Cuenta bien los lados e inténtalo de nuevo.", null);
+                    document.querySelectorAll('#opciones-n2 .btn-choice').forEach(b => b.classList.remove('selected'));
+                    seleccionUsuarioN2 = null;
+                    document.getElementById('btn-revisar-n2').style.display = "none";
+                } else {
+                    fallos++; 
+                    mostrarPopup("💔", "Sin intentos", `El nombre correcto era: ${solucionCorrectaN2}.`, avanzar);
+                }
+            }
+        }
+
+        // ==========================================
+        // MOTORES DE DIBUJO SVG
+        // ==========================================
+        function generarSVG(esPoligono, className) {
+            let strokeCol = esPoligono ? "#4361ee" : "#e63946";
+            let fillCol = esPoligono ? "#e0fbfc" : "none";
+            if(!esPoligono && Math.random() > 0.5) fillCol = "#ffccd5"; // A veces rellena los NO polígonos curvos
+            
+            let svgStr = `<svg class="${className}" viewBox="0 0 100 100">`;
+            if(esPoligono) {
+                let tipo = Math.floor(Math.random() * 3);
+                if(tipo === 0) svgStr += `<polygon points="50,10 90,90 10,90" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`; 
+                else if(tipo === 1) svgStr += `<polygon points="20,20 80,10 90,80 10,90" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`; 
+                else svgStr += `<polygon points="50,10 65,40 95,45 70,65 80,95 50,75 20,95 30,65 5,45 35,40" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`; 
+            } else {
+                let tipo = Math.floor(Math.random() * 3);
+                if(tipo === 0) svgStr += `<polyline points="10,90 50,10 90,90" fill="none" stroke="${strokeCol}" stroke-width="5" stroke-linecap="round"/>`; 
+                else if(tipo === 1) svgStr += `<circle cx="50" cy="50" r="40" fill="${fillCol}" stroke="${strokeCol}" stroke-width="4"/>`; 
+                else svgStr += `<path d="M10,50 Q50,10 90,50 T10,50" fill="none" stroke="${strokeCol}" stroke-width="5"/>`; 
+            }
+            svgStr += `</svg>`;
+            return svgStr;
+        }
+
+        function generarPoligonoRegularSVG(lados) {
+            let puntos = [];
+            let cx = 50, cy = 50, r = 45;
+            for (let i = 0; i < lados; i++) {
+                let angulo = -Math.PI / 2 + (i * 2 * Math.PI / lados);
+                let x = cx + r * Math.cos(angulo);
+                let y = cy + r * Math.sin(angulo);
+                puntos.push(`${x},${y}`);
+            }
+            return `<svg class="shape-svg" viewBox="0 0 100 100"><polygon points="${puntos.join(' ')}" fill="#e0fbfc" stroke="#2a9d8f" stroke-width="3"/></svg>`;
+        }
+
+        // ==========================================
+        // CONTROL GENERAL
+        // ==========================================
+        function avanzar() { 
+            ronda++; 
+            let maxRondas = (nivelActual === 1) ? 5 : 10;
+            if(ronda > maxRondas) finalizarNivel(); 
+            else generarEjercicio(); 
+        }
+
+        function finalizarNivel() {
+            guardarEnFirebase(`5º - U2 - Nivel ${nivelActual}`, aciertos, fallos);
+            
+            if(aciertos >= 8) {
+                if(nivelActual === 1) {
+                    localStorage.setItem('esmate_m5_u2_progreso_'+estudiante.nie, "2");
+                    mostrarPopup("🏆", `¡Nivel 1 Superado!`, `Ya sabes qué es un polígono. ¡Vamos al nivel 2!`, () => { iniciarNivel(2); });
+                } else {
+                    localStorage.setItem('esmate_m5_u2_progreso_'+estudiante.nie, "3"); 
+                    localStorage.setItem('esmate_show_progress', 'true');
+                    cambiarPantalla('screen-finale'); dispararConfeti();
+                }
+            } else {
+                let texto = (nivelActual===1) ? `Tuviste ${aciertos/2}/5 rondas correctas.` : `Tuviste ${aciertos}/10.`;
+                mostrarPopup("💪", "¡Casi lo logras!", `${texto} Necesitas 8 puntos para pasar. ¡Tú puedes!`, () => { iniciarNivel(nivelActual); });
+            }
+        }
+
+        function dispararConfeti() { for(let i=0; i<50; i++) { let confeti = document.createElement('div'); confeti.classList.add('confetti'); confeti.style.left = Math.random() * 100 + 'vw'; confeti.style.backgroundColor = ['#ff0', '#f00', '#0f0', '#00f', '#f0f'][Math.floor(Math.random()*5)]; confeti.style.animationDuration = (Math.random() * 3 + 2) + 's'; document.body.appendChild(confeti); setTimeout(() => confeti.remove(), 5000); } }
+        function cambiarPantalla(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        let accionAlCerrar = null;
+        function mostrarPopup(i, t, txt, f) { document.getElementById('fb-icon').textContent = i; document.getElementById('fb-title').textContent = t; document.getElementById('fb-text').textContent = txt; accionAlCerrar = f; document.getElementById('feedback-overlay').style.display = 'flex'; }
+        function cerrarFeedback() { document.getElementById('feedback-overlay').style.display = 'none'; if(accionAlCerrar) accionAlCerrar(); }
+        function guardarEnFirebase(tema, a, f) { const p = { nombre: estudiante.nombre, grado: estudiante.grado, tema: tema, aciertos: a, fallos: f, fecha: new Date().toLocaleString('es-SV') }; fetch(URL_BASE + "practicas.json", { method: "POST", body: JSON.stringify(p) }); }
     </script>
 </body>
 </html>
-
