@@ -136,7 +136,34 @@
             <button class="btn-cheat cheat-element" onclick="autoGanar()">⏭️ GANAR NIVEL</button>
         </div>
     </div>
+<div id="screen-game-n3" class="screen">
+        <div class="game-card">
+            <div style="display: flex; justify-content: space-between; font-weight: bold; color: #666; margin-bottom: 5px;">
+                <span>Nivel 3</span>
+                <span>Ronda <span id="ronda-n3">1</span>/5</span>
+                <span style="color: var(--incorrect-color)">Intentos: <span id="intentos-n3">2</span> ❤️</span>
+            </div>
+            
+            <h3 style="margin: 0; color: #333;">Polígonos Regulares e Irregulares</h3>
+            <div style="background: #fdf2f2; padding: 12px; border-radius: 8px; border-left: 5px solid var(--esmate-orange); font-size: 14px; text-align: left; margin: 10px 0 15px 0; color: #333;">
+                <b>📏 Regla de Oro:</b> Un polígono es <b>Regular</b> si TODOS sus lados miden lo mismo y TODOS sus ángulos son iguales. Si no cumple esto, es <b>Irregular</b>.
+            </div>
+            
+            <div id="pool-zone-n3" class="pool-zone" onclick="moverAlGrupoN3('pool-zone-n3')"></div>
 
+            <div class="group-zones">
+                <div id="zone-regular" class="drop-zone poly-zone" onclick="moverAlGrupoN3('zone-regular')" style="border-color: #2a9d8f; background: #e6f7f5;">
+                    <h4 style="width:100%; margin:0 0 5px 0; color:#2a9d8f;">💎 Regulares</h4>
+                </div>
+                <div id="zone-irregular" class="drop-zone nonpoly-zone" onclick="moverAlGrupoN3('zone-irregular')">
+                    <h4 style="width:100%; margin:0 0 5px 0; color:var(--incorrect-color);">📐 Irregulares</h4>
+                </div>
+            </div>
+
+            <button class="primary" id="btn-revisar-n3" onclick="revisarNivel3()" style="margin-top: 20px;">✅ Comprobar</button>
+        </div>
+    </div>
+    
     <div id="screen-finale" class="screen">
         <div class="game-card" style="background: linear-gradient(135deg, #2a9d8f 0%, #21867a 100%); color: white; border: none;">
             <h1 style="font-size: 35px;">¡Felicidades!</h1>
@@ -184,19 +211,44 @@
 
         let secuenciaN1 = []; // Guarda las rondas de figuras
         let secuenciaN2 = []; // Guarda los lados sin repetir
+        let secuenciaN3 = [];
 
         function iniciarNivel(nivel) {
             nivelActual = nivel; ronda = 1; aciertos = 0; fallos = 0;
+            // Ocultamos todas las pantallas de juego primero
+            document.getElementById('screen-game-n1').classList.remove('active');
+            document.getElementById('screen-game-n2').classList.remove('active');
+            document.getElementById('screen-game-n3').classList.remove('active');
+
             if(nivel === 1) {
                 cambiarPantalla('screen-game-n1');
                 prepararSecuenciaN1();
-            } else {
+            } else if(nivel === 2) {
                 cambiarPantalla('screen-game-n2');
                 prepararSecuenciaN2();
+            } else {
+                cambiarPantalla('screen-game-n3');
+                prepararSecuenciaN3();
             }
             generarEjercicio();
         }
 
+        function prepararSecuenciaN3() {
+            let reg = [0,1,2,3,4,5,6,7,8,9]; // IDs de figuras regulares
+            let irreg = [0,1,2,3,4,5,6,7,8,9]; // IDs de figuras irregulares
+            reg.sort(() => Math.random() - 0.5);
+            irreg.sort(() => Math.random() - 0.5);
+            
+            secuenciaN3 = [];
+            for(let r=0; r<5; r++) {
+                let figuras = [
+                    { tipo: 'reg', id: reg[r*2] }, { tipo: 'reg', id: reg[r*2+1] },
+                    { tipo: 'irreg', id: irreg[r*2] }, { tipo: 'irreg', id: irreg[r*2+1] }
+                ];
+                figuras.sort(() => Math.random() - 0.5);
+                secuenciaN3.push(figuras);
+            }
+        }
         function prepararSecuenciaN1() {
             let poly = [0,1,2,3,4,5,6,7,8,9]; // 10 diseños únicos
             let nonpoly = [0,1,2,3,4,5,6,7,8,9]; // 10 diseños únicos
@@ -252,9 +304,28 @@
                 solucionCorrectaN2 = nombresPoligonos[numLados];
                 document.getElementById('figura-n2-container').innerHTML = generarPoligonoRegularSVG(numLados);
                 generarBotonesNivel2(numLados);
+            else if(nivelActual === 3) {
+                document.getElementById('intentos-n3').textContent = "2";
+                document.getElementById('ronda-n3').textContent = ronda;
+                figuraSeleccionada = null;
+                document.getElementById('pool-zone-n3').innerHTML = "";
+                document.querySelectorAll('#zone-regular .shape-item, #zone-irregular .shape-item').forEach(el => el.remove());
+
+                let html = "";
+                secuenciaN3[ronda-1].forEach(f => {
+                    let svg = generarSVG_N3(f.tipo, f.id);
+                    html += `<div class="shape-item" data-type="${f.tipo}" onclick="seleccionarFigura(this, event)">${svg}</div>`;
+                });
+                document.getElementById('pool-zone-n3').innerHTML = html;
+            }
             }
         }
-
+function moverAlGrupoN3(id) {
+            if(!figuraSeleccionada) return;
+            document.getElementById(id).appendChild(figuraSeleccionada);
+            figuraSeleccionada.classList.remove('selected-shape');
+            figuraSeleccionada = null;
+        }
         // ==========================================
         // LÓGICA NIVEL 1 (TOCAR Y ENVIAR)
         // ==========================================
