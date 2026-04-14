@@ -150,14 +150,32 @@
         function buscarEstudiante() {
             const nie = document.getElementById('nie-input').value.trim();
             if (!nie) return;
+            
+            document.getElementById('btn-buscar').innerHTML = "⏳ Buscando...";
+            document.getElementById('nie-error').style.display = 'none'; // Oculta errores viejos
+            
             fetch(URL_BASE + `estudiantes/${nie}.json`).then(res => res.json()).then(datos => {
+                document.getElementById('btn-buscar').innerHTML = "🔍 Buscar mi nombre";
                 if (datos) {
                     estudianteActual = datos; estudianteActual.nie = nie;
                     document.getElementById('student-name-confirm').textContent = estudianteActual.nombre;
                     document.getElementById('confirmation-box').style.display = 'block';
                     document.getElementById('btn-buscar').style.display = 'none'; 
-                } else { document.getElementById('nie-error').style.display = 'block'; }
+                    document.getElementById('nie-input').disabled = true; // Bloquea la caja
+                } else { 
+                    document.getElementById('nie-error').style.display = 'block'; 
+                }
             });
+        }
+
+        function cancelarLogin() { 
+            estudianteActual = null; 
+            document.getElementById('confirmation-box').style.display = 'none'; 
+            document.getElementById('btn-buscar').style.display = 'block'; 
+            document.getElementById('nie-input').disabled = false; // Desbloquea la caja
+            document.getElementById('nie-input').value = ""; // Borra el texto equivocado
+            document.getElementById('nie-error').style.display = 'none'; // Limpia el error
+            document.getElementById('nie-input').focus(); // Pone el cursor listo para escribir
         }
 
         function confirmarLogin() { 
