@@ -148,10 +148,8 @@
                 estudianteActual = JSON.parse(guardado);
                 document.getElementById('user-greeting').textContent = `👤 Hola, ${estudianteActual.nombre}`;
                
-ajustarMateriasPorGrado();
+                ajustarMateriasPorGrado();
 
-                if(localStorage.getItem('esmate_show_progress') === 'true') {
-                
                 if(localStorage.getItem('esmate_show_progress') === 'true') {
                     localStorage.removeItem('esmate_show_progress');
                     verMiProgreso(); 
@@ -179,7 +177,14 @@ ajustarMateriasPorGrado();
         }
         document.getElementById('nie-input').addEventListener("keypress", e => { if (e.key === "Enter") buscarEstudiante(); });
         function cancelarLogin() { estudianteActual = null; document.getElementById('confirmation-box').style.display = 'none'; document.getElementById('btn-buscar').style.display = 'block'; document.getElementById('nie-input').disabled = false; document.getElementById('nie-input').value = ""; }
-        function confirmarLogin() function confirmarLogin() { localStorage.setItem('estudiante_esmate', JSON.stringify(estudianteActual)); document.getElementById('user-greeting').textContent = `👤 Hola, ${estudianteActual.nombre}`; ajustarMateriasPorGrado(); goTo('screen-subjects'); }
+        
+        function confirmarLogin() { 
+            localStorage.setItem('estudiante_esmate', JSON.stringify(estudianteActual)); 
+            document.getElementById('user-greeting').textContent = `👤 Hola, ${estudianteActual.nombre}`; 
+            ajustarMateriasPorGrado(); 
+            goTo('screen-subjects'); 
+        }
+        
         function cerrarSesion() { localStorage.removeItem('estudiante_esmate'); cancelarLogin(); goTo('screen-login'); }
 
         function verMiProgreso() {
@@ -223,7 +228,7 @@ ajustarMateriasPorGrado();
             
             // Contenedores para las notas más altas de cada nivel
             let u1_max = { n1:0, n2:0, n3:0, n4:0, n5:0, n6:0 };
-            let u2_max = { n1:0, n2:0 };
+            let u2_max = { n1:0, n2:0, n3:0, n4:0, n5:0, n6:0, n7:0, n8:0, n9:0 };
             
             let tablaHTML = `<table class="student-table"><tr><th>Fecha</th><th>Tema</th><th>Tu Nota</th></tr>`;
 
@@ -236,6 +241,13 @@ ajustarMateriasPorGrado();
                 if(t.includes("U2") || t.includes("Unidad 2")) {
                     if(t.includes("Nivel 1") && a > u2_max.n1) u2_max.n1 = a;
                     if(t.includes("Nivel 2") && a > u2_max.n2) u2_max.n2 = a;
+                    if(t.includes("Nivel 3") && a > u2_max.n3) u2_max.n3 = a;
+                    if(t.includes("Nivel 4") && a > u2_max.n4) u2_max.n4 = a;
+                    if(t.includes("Nivel 5") && a > u2_max.n5) u2_max.n5 = a;
+                    if(t.includes("Nivel 6") && a > u2_max.n6) u2_max.n6 = a;
+                    if(t.includes("Nivel 7") && a > u2_max.n7) u2_max.n7 = a;
+                    if(t.includes("Nivel 8") && a > u2_max.n8) u2_max.n8 = a;
+                    if(t.includes("Nivel 9") && a > u2_max.n9) u2_max.n9 = a;
                 } else if(t.includes("Nivel")) {
                     // Si no dice U2, asume que es de la Unidad 1
                     if(t.includes("Nivel 1") && a > u1_max.n1) u1_max.n1 = a;
@@ -248,7 +260,10 @@ ajustarMateriasPorGrado();
                 
                 let estrellita = (a >= 8) ? "🌟" : (a >= 6 ? "👍" : "💪");
                 let colorNota = (a >= 6) ? "var(--correct-color)" : "var(--incorrect-color)";
-                tablaHTML += `<tr><td style="font-size: 13px; color: #555;">${(p.fecha || "").split(',')[0]}</td><td>${t}</td><td style="color: ${colorNota}; font-weight: bold; font-size: 16px;">${a} / 10 ${estrellita}</td></tr>`;
+                // Excepción visual para el nivel 9 que es de 20 preguntas (se guarda sobre 10 en la base, pero lo mostramos con el texto correcto si fue de 20)
+                let notaTexto = (t.includes("Nivel 9") && a > 10) ? `${a} / 20` : `${a} / 10`;
+                
+                tablaHTML += `<tr><td style="font-size: 13px; color: #555;">${(p.fecha || "").split(',')[0]}</td><td>${t}</td><td style="color: ${colorNota}; font-weight: bold; font-size: 16px;">${notaTexto} ${estrellita}</td></tr>`;
             });
             tablaHTML += `</table>`;
 
@@ -256,8 +271,8 @@ ajustarMateriasPorGrado();
             let totalU1 = u1_max.n1 + u1_max.n2 + u1_max.n3 + u1_max.n4 + u1_max.n5 + u1_max.n6;
             let notaU1 = ((totalU1 / 60) * 10).toFixed(1);
 
-            let totalU2 = u2_max.n1 + u2_max.n2;
-            let notaU2 = ((totalU2 / 20) * 10).toFixed(1); // Sobre 20 puntos porque hay 2 niveles
+            let totalU2 = u2_max.n1 + u2_max.n2 + u2_max.n3 + u2_max.n4 + u2_max.n5 + u2_max.n6 + u2_max.n7 + u2_max.n8 + u2_max.n9;
+            let notaU2 = ((totalU2 / 90) * 10).toFixed(1); // Sobre 90 puntos porque hay 9 niveles
 
             let resumenUnidadHTML = `<h3 style="color: var(--text-dark); margin-top: 25px;">Resumen por Unidades</h3>`;
             let mostroAlMenosUna = false;
@@ -311,9 +326,9 @@ ajustarMateriasPorGrado();
             let rutaDestino = `${carpetaGrado}/${carpetaMateria}/${prefijoArchivo}-${gradoStr}-u${unitNumber}.html`;
             window.location.href = rutaDestino;
         }
+
         function ajustarMateriasPorGrado() {
             let grado = estudianteActual.grado.toString();
-            // Si el grado es 4 o 5, usamos "none" para ocultar. Si no, lo dejamos vacío ("") para que se vea normal.
             let visibilidad = (grado === "4" || grado === "5") ? "none" : ""; 
             
             document.querySelector('.card.lenguaje').style.display = visibilidad;
