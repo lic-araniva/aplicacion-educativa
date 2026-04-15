@@ -90,10 +90,18 @@
                 <select id="assign-unidad">
                     <option value="1">Unidad 1</option><option value="2">Unidad 2</option><option value="3">Unidad 3</option>
                     <option value="4">Unidad 4</option><option value="5">Unidad 5</option>
+                    <option value="6">Unidad 6</option><option value="7">Unidad 7</option>
+                    <option value="8">Unidad 8</option><option value="9">Unidad 9</option>
+                    <option value="10">Unidad 10</option>
                 </select>
                 <select id="assign-tema">
                     <option value="1">Tema 1</option><option value="2">Tema 2</option><option value="3">Tema 3</option>
-                    <option value="4">Tema 4</option><option value="5">Tema 5</option>
+                    <option value="4">Tema 4</option><option value="5">Tema 5</option><option value="6">Tema 6</option>
+                    <option value="7">Tema 7</option><option value="8">Tema 8</option><option value="9">Tema 9</option>
+                    <option value="10">Tema 10</option><option value="11">Tema 11</option><option value="12">Tema 12</option>
+                    <option value="13">Tema 13</option><option value="14">Tema 14</option><option value="15">Tema 15</option>
+                    <option value="16">Tema 16</option><option value="17">Tema 17</option><option value="18">Tema 18</option>
+                    <option value="19">Tema 19</option><option value="20">Tema 20</option>
                 </select>
                 <button class="btn-action" style="background: var(--esmate-blue);" onclick="crearAsignacion()">🎯 Asignar a Uno</button>
             </div>
@@ -114,10 +122,18 @@
                 <select id="masivo-unidad">
                     <option value="1">Unidad 1</option><option value="2">Unidad 2</option><option value="3">Unidad 3</option>
                     <option value="4">Unidad 4</option><option value="5">Unidad 5</option>
+                    <option value="6">Unidad 6</option><option value="7">Unidad 7</option>
+                    <option value="8">Unidad 8</option><option value="9">Unidad 9</option>
+                    <option value="10">Unidad 10</option>
                 </select>
                 <select id="masivo-tema">
                     <option value="1">Tema 1</option><option value="2">Tema 2</option><option value="3">Tema 3</option>
-                    <option value="4">Tema 4</option><option value="5">Tema 5</option>
+                    <option value="4">Tema 4</option><option value="5">Tema 5</option><option value="6">Tema 6</option>
+                    <option value="7">Tema 7</option><option value="8">Tema 8</option><option value="9">Tema 9</option>
+                    <option value="10">Tema 10</option><option value="11">Tema 11</option><option value="12">Tema 12</option>
+                    <option value="13">Tema 13</option><option value="14">Tema 14</option><option value="15">Tema 15</option>
+                    <option value="16">Tema 16</option><option value="17">Tema 17</option><option value="18">Tema 18</option>
+                    <option value="19">Tema 19</option><option value="20">Tema 20</option>
                 </select>
                 <button class="btn-action" style="background: var(--esmate-green);" onclick="crearAsignacionMasiva()">🚀 Asignar a Todos</button>
             </div>
@@ -228,10 +244,12 @@
             listaAsignaciones.forEach(a => {
                 let est = listaEstudiantes.find(e => e.nie == a.nie);
                 let nombreEst = est ? est.nombre : "NIE: " + a.nie;
-                // Ahora mostramos la materia, unidad y TEMA
+                // PARCHE: Si a.tema no existe (tareas viejas), muestra "Tema General" en vez de undefined.
+                let temaTexto = a.tema ? `Tema ${a.tema}` : "Tema General";
+                
                 html += `<tr>
                     <td><b>${nombreEst}</b></td>
-                    <td><span class="badge-assign">${a.materia}</span> Unidad ${a.unidad} - Tema ${a.tema}</td>
+                    <td><span class="badge-assign">${a.materia}</span> Unidad ${a.unidad} - ${temaTexto}</td>
                     <td><button class="btn-delete" onclick="borrarAsignacion('${a.nie}', '${a.id}')">Eliminar</button></td>
                 </tr>`;
             });
