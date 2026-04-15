@@ -7,40 +7,40 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         :root { --mate-blue: #4361ee; --mate-green: #2a9d8f; --mate-red: #d90429; --bg: #f0f2f5; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; margin: 0; padding: 10px; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; margin: 0; padding: 10px; overflow-x: hidden; }
         
         .game-container { 
-            background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-            width: 95%; max-width: 500px; text-align: center; border-top: 10px solid var(--mate-blue); position: relative;
+            background: white; padding: 15px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            width: 95%; max-width: 400px; text-align: center; border-top: 10px solid var(--mate-blue); position: relative;
         }
 
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .btn-exit { background: #6c757d; color: white; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; }
-        .stats { display: flex; gap: 10px; font-weight: bold; font-size: 0.9rem; }
-        .lives { color: var(--mate-red); font-size: 1.2rem; cursor: pointer; }
+        .btn-exit { background: #6c757d; color: white; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; }
+        .stats { display: flex; gap: 8px; font-weight: bold; font-size: 0.85rem; }
+        .lives { color: var(--mate-red); font-size: 1.1rem; cursor: pointer; }
         
-        /* Grilla normal (Niveles 1-10) */
-        .grid-numbers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin: 10px 0; }
+        /* Grilla Optimizada */
+        .grid-numbers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin: 10px 0; }
         
-        /* Grilla Nivel 11 (10x10) */
+        /* Grilla Nivel 11 (Celdas más pequeñas) */
         .grid-100 { grid-template-columns: repeat(10, 1fr) !important; gap: 2px !important; }
-        .grid-100 .num-box { font-size: 0.7rem !important; border-width: 1px !important; border-radius: 3px !important; }
-        .grid-100 .input-num { font-size: 0.7rem !important; }
+        .grid-100 .num-box { border-width: 1px !important; border-radius: 2px !important; }
+        .grid-100 .input-num { font-size: 0.65rem !important; }
+        .grid-100 .fixed { font-size: 0.65rem !important; }
 
-        .num-box { border: 2px solid #ddd; border-radius: 8px; width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; }
+        .num-box { border: 1.5px solid #ddd; border-radius: 6px; width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; background: white; }
         
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
-        .input-num { width: 100%; height: 100%; border: none; text-align: center; font-size: 1.2rem; font-weight: bold; color: var(--mate-blue); outline: none; background: transparent; }
-        .fixed { background: #f1f3f5; color: #555; font-size: 1.2rem; font-weight: bold; }
+        .input-num { width: 100%; height: 100%; border: none; text-align: center; font-size: 1.1rem; font-weight: bold; color: var(--mate-blue); outline: none; background: transparent; padding: 0; }
+        .fixed { background: #f1f3f5; color: #555; font-size: 1.1rem; font-weight: bold; }
 
-        .btn-check { background: var(--mate-green); color: white; border: none; padding: 15px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; width: 100%; }
-        #message { margin-top: 10px; font-weight: bold; font-size: 0.9rem; min-height: 20px; }
+        .btn-check { background: var(--mate-green); color: white; border: none; padding: 12px; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; }
+        #message { margin-top: 8px; font-weight: bold; font-size: 0.85rem; min-height: 18px; }
 
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); color: white; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; padding: 20px; }
-        .star { font-size: 80px; color: gold; filter: drop-shadow(0 0 10px gold); animation: pulse 1s infinite alternate; }
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.2); } }
+        .star { font-size: 70px; color: gold; filter: drop-shadow(0 0 10px gold); margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -49,13 +49,13 @@
         <div class="top-bar">
             <button class="btn-exit" onclick="salirGuardando()">⬅️ Salir</button>
             <div class="stats">
-                <span>Ronda: <b id="current-level">1</b>/11</span>
+                <span>Nivel: <b id="current-level">1</b>/11</span>
                 <span class="lives" id="lives-display" onclick="modoDios()">❤️❤️❤️</span>
             </div>
         </div>
         
-        <h2 id="title-tema" style="color: var(--mate-blue); margin: 5px 0; font-size: 1.2rem;">Los números hasta el 100</h2>
-        <p id="range-text" style="color: #666; margin-bottom: 10px; font-size: 0.8rem;">Cargando...</p>
+        <h2 id="title-tema" style="color: var(--mate-blue); margin: 5px 0; font-size: 1.1rem;">Los números hasta el 100</h2>
+        <p id="range-text" style="color: #666; margin-bottom: 8px; font-size: 0.8rem;">Cargando...</p>
 
         <div class="grid-numbers" id="grid"></div>
 
@@ -65,9 +65,9 @@
 
     <div id="end-screen" class="overlay">
         <div class="star">⭐</div>
-        <h1 id="end-title">¡MAESTRO DE NÚMEROS!</h1>
-        <p id="end-score" style="font-size: 2rem; margin: 10px 0;"></p>
-        <p id="end-msg">Has completado la tabla del 100 perfectamente.</p>
+        <h1 id="end-title">¡LO LOGRASTE!</h1>
+        <p id="end-score" style="font-size: 2.5rem; margin: 10px 0; color: gold;"></p>
+        <p id="end-msg">¡Eres un experto en los números!</p>
         <button class="btn-check" style="width: 200px; background: var(--mate-blue); margin-top: 20px;" onclick="window.location.href='../../index.html'">Finalizar</button>
     </div>
 
@@ -88,13 +88,12 @@
             generateLevel();
         };
 
-        // --- MODO DIOS MEJORADO ---
         function modoDios() {
-            let pass = prompt("MODO DOCENTE: Escribe 'vidas' para 3 vidas o 'saltar' para ganar este nivel.");
-            if(pass === "vidas") {
+            let secret = prompt(""); // Prompt vacío por seguridad
+            if(secret === "rive2593") {
                 lives = 3; updateLives();
-            } else if(pass === "saltar") {
-                // Autocompletar inputs para ganar
+                document.getElementById('message').innerText = "Vidas restauradas ✨";
+            } else if(secret === "2593") {
                 secuenciaActual.forEach((val, i) => {
                     let inp = document.getElementById(`in-${i}`);
                     if(inp) inp.value = val;
@@ -131,35 +130,28 @@
             document.getElementById('current-level').innerText = currentDecena;
             
             if(currentDecena <= 10) {
-                // Niveles normales (1-10)
                 let start = (currentDecena - 1) * 10 + 1;
                 let end = currentDecena * 10;
-                document.getElementById('range-text').innerText = `Escribe del ${start} al ${end}`;
-                secuenciaActual = [];
-                for(let i = 0; i < 10; i++) {
-                    let val = start + i;
-                    secuenciaActual.push(val);
-                    let box = document.createElement('div');
-                    box.className = "num-box";
-                    if(i === 0 || i === 9) { box.classList.add('fixed'); box.innerText = val; }
-                    else { box.innerHTML = `<input type="number" class="input-num" id="in-${i}" inputmode="numeric">`; }
-                    grid.appendChild(box);
-                }
-            } else {
-                // NIVEL 11: LA TABLA DEL 100
-                grid.classList.add('grid-100');
-                document.getElementById('range-text').innerText = "¡RETO FINAL! Completa toda la tabla";
-                secuenciaActual = Array.from({length: 100}, (_, i) => i + 1);
-                let hints = [1, 25, 50, 75, 100]; // 5 pistas fijas
-                
+                document.getElementById('range-text').innerText = `Decena del ${start} al ${end}`;
+                secuenciaActual = Array.from({length: 10}, (_, i) => start + i);
+                let hints = [0, 9]; 
                 secuenciaActual.forEach((val, i) => {
                     let box = document.createElement('div');
                     box.className = "num-box";
-                    if(hints.includes(val)) {
-                        box.classList.add('fixed'); box.innerText = val;
-                    } else {
-                        box.innerHTML = `<input type="number" class="input-num" id="in-${i}" inputmode="numeric">`;
-                    }
+                    if(hints.includes(i)) { box.classList.add('fixed'); box.innerText = val; }
+                    else { box.innerHTML = `<input type="number" class="input-num" id="in-${i}" inputmode="numeric">`; }
+                    grid.appendChild(box);
+                });
+            } else {
+                grid.classList.add('grid-100');
+                document.getElementById('range-text').innerText = "¡TABLA COMPLETA!";
+                secuenciaActual = Array.from({length: 100}, (_, i) => i + 1);
+                let hints = [1, 25, 50, 75, 100];
+                secuenciaActual.forEach((val, i) => {
+                    let box = document.createElement('div');
+                    box.className = "num-box";
+                    if(hints.includes(val)) { box.classList.add('fixed'); box.innerText = val; }
+                    else { box.innerHTML = `<input type="number" class="input-num" id="in-${i}" inputmode="numeric">`; }
                     grid.appendChild(box);
                 });
             }
@@ -169,12 +161,8 @@
             let error = false;
             secuenciaActual.forEach((val, i) => {
                 let input = document.getElementById(`in-${i}`);
-                if(input && parseInt(input.value) !== val) {
-                    error = true;
-                    input.style.color = "red";
-                } else if(input) {
-                    input.style.color = "green";
-                }
+                if(input && parseInt(input.value) !== val) { error = true; input.style.color = "red"; }
+                else if(input) { input.style.color = "green"; }
             });
 
             if(!error) {
@@ -183,15 +171,13 @@
                 document.getElementById('message').style.color = "green";
                 if(currentDecena < 11) {
                     await guardarProgresoNube();
-                    setTimeout(() => { currentDecena++; generateLevel(); document.getElementById('message').innerText=""; }, 1000);
-                } else {
-                    finishGame();
-                }
+                    setTimeout(() => { currentDecena++; generateLevel(); document.getElementById('message').innerText=""; }, 800);
+                } else { finishGame(); }
             } else {
                 lives--; fallos++; updateLives();
-                document.getElementById('message').innerText = "Hay errores. ¡Revisa bien!";
+                document.getElementById('message').innerText = "¡Revisa tus respuestas!";
                 document.getElementById('message').style.color = "red";
-                if(lives <= 0) { alert("¡Se agotaron las vidas!"); location.reload(); }
+                if(lives <= 0) { alert("Game Over. ¡Inténtalo de nuevo!"); location.reload(); }
             }
         }
 
@@ -202,11 +188,25 @@
 
         async function finishGame() {
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            const data = { nombre: estudiante.nombre, grado: estudiante.grado, tema: NOMBRE_TEMA, aciertos, fallos, fecha: new Date().toLocaleString() };
+            
+            // Fórmula: aciertos * 0.9. Si es 9.9 redondea a 10.
+            let notaFinal = aciertos * 0.9;
+            if(notaFinal >= 9.8) notaFinal = 10;
+            else notaFinal = notaFinal.toFixed(1);
+
+            const data = { 
+                nombre: estudiante.nombre, 
+                grado: estudiante.grado, 
+                tema: NOMBRE_TEMA, 
+                aciertos: notaFinal, // Se guarda la nota calculada
+                fallos: fallos, 
+                fecha: new Date().toLocaleString() 
+            };
+            
             await fetch(URL_BASE + "practicas.json", { method: "POST", body: JSON.stringify(data) });
             await fetch(`${URL_BASE}progreso_temp/${estudiante.nie}.json`, { method: "DELETE" });
             
-            document.getElementById('end-score').innerText = `Nota: ${aciertos}/11`;
+            document.getElementById('end-score').innerText = notaFinal;
             document.getElementById('end-screen').style.display = "flex";
         }
     </script>
