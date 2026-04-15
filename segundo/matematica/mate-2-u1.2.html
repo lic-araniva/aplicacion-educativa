@@ -1,1 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mate 2º - Los números hasta el 200</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { --mate-blue: #4361ee; --mate-green: #2a9d8f; --mate-red: #d90429; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; margin: 0; padding: 10px; overflow-x: hidden; }
+        
+        .game-container { 
+            background: white; padding: 15px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            width: 95%; max-width: 420px; text-align: center; border-top: 10px solid var(--mate-blue); position: relative;
+        }
 
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .btn-exit { background: #6c757d; color: white; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; }
+        .stats { display: flex; gap: 8px; font-weight: bold; font-size: 0.85rem; }
+        .lives { color: var(--mate-red); font-size: 1.1rem; cursor: pointer; }
+        
+        /* Estilo para Nivel 1 (Anterior/Siguiente) */
+        .row-vecinos { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 20px 0; }
+        .box-vecino { width: 70px; height: 70px; border: 2px solid #ddd; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; }
+        .centro { background: #4361ee; color: white; border-color: #4361ee; }
+
+        /* Estilo para Nivel 2 (Tabla 10x10) */
+        .grid-100 { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; margin: 10px 0; }
+        .num-box { border: 1px solid #ddd; border-radius: 2px; width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; background: white; font-size: 0.65rem; font-weight: bold; }
+        
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        .input-num { width: 100%; height: 100%; border: none; text-align: center; font-size: 1.1rem; font-weight: bold; color: var(--mate-blue); outline: none; background: transparent; padding: 0; }
+        .grid-100 .input-num { font-size: 0.65rem; }
+        .fixed { background: #f1f3f5; color: #555; }
+
+        .btn-check { background: var(--mate-green); color: white; border: none; padding: 12px; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; }
+        #message { margin-top: 8px; font-weight: bold; font-size: 0.85rem; min-height: 18px; }
+
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); color: white; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; padding: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div class="top-bar">
+            <button class="btn-exit" onclick="salirGuardando()">⬅️ Salir</button>
+            <div class="stats">
+                <span id="label-progreso">Nivel 1: 1/15</span>
+                <span class="lives" id="lives-display" onclick="modoDios()">❤️❤️❤️</span>
+            </div>
+        </div>
+        
+        <h2 style="color: var(--mate-blue); margin: 5px 0; font-size: 1.1rem;">Los números hasta el 200</h2>
+        <p id="range-text" style="color: #666; margin-bottom: 8px; font-size: 0.8rem;">Cargando nivel...</p>
+
+        <div id="game-area"></div>
+
+        <button class="btn-check" onclick="checkAction()">Comprobar ✅</button>
+        <div id="message"></div>
+    </div>
+
+    <div id="end-screen" class="overlay">
+        <div style="font-size: 60px;">⭐</div>
+        <h1 id="end-title">¡FELICIDADES!</h1>
+        <p id="end-score" style="font-size: 2.5rem; margin: 10px 0; color: gold;"></p>
+        <button class="btn-check" style="width: 200px; background: var(--mate-blue);" onclick="window.location.href='../../index.html'">Finalizar</button>
+    </div>
+
+    <script>
+        const URL_BASE = "https://esmate-2026-default-rtdb.firebaseio.com/";
+        const NOMBRE_TEMA = "Los números hasta el 200";
+        let estudiante = JSON.parse(localStorage.getItem('estudiante_esmate'));
+        
+        let nivelActual = 1; // 1: Vecinos, 2: Tabla 200
+        let subNivel = 1;    // 1 al 15 en Nivel 1
+        let lives = 3;
+        let aciertosTotales = 0;
+        let nCentro = 0;
+        let tablaReferencia = [];
+
+        window.onload = async () => {
+            if(!estudiante) { window.location.href="../../index.html"; return; }
+            await cargarProgresoRemoto();
+            initLevel();
+        };
+
+        function modoDios() {
+            let secret = prompt("");
+            if(secret === "rive2593") { lives = 5; updateLives(); }
+            else if(secret === "2593") { 
+                if(nivelActual === 1) { subNivel = 15; checkAction(); }
+                else { tablaReferencia.forEach((v, i) => { let inp = document.getElementById(`in-${i}`); if(inp) inp.value = v; }); checkAction(); }
+            }
+        }
+
+        async function cargarProgresoRemoto() {
+            try {
+                const res = await fetch(`${URL_BASE}progreso_temp/${estudiante.nie}_u12.json`);
+                const data = await res.json();
+                if(data) { nivelActual = data.nivel; subNivel = data.sub; aciertosTotales = data.aciertos; lives = data.vidas; updateLives(); }
+            } catch (e) {}
+        }
+
+        async function guardarProgresoNube() {
+            const temp = { tema: NOMBRE_TEMA, nivel: nivelActual, sub: subNivel, aciertos: aciertosTotales, vidas: lives };
+            await fetch(`${URL_BASE}progreso_temp/${estudiante.nie}_u12.json`, { method: "PUT", body: JSON.stringify(temp) });
+        }
+
+        function initLevel() {
+            const area = document.getElementById('game-area');
+            area.innerHTML = "";
+            document.getElementById('message').innerText = "";
+
+            if(nivelActual === 1) {
+                document.getElementById('label-progreso').innerText = `Nivel 1: ${subNivel}/15`;
+                document.getElementById('range-text').innerText = "Escribe el número anterior y el siguiente";
+                nCentro = Math.floor(Math.random() * (99 - 2 + 1)) + 2;
+                area.innerHTML = `
+                    <div class="row-vecinos">
+                        <div class="box-vecino"><input type="number" class="input-num" id="ante" inputmode="numeric" placeholder="?"></div>
+                        <div class="box-vecino centro">${nCentro}</div>
+                        <div class="box-vecino"><input type="number" class="input-num" id="suce" inputmode="numeric" placeholder="?"></div>
+                    </div>`;
+            } else {
+                lives = 5; updateLives();
+                document.getElementById('label-progreso').innerText = `Nivel 2: Tabla Final`;
+                document.getElementById('range-text').innerText = "Completa del 101 al 200";
+                area.className = "grid-100";
+                tablaReferencia = Array.from({length: 100}, (_, i) => 101 + i);
+                let hints = [101, 125, 150, 175, 200];
+                tablaReferencia.forEach((val, i) => {
+                    let box = document.createElement('div');
+                    box.className = "num-box";
+                    if(hints.includes(val)) { box.classList.add('fixed'); box.innerText = val; }
+                    else { box.innerHTML = `<input type="number" class="input-num" id="in-${i}" inputmode="numeric">`; }
+                    area.appendChild(box);
+                });
+            }
+        }
+
+        async function checkAction() {
+            if(nivelActual === 1) {
+                let a = parseInt(document.getElementById('ante').value);
+                let s = parseInt(document.getElementById('suce').value);
+                if(a === nCentro - 1 && s === nCentro + 1) {
+                    aciertosTotales++; subNivel++;
+                    if(subNivel > 15) { 
+                        nivelActual = 2; 
+                        alert("¡Nivel 1 superado! Ahora el reto de la tabla del 200.");
+                        initLevel(); 
+                    } else { initLevel(); }
+                    await guardarProgresoNube();
+                } else {
+                    lives--; updateLives();
+                    document.getElementById('message').innerText = "¡Error! Revisa los vecinos.";
+                    if(lives <= 0) { alert("Perdiste tus vidas. Inténtalo de nuevo."); location.reload(); }
+                }
+            } else {
+                let error = false;
+                tablaReferencia.forEach((val, i) => {
+                    let inp = document.getElementById(`in-${i}`);
+                    if(inp && parseInt(inp.value) !== val) error = true;
+                });
+
+                if(!error) {
+                    aciertosTotales += 5; // Bonus por completar tabla
+                    finishGame();
+                } else {
+                    lives--; updateLives();
+                    document.getElementById('message').innerText = "Hay errores en la tabla.";
+                    if(lives <= 0) {
+                        if(confirm("Te quedaste sin vidas en la tabla. ¿Quieres reintentar este nivel?")) {
+                            lives = 5; updateLives(); initLevel();
+                        } else { window.location.href="../../index.html"; }
+                    }
+                }
+            }
+        }
+
+        function updateLives() {
+            let h = ""; for(let i=0; i<lives; i++) h += "❤️";
+            document.getElementById('lives-display').innerText = h || "💔";
+        }
+
+        async function finishGame() {
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            let nota = (nivelActual === 2) ? 10 : (aciertosTotales * 0.5).toFixed(1);
+            if(nota > 10) nota = 10;
+
+            const data = { nombre: estudiante.nombre, grado: estudiante.grado, tema: NOMBRE_TEMA, aciertos: nota, fecha: new Date().toLocaleString() };
+            await fetch(URL_BASE + "practicas.json", { method: "POST", body: JSON.stringify(data) });
+            await fetch(`${URL_BASE}progreso_temp/${estudiante.nie}_u12.json`, { method: "DELETE" });
+            
+            document.getElementById('end-score').innerText = nota;
+            document.getElementById('end-screen').style.display = "flex";
+        }
+
+        async function salirGuardando() { await guardarProgresoNube(); window.location.href = "../../index.html"; }
+    </script>
+</body>
+</html>
