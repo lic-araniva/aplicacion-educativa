@@ -30,12 +30,12 @@
         .btn-edit { background: var(--esmate-orange); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; margin-right: 5px;}
         
         .badge-assign { background: #fee440; color: #333; padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; margin-right: 5px; border: 1px solid #ccb100;}
+        .badge-pass { background: #e9ecef; color: #333; padding: 4px 8px; border-radius: 5px; font-family: monospace; font-size: 13px; border: 1px solid #ccc;}
         
         .sub-nav { display: flex; gap: 5px; margin-bottom: 15px; background: #f1f3f5; padding: 10px; border-radius: 8px; }
         .sub-btn { background: white; border: 1px solid #ccc; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; color: #666; }
         .sub-btn.active { background: var(--esmate-orange); color: white; border-color: var(--esmate-orange); }
 
-        /* Estilos específicos para la Sábana de Notas */
         .input-nota { width: 45px; padding: 5px; text-align: center; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; color: var(--esmate-blue);}
         .box-calificaciones { background: #fdf2f2; border: 2px solid var(--esmate-red); padding: 15px; border-radius: 10px; margin-bottom: 20px;}
         .col-grupo { display: flex; flex-direction: column; gap: 5px; flex: 1; }
@@ -64,13 +64,14 @@
 
         <div id="tab-estudiantes" class="tab-content active">
             <div class="form-box">
-                <input type="number" id="new-nie" placeholder="NIE">
-                <input type="text" id="new-nombre" placeholder="Nombre Completo">
-                <select id="new-grado">
+                <input type="number" id="new-nie" placeholder="NIE" style="flex: 0.5;">
+                <input type="text" id="new-nombre" placeholder="Nombre Completo" style="flex: 1.5;">
+                <select id="new-grado" style="flex: 0.5;">
                     <option value="2">2º Grado</option><option value="3">3º Grado</option>
                     <option value="4">4º Grado</option><option value="5">5º Grado</option><option value="6">6º Grado</option>
                 </select>
-                <button class="btn-action" onclick="guardarEstudiante()">➕ Registrar</button>
+                <input type="text" id="new-pass" placeholder="Contraseña (Auto: 2026)" style="flex: 1;">
+                <button class="btn-action" onclick="guardarEstudiante()">💾 Guardar</button>
             </div>
             <div class="form-box" style="background: #f1f3f5; border: 1px solid #ddd;">
                 <span>🔍 Filtrar por grado:</span>
@@ -81,7 +82,7 @@
                 </select>
             </div>
             <table id="tabla-estudiantes">
-                <thead><tr><th>NIE</th><th>Nombre</th><th>Grado</th><th>Acciones</th></tr></thead>
+                <thead><tr><th>NIE</th><th>Nombre</th><th>Grado</th><th>Contraseña</th><th>Acciones</th></tr></thead>
                 <tbody id="est-body"></tbody>
             </table>
         </div>
@@ -249,7 +250,7 @@
             document.querySelectorAll('.select-temas-dinamicos').forEach(sel => sel.innerHTML = html);
         }
 
-        // --- ESTUDIANTES ---
+        // --- ESTUDIANTES (ACTUALIZADO CON CONTRASEÑA) ---
         function cargarEstudiantes() {
             fetch(URL_BASE + "estudiantes.json").then(res => res.json()).then(datos => {
                 listaEstudiantes = datos ? Object.keys(datos).map(k => ({nie:k, ...datos[k]})) : [];
@@ -266,20 +267,54 @@
             let f = g ? listaEstudiantes.filter(e => e.grado === g) : listaEstudiantes;
             let html = "";
             f.sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(e => {
-                html += `<tr><td>${e.nie}</td><td>${e.nombre}</td><td>${e.grado}º</td>
-                <td><button class="btn-edit" onclick="prepararEdit('${e.nie}','${e.nombre}','${e.grado}')">✏️</button>
-                <button class="btn-delete" onclick="borrarEst('${e.nie}')">🗑️</button></td></tr>`;
+                let passActual = e.password || "2026";
+                html += `<tr>
+                    <td>${e.nie}</td>
+                    <td><b>${e.nombre}</b></td>
+                    <td>${e.grado}º</td>
+                    <td><span class="badge-pass">🔑 ${passActual}</span></td>
+                    <td>
+                        <button class="btn-edit" onclick="prepararEdit('${e.nie}','${e.nombre}','${e.grado}','${passActual}')">✏️</button>
+                        <button class="btn-delete" onclick="borrarEst('${e.nie}')">🗑️</button>
+                    </td>
+                </tr>`;
             });
             document.getElementById('est-body').innerHTML = html;
         }
 
         function guardarEstudiante() {
-            let nie = document.getElementById('new-nie').value, nom = document.getElementById('new-nombre').value, gra = document.getElementById('new-grado').value;
+            let nie = document.getElementById('new-nie').value;
+            let nom = document.getElementById('new-nombre').value;
+            let gra = document.getElementById('new-grado').value;
+            let pass = document.getElementById('new-pass').value || "2026"; // Asigna 2026 si está vacío
+
             if(!nie || !nom) return alert("Faltan datos");
-            fetch(URL_BASE + `estudiantes/${nie}.json`, { method:"PUT", body:JSON.stringify({nombre:nom, grado:gra}) }).then(()=> {
-                document.getElementById('new-nie').value=""; document.getElementById('new-nombre').value=""; cargarEstudiantes();
+            
+            // Se envía a Firebase incluyendo la clave y la variable de control 'debeCambiarPass'
+            let dataEstudiante = { nombre: nom, grado: gra, password: pass };
+            
+            // Si le estamos asignando la por defecto, asumimos que debe cambiarla al entrar
+            if(pass === "2026") { dataEstudiante.debeCambiarPass = true; }
+
+            fetch(URL_BASE + `estudiantes/${nie}.json`, { 
+                method: "PUT", 
+                body: JSON.stringify(dataEstudiante) 
+            }).then(()=> {
+                document.getElementById('new-nie').value=""; 
+                document.getElementById('new-nombre').value=""; 
+                document.getElementById('new-pass').value=""; 
+                cargarEstudiantes();
             });
         }
+
+        function prepararEdit(nie, nombre, grado, pass) {
+            document.getElementById('new-nie').value = nie;
+            document.getElementById('new-nombre').value = nombre;
+            document.getElementById('new-grado').value = grado;
+            document.getElementById('new-pass').value = pass;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         function borrarEst(nie) { if(confirm("¿Borrar?")) fetch(URL_BASE + `estudiantes/${nie}.json`, {method:"DELETE"}).then(()=>cargarEstudiantes()); }
 
         // --- ASIGNACIONES ---
@@ -367,7 +402,7 @@
             body.innerHTML = html || "<tr><td colspan='4' style='text-align:center;'>No hay datos para mostrar.</td></tr>";
         }
 
-        // --- NUEVO MOTOR DE CALIFICACIONES ---
+        // --- CALIFICACIONES ---
         function calcularPromedioTemas(nombreEst, stringTemas) {
             if(!stringTemas) return 0;
             let temasRequeridos = stringTemas.split(',').map(t => t.trim()).filter(t => t);
@@ -382,7 +417,7 @@
                 if(prac) { suma += parseInt(prac.aciertos); }
             });
 
-            return suma / temasRequeridos.length; // Base 10
+            return suma / temasRequeridos.length;
         }
 
         function recalcularFila(nie) {
@@ -390,7 +425,6 @@
             let inInt = parseFloat(document.getElementById(`calc-int-${nie}`).textContent) || 0;
             let inPru = parseFloat(document.getElementById(`calc-pru-${nie}`).textContent) || 0;
             
-            // Evaluaciones manuales (se digita nota base 10 y se le saca el 5% = x 0.05)
             let valAuto = parseFloat(document.getElementById(`input-auto-${nie}`).value) || 0;
             let valCo = parseFloat(document.getElementById(`input-co-${nie}`).value) || 0;
             let valHet = parseFloat(document.getElementById(`input-het-${nie}`).value) || 0;
@@ -400,8 +434,6 @@
             let inHet = valHet * 0.05;
 
             let notaFinal = (inCot + inInt + inPru + inAuto + inCo + inHet).toFixed(1);
-            
-            // Limitar a máximo 10 por seguridad
             if(notaFinal > 10) notaFinal = 10.0;
             
             document.getElementById(`nota-final-${nie}`).textContent = notaFinal;
@@ -467,7 +499,6 @@
             }).catch(err => alert("Error al guardar algunas notas."));
         }
 
-        // --- EXPORTAR A EXCEL (CSV) ---
         function exportarCSV() {
             let rows = document.querySelectorAll("#tabla-calificaciones tr");
             let csv = [];
@@ -475,19 +506,14 @@
                 let row = [], cols = rows[i].querySelectorAll("td, th");
                 for (let j = 0; j < cols.length; j++) {
                     let text = "";
-                    // Si la celda tiene un input (las rúbricas), extraemos su valor digitado
-                    if (cols[j].querySelector("input")) {
-                        text = cols[j].querySelector("input").value || "0";
-                    } else {
-                        text = cols[j].innerText;
-                    }
-                    // Limpiamos saltos de línea y formateamos para CSV
+                    if (cols[j].querySelector("input")) { text = cols[j].querySelector("input").value || "0"; } 
+                    else { text = cols[j].innerText; }
                     row.push('"' + text.replace(/"/g, '""').replace(/\n/g, '') + '"');
                 }
                 csv.push(row.join(","));
             }
             let csvString = csv.join("\n");
-            let blob = new Blob(["\uFEFF" + csvString], { type: "text/csv;charset=utf-8;" }); // uFEFF asegura que Excel lea los acentos
+            let blob = new Blob(["\uFEFF" + csvString], { type: "text/csv;charset=utf-8;" });
             let link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
             link.download = "Cuadro_Notas_ESMATE.csv";
