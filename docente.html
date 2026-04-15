@@ -28,9 +28,13 @@
         
         .btn-delete { background: var(--esmate-red); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
         .btn-edit { background: var(--esmate-orange); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; margin-right: 5px;}
-        .btn-assign { background: var(--esmate-blue); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold;}
-
+        
         .badge-assign { background: #fee440; color: #333; padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; margin-right: 5px; border: 1px solid #ccb100;}
+        
+        /* Estilos para Sub-rendimiento */
+        .sub-nav { display: flex; gap: 5px; margin-bottom: 15px; background: #f1f3f5; padding: 10px; border-radius: 8px; }
+        .sub-btn { background: white; border: 1px solid #ccc; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; color: #666; }
+        .sub-btn.active { background: var(--esmate-orange); color: white; border-color: var(--esmate-orange); }
     </style>
 </head>
 <body>
@@ -42,16 +46,18 @@
     </div>
 
     <div id="dashboard" class="container" style="display: none;">
-        <h1>Administración de Escuela Virtual</h1>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Administración Virtual</h1>
+            <button class="btn-action" style="background: #6c757d;" onclick="cargarTodo()">🔄 Sincronizar Datos</button>
+        </div>
         
         <div class="tabs">
             <button class="tab-btn active" onclick="cambiarPestana('estudiantes')">👥 Estudiantes</button>
-            <button class="tab-btn" onclick="cambiarPestana('asignar')">🎯 Asignar Contenido</button>
+            <button class="tab-btn" onclick="cambiarPestana('asignar')">🎯 Asignar</button>
             <button class="tab-btn" onclick="cambiarPestana('practicas')">📊 Rendimiento</button>
         </div>
 
         <div id="tab-estudiantes" class="tab-content active">
-            <h3 id="form-titulo">Registrar Estudiante</h3>
             <div class="form-box">
                 <input type="number" id="new-nie" placeholder="NIE">
                 <input type="text" id="new-nombre" placeholder="Nombre Completo">
@@ -59,18 +65,16 @@
                     <option value="2">2º Grado</option><option value="3">3º Grado</option>
                     <option value="4">4º Grado</option><option value="5">5º Grado</option><option value="6">6º Grado</option>
                 </select>
-                <button class="btn-action" id="btn-guardar-est" onclick="guardarEstudiante()">➕ Registrar</button>
+                <button class="btn-action" onclick="guardarEstudiante()">➕ Registrar</button>
             </div>
-
             <div class="form-box" style="background: #f1f3f5; border: 1px solid #ddd;">
-                <span style="font-weight: bold; color: #555;">🔍 Filtrar tabla por grado:</span>
+                <span>🔍 Filtrar por grado:</span>
                 <select id="filtro-est-grado" onchange="filtrarEstudiantes()">
                     <option value="">🏫 Todos los Grados</option>
                     <option value="2">2º Grado</option><option value="3">3º Grado</option>
                     <option value="4">4º Grado</option><option value="5">5º Grado</option><option value="6">6º Grado</option>
                 </select>
             </div>
-
             <table id="tabla-estudiantes">
                 <thead><tr><th>NIE</th><th>Nombre</th><th>Grado</th><th>Acciones</th></tr></thead>
                 <tbody id="est-body"></tbody>
@@ -78,81 +82,58 @@
         </div>
 
         <div id="tab-asignar" class="tab-content">
-            
-            <h3 style="color: var(--esmate-blue); margin-bottom: 5px;">👤 Asignación Individual</h3>
-            <p style="margin-top: 0; font-size: 14px; color: #666;">Envía una actividad a un estudiante específico (Nivelación o Refuerzo).</p>
-            <div class="form-box" style="background: #fff3cd; border: 2px solid #ffeeba;">
-                <select id="assign-student"><option value="">👤 Selecciona un estudiante...</option></select>
+            <h3 style="color: var(--esmate-blue);">👤 Individual</h3>
+            <div class="form-box" style="background: #fff3cd;">
+                <select id="assign-student"><option value="">Seleccionar estudiante...</option></select>
                 <select id="assign-materia">
                     <option value="Matemática">Matemática</option><option value="Lenguaje">Lenguaje</option>
                     <option value="Ciencias">Ciencias</option><option value="Ciudadanía">Ciudadanía y Valores</option>
                 </select>
                 <select id="assign-unidad">
                     <option value="1">Unidad 1</option><option value="2">Unidad 2</option><option value="3">Unidad 3</option>
-                    <option value="4">Unidad 4</option><option value="5">Unidad 5</option>
-                    <option value="6">Unidad 6</option><option value="7">Unidad 7</option>
-                    <option value="8">Unidad 8</option><option value="9">Unidad 9</option>
-                    <option value="10">Unidad 10</option>
                 </select>
-                <select id="assign-tema">
-                    <option value="1">Tema 1</option><option value="2">Tema 2</option><option value="3">Tema 3</option>
-                    <option value="4">Tema 4</option><option value="5">Tema 5</option><option value="6">Tema 6</option>
-                    <option value="7">Tema 7</option><option value="8">Tema 8</option><option value="9">Tema 9</option>
-                    <option value="10">Tema 10</option><option value="11">Tema 11</option><option value="12">Tema 12</option>
-                    <option value="13">Tema 13</option><option value="14">Tema 14</option><option value="15">Tema 15</option>
-                    <option value="16">Tema 16</option><option value="17">Tema 17</option><option value="18">Tema 18</option>
-                    <option value="19">Tema 19</option><option value="20">Tema 20</option>
-                </select>
-                <button class="btn-action" style="background: var(--esmate-blue);" onclick="crearAsignacion()">🎯 Asignar a Uno</button>
+                <select id="assign-tema" class="select-temas-dinamicos"></select>
+                <button class="btn-action" style="background: var(--esmate-blue);" onclick="crearAsignacion()">🎯 Asignar</button>
             </div>
 
-            <h3 style="color: var(--esmate-green); margin-bottom: 5px; margin-top: 30px;">🏫 Asignación Masiva</h3>
-            <p style="margin-top: 0; font-size: 14px; color: #666;">Envía el tema de la clase de hoy a todos los estudiantes de un grado simultáneamente.</p>
-            <div class="form-box" style="background: #e6f7f5; border: 2px solid #2a9d8f;">
+            <h3 style="color: var(--esmate-green);">🏫 Masiva por Grado</h3>
+            <div class="form-box" style="background: #e6f7f5;">
                 <select id="masivo-grado">
-                    <option value="">🏫 Selecciona el grado completo...</option>
-                    <option value="2">Todos los de 2º Grado</option><option value="3">Todos los de 3º Grado</option>
-                    <option value="4">Todos los de 4º Grado</option><option value="5">Todos los de 5º Grado</option>
-                    <option value="6">Todos los de 6º Grado</option>
+                    <option value="">Seleccionar grado...</option>
+                    <option value="2">2º Grado</option><option value="3">3º Grado</option>
+                    <option value="4">4º Grado</option><option value="5">5º Grado</option>
                 </select>
                 <select id="masivo-materia">
                     <option value="Matemática">Matemática</option><option value="Lenguaje">Lenguaje</option>
-                    <option value="Ciencias">Ciencias</option><option value="Ciudadanía">Ciudadanía y Valores</option>
+                    <option value="Ciencias">Ciencias</option>
                 </select>
                 <select id="masivo-unidad">
-                    <option value="1">Unidad 1</option><option value="2">Unidad 2</option><option value="3">Unidad 3</option>
-                    <option value="4">Unidad 4</option><option value="5">Unidad 5</option>
-                    <option value="6">Unidad 6</option><option value="7">Unidad 7</option>
-                    <option value="8">Unidad 8</option><option value="9">Unidad 9</option>
-                    <option value="10">Unidad 10</option>
+                    <option value="1">Unidad 1</option><option value="2">Unidad 2</option>
                 </select>
-                <select id="masivo-tema">
-                    <option value="1">Tema 1</option><option value="2">Tema 2</option><option value="3">Tema 3</option>
-                    <option value="4">Tema 4</option><option value="5">Tema 5</option><option value="6">Tema 6</option>
-                    <option value="7">Tema 7</option><option value="8">Tema 8</option><option value="9">Tema 9</option>
-                    <option value="10">Tema 10</option><option value="11">Tema 11</option><option value="12">Tema 12</option>
-                    <option value="13">Tema 13</option><option value="14">Tema 14</option><option value="15">Tema 15</option>
-                    <option value="16">Tema 16</option><option value="17">Tema 17</option><option value="18">Tema 18</option>
-                    <option value="19">Tema 19</option><option value="20">Tema 20</option>
-                </select>
+                <select id="masivo-tema" class="select-temas-dinamicos"></select>
                 <button class="btn-action" style="background: var(--esmate-green);" onclick="crearAsignacionMasiva()">🚀 Asignar a Todos</button>
             </div>
 
-            <h3 style="margin-top: 30px;">📋 Tareas Asignadas Actuales</h3>
             <table>
-                <thead><tr><th>Estudiante</th><th>Contenido Asignado</th><th>Acción</th></tr></thead>
+                <thead><tr><th>Estudiante</th><th>Contenido</th><th>Acción</th></tr></thead>
                 <tbody id="assign-body"></tbody>
             </table>
         </div>
 
         <div id="tab-practicas" class="tab-content">
-            <div class="form-box">
-                <input type="text" id="filtro-prac-nombre" placeholder="🔍 Buscar nombre..." onkeyup="filtrarPracticas()">
-                <select id="filtro-tema" onchange="filtrarPracticas()"><option value="">📚 Todos los temas</option></select>
+            <div class="sub-nav">
+                <button class="sub-btn active" onclick="cambiarVistaRendimiento('individual', this)">👤 Por Estudiante</button>
+                <button class="sub-btn" onclick="cambiarVistaRendimiento('grado', this)">🏫 Por Grado</button>
+                <button class="sub-btn" onclick="cambiarVistaRendimiento('asignatura', this)">📚 Por Asignatura</button>
+                <button class="sub-btn" onclick="cambiarVistaRendimiento('tema', this)">📐 Por Tema</button>
             </div>
-            <table id="tabla-practicas">
-                <thead><tr><th>Fecha</th><th>Nombre</th><th>Grado</th><th>Tema</th><th>Nota</th><th>Fallos</th><th>Acción</th></tr></thead>
-                <tbody id="prac-body"></tbody>
+
+            <div id="rendimiento-controles" class="form-box">
+                </div>
+
+            <table id="tabla-rendimiento">
+                <thead id="rend-head"></thead>
+                <tbody id="rend-body"></tbody>
             </table>
         </div>
 
@@ -160,7 +141,7 @@
 
     <script>
         const URL_BASE = "https://esmate-2026-default-rtdb.firebaseio.com/";
-        let listaEstudiantes = [], listaPracticas = [], listaAsignaciones = [];
+        let listaEstudiantes = [], listaPracticas = [], listaAsignaciones = [], nombresTemas = {};
 
         function verificarPIN() {
             if(document.getElementById('pin-input').value === "profe2026") {
@@ -177,166 +158,150 @@
             event.currentTarget.classList.add('active');
         }
 
-        function cargarTodo() { cargarEstudiantes(); cargarPracticas(); cargarAsignaciones(); }
+        async function cargarTodo() { 
+            await cargarNombresTemas(); 
+            cargarEstudiantes(); 
+            cargarPracticas(); 
+            cargarAsignaciones(); 
+        }
 
-        // --- LÓGICA ESTUDIANTES ---
+        // --- RETO: SINCRONIZACIÓN DE NOMBRES ---
+        async function cargarNombresTemas() {
+            try {
+                const res = await fetch(URL_BASE + "config/temas.json");
+                nombresTemas = await res.json() || {};
+                dibujarSelectTemas();
+            } catch (e) { console.log("Usando nombres por defecto"); dibujarSelectTemas(); }
+        }
+
+        function dibujarSelectTemas() {
+            let html = "";
+            for(let i=1; i<=20; i++) {
+                // Si existe un nombre en la DB lo pone, si no pone "Tema X"
+                let nombre = nombresTemas[i] || `Tema ${i}`;
+                html += `<option value="${i}">${nombre}</option>`;
+            }
+            document.querySelectorAll('.select-temas-dinamicos').forEach(sel => sel.innerHTML = html);
+        }
+
+        // --- ESTUDIANTES ---
         function cargarEstudiantes() {
             fetch(URL_BASE + "estudiantes.json").then(res => res.json()).then(datos => {
                 listaEstudiantes = datos ? Object.keys(datos).map(k => ({nie:k, ...datos[k]})) : [];
                 filtrarEstudiantes();
-
-                let selectHtml = '<option value="">👤 Selecciona un estudiante...</option>';
+                let selectHtml = '<option value="">Seleccionar estudiante...</option>';
                 listaEstudiantes.sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(e => {
                     selectHtml += `<option value="${e.nie}">${e.nombre} (${e.grado}º)</option>`;
                 });
                 document.getElementById('assign-student').innerHTML = selectHtml;
             });
         }
-
         function filtrarEstudiantes() {
-            let gradoSeleccionado = document.getElementById('filtro-est-grado').value;
-            let listaFiltrada = listaEstudiantes;
-            if (gradoSeleccionado !== "") { listaFiltrada = listaEstudiantes.filter(e => e.grado === gradoSeleccionado); }
-            dibujarEstudiantes(listaFiltrada);
-        }
-
-        function dibujarEstudiantes(lista) {
+            let g = document.getElementById('filtro-est-grado').value;
+            let f = g ? listaEstudiantes.filter(e => e.grado === g) : listaEstudiantes;
             let html = "";
-            lista.sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(e => {
+            f.sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(e => {
                 html += `<tr><td>${e.nie}</td><td>${e.nombre}</td><td>${e.grado}º</td>
                 <td><button class="btn-edit" onclick="prepararEdit('${e.nie}','${e.nombre}','${e.grado}')">✏️</button>
                 <button class="btn-delete" onclick="borrarEst('${e.nie}')">🗑️</button></td></tr>`;
             });
-            document.getElementById('est-body').innerHTML = html || "<tr><td colspan='4' style='text-align:center;'>No hay estudiantes.</td></tr>";
+            document.getElementById('est-body').innerHTML = html;
         }
 
         function guardarEstudiante() {
             let nie = document.getElementById('new-nie').value, nom = document.getElementById('new-nombre').value, gra = document.getElementById('new-grado').value;
-            if(!nie || !nom) return alert("Completa los datos");
+            if(!nie || !nom) return alert("Faltan datos");
             fetch(URL_BASE + `estudiantes/${nie}.json`, { method:"PUT", body:JSON.stringify({nombre:nom, grado:gra}) }).then(()=> {
-                document.getElementById('new-nie').value=""; document.getElementById('new-nombre').value=""; 
-                alert("Estudiante guardado/actualizado"); cargarEstudiantes();
+                document.getElementById('new-nie').value=""; document.getElementById('new-nombre').value=""; cargarEstudiantes();
             });
         }
-        
-        function prepararEdit(nie, nombre, grado) {
-            document.getElementById('new-nie').value = nie; document.getElementById('new-nombre').value = nombre; document.getElementById('new-grado').value = grado;
-            window.scrollTo(0, 0); 
-        }
+        function borrarEst(nie) { if(confirm("¿Borrar?")) fetch(URL_BASE + `estudiantes/${nie}.json`, {method:"DELETE"}).then(()=>cargarEstudiantes()); }
 
-        function borrarEst(nie) { if(confirm("¿Borrar estudiante?")) fetch(URL_BASE + `estudiantes/${nie}.json`, {method:"DELETE"}).then(()=>cargarEstudiantes()); }
-
-        // --- LÓGICA MOTOR DE ASIGNACIONES ---
+        // --- ASIGNACIONES ---
         function cargarAsignaciones() {
             fetch(URL_BASE + "asignaciones.json").then(res => res.json()).then(datos => {
                 listaAsignaciones = [];
-                if(datos) {
-                    for(let nie in datos) {
-                        for(let idAsig in datos[nie]) { listaAsignaciones.push({ id: idAsig, nie: nie, ...datos[nie][idAsig] }); }
-                    }
-                }
-                dibujarTablaAsignaciones();
+                if(datos) for(let nie in datos) for(let id in datos[nie]) listaAsignaciones.push({id, nie, ...datos[nie][id]});
+                let h = "";
+                listaAsignaciones.forEach(a => {
+                    let e = listaEstudiantes.find(est => est.nie == a.nie);
+                    let tNom = nombresTemas[a.tema] || `Tema ${a.tema}`;
+                    h += `<tr><td><b>${e ? e.nombre : a.nie}</b></td><td><span class="badge-assign">${a.materia}</span> U${a.unidad} - ${tNom}</td>
+                    <td><button class="btn-delete" onclick="borrarAsignacion('${a.nie}','${a.id}')">Eliminar</button></td></tr>`;
+                });
+                document.getElementById('assign-body').innerHTML = h;
             });
         }
-
-        function dibujarTablaAsignaciones() {
-            let html = "";
-            listaAsignaciones.forEach(a => {
-                let est = listaEstudiantes.find(e => e.nie == a.nie);
-                let nombreEst = est ? est.nombre : "NIE: " + a.nie;
-                // PARCHE: Si a.tema no existe (tareas viejas), muestra "Tema General" en vez de undefined.
-                let temaTexto = a.tema ? `Tema ${a.tema}` : "Tema General";
-                
-                html += `<tr>
-                    <td><b>${nombreEst}</b></td>
-                    <td><span class="badge-assign">${a.materia}</span> Unidad ${a.unidad} - ${temaTexto}</td>
-                    <td><button class="btn-delete" onclick="borrarAsignacion('${a.nie}', '${a.id}')">Eliminar</button></td>
-                </tr>`;
-            });
-            document.getElementById('assign-body').innerHTML = html || "<tr><td colspan='3' style='text-align:center;'>No hay tareas asignadas.</td></tr>";
-        }
-
         function crearAsignacion() {
             let nie = document.getElementById('assign-student').value;
-            let materia = document.getElementById('assign-materia').value;
-            let unidad = document.getElementById('assign-unidad').value;
-            let tema = document.getElementById('assign-tema').value;
-
-            if(!nie) return alert("Selecciona un estudiante");
-
-            let nuevaAsig = { materia: materia, unidad: unidad, tema: tema, fecha: new Date().toLocaleString('es-SV') };
-
-            fetch(URL_BASE + `asignaciones/${nie}.json`, {
-                method: "POST",
-                body: JSON.stringify(nuevaAsig)
-            }).then(() => { alert("🎯 Asignación individual enviada con éxito"); cargarAsignaciones(); });
+            if(!nie) return alert("Elige estudiante");
+            let data = { materia: document.getElementById('assign-materia').value, unidad: document.getElementById('assign-unidad').value, tema: document.getElementById('assign-tema').value, fecha: new Date().toLocaleString() };
+            fetch(URL_BASE + `asignaciones/${nie}.json`, { method: "POST", body: JSON.stringify(data) }).then(() => cargarAsignaciones());
         }
-
-        // NUEVA FUNCIÓN: ASIGNACIÓN MASIVA
         function crearAsignacionMasiva() {
-            let grado = document.getElementById('masivo-grado').value;
-            let materia = document.getElementById('masivo-materia').value;
-            let unidad = document.getElementById('masivo-unidad').value;
-            let tema = document.getElementById('masivo-tema').value;
+            let g = document.getElementById('masivo-grado').value;
+            if(!g) return alert("Elige grado");
+            let ests = listaEstudiantes.filter(e => e.grado === g);
+            let data = { materia: document.getElementById('masivo-materia').value, unidad: document.getElementById('masivo-unidad').value, tema: document.getElementById('masivo-tema').value, fecha: new Date().toLocaleString() };
+            let ps = ests.map(e => fetch(URL_BASE + `asignaciones/${e.nie}.json`, { method: "POST", body: JSON.stringify(data) }));
+            Promise.all(ps).then(() => { alert("Asignado a todo el grado"); cargarAsignaciones(); });
+        }
+        function borrarAsignacion(nie, id) { fetch(URL_BASE + `asignaciones/${nie}/${id}.json`, { method: "DELETE" }).then(() => cargarAsignaciones()); }
 
-            if(!grado) return alert("⚠️ Selecciona un grado completo para la asignación masiva.");
-
-            let estudiantesGrado = listaEstudiantes.filter(e => e.grado === grado);
-            if(estudiantesGrado.length === 0) return alert(`No tienes estudiantes matriculados en ${grado}º Grado.`);
-
-            if(confirm(`¿Seguro que deseas asignar la Unidad ${unidad} - Tema ${tema} de ${materia} a los ${estudiantesGrado.length} estudiantes de ${grado}º Grado?`)) {
-                
-                let promesas = [];
-                let nuevaAsig = { materia: materia, unidad: unidad, tema: tema, fecha: new Date().toLocaleString('es-SV') };
-
-                // Hacemos un POST por cada estudiante de ese grado
-                estudiantesGrado.forEach(est => {
-                    let peticion = fetch(URL_BASE + `asignaciones/${est.nie}.json`, {
-                        method: "POST",
-                        body: JSON.stringify(nuevaAsig)
-                    });
-                    promesas.push(peticion);
-                });
-
-                // Esperamos a que Firebase guarde todo y luego recargamos la tabla
-                Promise.all(promesas).then(() => {
-                    alert(`🚀 ¡Éxito! Se asignó el tema a los ${estudiantesGrado.length} estudiantes.`);
-                    cargarAsignaciones();
-                }).catch(err => {
-                    alert("Hubo un error de conexión al asignar a algunos estudiantes.");
-                });
-            }
+        // --- OPCIÓN B: RENDIMIENTO DETALLADO ---
+        let vistaActualRendimiento = "individual";
+        function cambiarVistaRendimiento(v, btn) {
+            vistaActualRendimiento = v;
+            document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            dibujarControlesRendimiento();
         }
 
-        function borrarAsignacion(nie, id) {
-            if(confirm("¿Quitar esta asignación?")) { fetch(URL_BASE + `asignaciones/${nie}/${id}.json`, { method: "DELETE" }).then(() => cargarAsignaciones()); }
+        function dibujarControlesRendimiento() {
+            let c = document.getElementById('rendimiento-controles');
+            if(vistaActualRendimiento === "individual") {
+                c.innerHTML = `<select id="rend-sel-est" onchange="verRendimiento()"><option value="">Selecciona un estudiante...</option>${listaEstudiantes.map(e=>`<option value="${e.nombre}">${e.nombre}</option>`)}</select>`;
+            } else if(vistaActualRendimiento === "grado") {
+                c.innerHTML = `<select id="rend-sel-grado" onchange="verRendimiento()"><option value="">Selecciona un grado...</option><option value="2">2º Grado</option><option value="3">3º Grado</option><option value="4">4º Grado</option><option value="5">5º Grado</option></select>`;
+            } else if(vistaActualRendimiento === "tema") {
+                c.innerHTML = `<select id="rend-sel-tema" onchange="verRendimiento()"><option value="">Selecciona un tema...</option>${[...new Set(listaPracticas.map(p=>p.tema))].map(t=>`<option value="${t}">${t}</option>`)}</select>`;
+            } else { c.innerHTML = "<span>Mostrando promedios generales por materia</span>"; verRendimiento(); }
         }
 
-        // --- RENDIMIENTO ---
         function cargarPracticas() {
             fetch(URL_BASE + "practicas.json").then(res => res.json()).then(datos => {
                 listaPracticas = datos ? Object.keys(datos).map(k => ({id:k, ...datos[k]})) : [];
                 listaPracticas.reverse();
-                extraerTemas(); dibujarPracticas(listaPracticas);
+                dibujarControlesRendimiento();
             });
         }
-        function dibujarPracticas(l) {
-            let h = "";
-            l.forEach(p => h += `<tr><td>${p.fecha || '-'}</td><td>${p.nombre}</td><td>${p.grado}º</td><td>${p.tema}</td><td><b>${p.aciertos}</b></td><td>${p.fallos}</td><td><button class="btn-delete" onclick="borrarPrac('${p.id}')">🗑️</button></td></tr>`);
-            document.getElementById('prac-body').innerHTML = h;
+
+        function verRendimiento() {
+            let body = document.getElementById('rend-body'), head = document.getElementById('rend-head'), html = "";
+            
+            if(vistaActualRendimiento === "individual") {
+                head.innerHTML = "<tr><th>Fecha</th><th>Tema</th><th>Puntos</th><th>Fallos</th></tr>";
+                let nom = document.getElementById('rend-sel-est').value;
+                listaPracticas.filter(p => p.nombre === nom).forEach(p => html += `<tr><td>${p.fecha}</td><td>${p.tema}</td><td>${p.aciertos}</td><td>${p.fallos}</td></tr>`);
+            } else if(vistaActualRendimiento === "grado") {
+                head.innerHTML = "<tr><th>Estudiante</th><th>Promedio Puntos</th><th>Prácticas Realizadas</th></tr>";
+                let g = document.getElementById('rend-sel-grado').value;
+                let porEst = {};
+                listaPracticas.filter(p => p.grado == g).forEach(p => {
+                    if(!porEst[p.nombre]) porEst[p.nombre] = { suma:0, cant:0 };
+                    porEst[p.nombre].suma += parseInt(p.aciertos); porEst[p.nombre].cant++;
+                });
+                for(let n in porEst) html += `<tr><td>${n}</td><td>${(porEst[n].suma/porEst[n].cant).toFixed(1)}</td><td>${porEst[n].cant}</td></tr>`;
+            } else if(vistaActualRendimiento === "tema") {
+                head.innerHTML = "<tr><th>Estudiante</th><th>Nota</th><th>Estado</th></tr>";
+                let t = document.getElementById('rend-sel-tema').value;
+                listaPracticas.filter(p => p.tema === t).forEach(p => {
+                    let estado = p.aciertos >= 8 ? "✅ Aprobado" : "❌ Refuerzo";
+                    html += `<tr><td>${p.nombre}</td><td>${p.aciertos}</td><td>${estado}</td></tr>`;
+                });
+            }
+            body.innerHTML = html || "<tr><td colspan='4' style='text-align:center;'>No hay datos para mostrar.</td></tr>";
         }
-        function extraerTemas() {
-            let temas = [...new Set(listaPracticas.map(p => p.tema))].sort();
-            let h = '<option value="">📚 Todos los temas</option>';
-            temas.forEach(t => h += `<option value="${t}">${t}</option>`);
-            document.getElementById('filtro-tema').innerHTML = h;
-        }
-        function filtrarPracticas() {
-            let n = document.getElementById('filtro-prac-nombre').value.toLowerCase(), t = document.getElementById('filtro-tema').value;
-            let f = listaPracticas.filter(p => p.nombre.toLowerCase().includes(n) && (t==="" || p.tema===t));
-            dibujarPracticas(f);
-        }
-        function borrarPrac(id) { if(confirm("¿Borrar registro?")) fetch(URL_BASE + `practicas/${id}.json`, {method:"DELETE"}).then(()=>cargarPracticas()); }
     </script>
 </body>
 </html>
