@@ -8,37 +8,37 @@
         :root { --mate-blue: #4361ee; --mate-green: #2a9d8f; --mate-red: #d90429; --bg: #f0f2f5; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; }
         
-        .game-container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 600px; text-align: center; border-top: 10px solid var(--mate-blue); }
-        .stats { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; font-size: 1.2rem; }
-        .lives { color: var(--mate-red); font-size: 1.5rem; }
+        .game-container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 95%; max-width: 600px; text-align: center; border-top: 10px solid var(--mate-blue); position: relative;}
+        .stats { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; font-size: 1.1rem; align-items: center;}
+        .lives { color: var(--mate-red); font-size: 1.5rem; cursor: pointer; transition: 0.3s;}
+        .lives:hover { transform: scale(1.1); filter: drop-shadow(0 0 5px gold);}
         
         .grid-numbers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 20px 0; }
-        .num-box { padding: 0; border: 2px solid #ddd; border-radius: 10px; font-size: 1.5rem; font-weight: bold; text-align: center; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .num-box { padding: 0; border: 2px solid #ddd; border-radius: 10px; font-size: 1.5rem; font-weight: bold; text-align: center; width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; }
         
-        /* Quitamos flechas de los inputs (barra lateral) */
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
-
         .input-num { width: 100%; height: 100%; border: none; text-align: center; font-size: 1.8rem; font-weight: bold; color: var(--mate-blue); outline: none; background: transparent; }
         .fixed { background: #e9ecef; color: #555; border-color: #ccc; }
 
         .btn-check { background: var(--mate-green); color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 1.2rem; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; margin-top: 10px; }
-        .btn-check:hover { background: #21867a; transform: scale(1.02); }
+        .btn-exit { background: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; position: absolute; top: -50px; left: 0; }
         
         #message { margin-top: 15px; font-weight: bold; min-height: 24px; }
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; padding: 20px; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); color: white; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; padding: 20px; }
     </style>
 </head>
 <body>
 
     <div class="game-container">
+        <button class="btn-exit" onclick="salirGuardando()">⬅️ Salir y Guardar</button>
+        
         <div class="stats">
             <div>Decena: <span id="current-level">1</span>/10</div>
-            <div class="lives" id="lives-display">❤️❤️❤️</div>
+            <div class="lives" id="lives-display" onclick="modoDios()" title="Modo Dios (Recuperar Vidas)">❤️❤️❤️</div>
         </div>
         
         <h2 style="color: var(--mate-blue); margin-bottom: 5px;">Los números hasta el 100</h2>
-        <p id="range-text" style="font-weight: bold; color: #666;">Cargando nivel...</p>
+        <p id="range-text" style="font-weight: bold; color: #666;">Sincronizando progreso...</p>
 
         <div class="grid-numbers" id="grid"></div>
 
@@ -51,11 +51,12 @@
         <div id="medal-icon" style="font-size: 80px; margin: 20px 0;"></div>
         <p id="end-score" style="font-size: 2rem; margin: 10px 0;"></p>
         <p id="end-msg" style="margin-bottom: 30px; font-size: 1.2rem;"></p>
-        <button class="btn-check" style="width: 250px; background: var(--mate-blue);" onclick="location.href='../../index.html'">Volver a mis Clases</button>
+        <button class="btn-check" style="width: 250px; background: var(--mate-blue);" onclick="window.location.href='../../index.html'">Volver a mis Clases</button>
     </div>
 
     <script>
         const URL_BASE = "https://esmate-2026-default-rtdb.firebaseio.com/";
+        const NOMBRE_TEMA = "Los números hasta el 100";
         let estudiante = JSON.parse(localStorage.getItem('estudiante_esmate'));
         
         let lives = 3;
@@ -64,10 +65,58 @@
         let fallos = 0;
         let secuenciaActual = [];
 
-        window.onload = () => {
-            if(!estudiante) { alert("¡Ups! Debes entrar con tu NIE primero."); window.location.href="../../index.html"; return; }
+        window.onload = async () => {
+            if(!estudiante) { alert("Inicia sesión primero"); window.location.href="../../index.html"; return; }
+            await cargarProgresoRemoto();
             generateLevel();
         };
+
+        // --- MODO DIOS (RECUPERAR VIDAS) ---
+        function modoDios() {
+            if(confirm("¿Eres el docente? Activar modo recuperación de vidas.")) {
+                lives = 3;
+                updateLives();
+                document.getElementById('message').innerText = "✨ Vidas restauradas (Modo Dios)";
+                document.getElementById('message').style.color = "gold";
+            }
+        }
+
+        // --- PERSISTENCIA (GUARDADO EN NUBE) ---
+        async function cargarProgresoRemoto() {
+            try {
+                const res = await fetch(`${URL_BASE}progreso_temp/${estudiante.nie}.json`);
+                const data = await res.json();
+                if(data && data.tema === NOMBRE_TEMA) {
+                    currentDecena = data.decena;
+                    aciertos = data.aciertos;
+                    fallos = data.fallos;
+                    lives = data.vidas;
+                    updateLives();
+                    console.log("Progreso recuperado de la nube");
+                }
+            } catch (e) { console.log("Iniciando desde cero"); }
+        }
+
+        async function guardarProgresoNube() {
+            const temp = {
+                tema: NOMBRE_TEMA,
+                decena: currentDecena,
+                aciertos: aciertos,
+                fallos: fallos,
+                vidas: lives,
+                ultimaAct: new Date().toISOString()
+            };
+            await fetch(`${URL_BASE}progreso_temp/${estudiante.nie}.json`, {
+                method: "PUT",
+                body: JSON.stringify(temp)
+            });
+        }
+
+        async function salirGuardando() {
+            await guardarProgresoNube();
+            alert("Progreso guardado. ¡Hasta pronto!");
+            window.location.href = "../../index.html";
+        }
 
         function generateLevel() {
             const grid = document.getElementById('grid');
@@ -76,72 +125,61 @@
             
             let start = (currentDecena - 1) * 10 + 1;
             let end = currentDecena * 10;
-            document.getElementById('range-text').innerText = `Escribe los números del ${start} al ${end}`;
+            document.getElementById('range-text').innerText = `Escribe del ${start} al ${end}`;
             
             secuenciaActual = [];
-            // Pistas fijas: el primero y el último
             let hintPos = [0, 9]; 
 
             for(let i = 0; i < 10; i++) {
                 let val = start + i;
                 secuenciaActual.push(val);
-                
                 let box = document.createElement('div');
                 box.className = "num-box";
-                
                 if(hintPos.includes(i)) {
-                    box.classList.add('fixed');
-                    box.innerText = val;
+                    box.classList.add('fixed'); box.innerText = val;
                 } else {
-                    // Input limpio sin barras laterales, solo para escribir
                     box.innerHTML = `<input type="number" class="input-num" id="in-${i}" inputmode="numeric" placeholder="?">`;
                 }
                 grid.appendChild(box);
             }
         }
 
-        function checkSequence() {
+        async function checkSequence() {
             let errorEnEstaDecena = false;
             let vacios = false;
 
             for(let i = 0; i < 10; i++) {
                 let input = document.getElementById(`in-${i}`);
                 if(input) {
-                    if(input.value === "") { vacios = true; }
-                    if(parseInt(input.value) !== secuenciaActual[i]) {
-                        errorEnEstaDecena = true;
-                    }
+                    if(input.value === "") vacios = true;
+                    if(parseInt(input.value) !== secuenciaActual[i]) errorEnEstaDecena = true;
                 }
             }
 
             if(vacios) {
-                document.getElementById('message').innerText = "¡No dejes cuadros vacíos! 🤔";
-                document.getElementById('message').style.color = "orange";
+                document.getElementById('message').innerText = "¡Hay cuadros vacíos! 🤔";
                 return;
             }
 
             if(!errorEnEstaDecena) {
                 aciertos++;
-                document.getElementById('message').innerText = "¡Perfecto! Siguiente decena... 🚀";
+                document.getElementById('message').innerText = "¡Perfecto! 🚀";
                 document.getElementById('message').style.color = "green";
-                setTimeout(nextLevel, 1200);
+                await guardarProgresoNube(); // Guardar cada vez que acierta
+                setTimeout(nextLevel, 1000);
             } else {
                 lives--;
                 fallos++;
                 updateLives();
-                document.getElementById('message').innerText = "¡Cuidado! Revisa los números en rojo 🚩";
+                document.getElementById('message').innerText = "¡Cuidado! Hay errores 🚩";
                 document.getElementById('message').style.color = "red";
                 
-                // Marcar en rojo los errores
                 for(let i=0; i<10; i++) {
                     let input = document.getElementById(`in-${i}`);
-                    if(input && parseInt(input.value) !== secuenciaActual[i]) {
-                        input.style.backgroundColor = "#ffe3e3";
-                        input.style.color = "red";
-                    }
+                    if(input && parseInt(input.value) !== secuenciaActual[i]) input.style.color = "red";
                 }
 
-                if(lives <= 0) finishGame("💔 ¡Vuelve a intentarlo!", "¡No te rindas! Sigue practicando para mejorar.");
+                if(lives <= 0) finishGame("💔 ¡Vuelve a intentarlo!", "Perdiste tus vidas.");
             }
         }
 
@@ -152,42 +190,35 @@
         }
 
         function nextLevel() {
-            document.getElementById('message').innerText = "";
             if(currentDecena < 10) {
                 currentDecena++;
                 generateLevel();
             } else {
-                finishGame("🏆 ¡Nivel Completado!", "¡Eres un experto en los números!");
+                finishGame("🏆 ¡Nivel Completado!", "¡Eres un experto!");
             }
         }
 
-        function finishGame(title, msg) {
+        async function finishGame(title, msg) {
             const screen = document.getElementById('end-screen');
-            const scoreText = document.getElementById('end-score');
+            let medalla = aciertos >= 8 ? "🥇" : "🥉";
             
-            // Poner medalla según nota
-            let medalla = aciertos >= 9 ? "🥇" : (aciertos >= 7 ? "🥈" : "🥉");
-            document.getElementById('medal-icon').innerText = medalla;
-
-            // Datos para Firebase
-            let data = {
+            const data = {
                 nombre: estudiante.nombre,
                 grado: estudiante.grado,
-                tema: "Los números hasta el 100", // Nombre real
+                tema: NOMBRE_TEMA,
                 aciertos: aciertos,
                 fallos: fallos,
                 fecha: new Date().toLocaleString('es-SV')
             };
 
-            fetch(URL_BASE + "practicas.json", {
-                method: "POST",
-                body: JSON.stringify(data)
-            }).then(() => {
-                document.getElementById('end-title').innerText = title;
-                document.getElementById('end-msg').innerText = msg;
-                scoreText.innerText = `Lograste: ${aciertos}/10`;
-                screen.style.display = "flex";
-            });
+            await fetch(URL_BASE + "practicas.json", { method: "POST", body: JSON.stringify(data) });
+            // Borrar progreso temporal al terminar
+            await fetch(`${URL_BASE}progreso_temp/${estudiante.nie}.json`, { method: "DELETE" });
+
+            document.getElementById('end-title').innerText = title;
+            document.getElementById('medal-icon').innerText = medalla;
+            document.getElementById('end-score').innerText = `${aciertos}/10`;
+            screen.style.display = "flex";
         }
     </script>
 </body>
