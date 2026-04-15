@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mate 2º - Secuencia hasta 100</title>
+    <title>Mate 2º - Los números hasta el 100</title>
     <style>
         :root { --mate-blue: #4361ee; --mate-green: #2a9d8f; --mate-red: #d90429; --bg: #f0f2f5; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; }
@@ -13,15 +13,20 @@
         .lives { color: var(--mate-red); font-size: 1.5rem; }
         
         .grid-numbers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 20px 0; }
-        .num-box { padding: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 1.5rem; font-weight: bold; text-align: center; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
-        .input-num { width: 100%; border: none; text-align: center; font-size: 1.5rem; font-weight: bold; color: var(--mate-blue); outline: none; }
+        .num-box { padding: 0; border: 2px solid #ddd; border-radius: 10px; font-size: 1.5rem; font-weight: bold; text-align: center; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        
+        /* Quitamos flechas de los inputs (barra lateral) */
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        .input-num { width: 100%; height: 100%; border: none; text-align: center; font-size: 1.8rem; font-weight: bold; color: var(--mate-blue); outline: none; background: transparent; }
         .fixed { background: #e9ecef; color: #555; border-color: #ccc; }
 
-        .btn-check { background: var(--mate-green); color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 1.2rem; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+        .btn-check { background: var(--mate-green); color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 1.2rem; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; margin-top: 10px; }
         .btn-check:hover { background: #21867a; transform: scale(1.02); }
         
         #message { margin-top: 15px; font-weight: bold; min-height: 24px; }
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; padding: 20px; }
     </style>
 </head>
 <body>
@@ -32,19 +37,21 @@
             <div class="lives" id="lives-display">❤️❤️❤️</div>
         </div>
         
-        <h2>Completa la secuencia</h2>
-        <p id="range-text">Números del 1 al 10</p>
+        <h2 style="color: var(--mate-blue); margin-bottom: 5px;">Los números hasta el 100</h2>
+        <p id="range-text" style="font-weight: bold; color: #666;">Cargando nivel...</p>
 
         <div class="grid-numbers" id="grid"></div>
 
-        <button class="btn-check" onclick="checkSequence()">Comprobar Decena</button>
+        <button class="btn-check" onclick="checkSequence()">Comprobar Decena ✅</button>
         <div id="message"></div>
     </div>
 
     <div id="end-screen" class="overlay">
         <h1 id="end-title"></h1>
-        <p id="end-score" style="font-size: 2rem;"></p>
-        <button class="btn-check" style="width: 200px;" onclick="location.href='../../index.html'">Volver al Inicio</button>
+        <div id="medal-icon" style="font-size: 80px; margin: 20px 0;"></div>
+        <p id="end-score" style="font-size: 2rem; margin: 10px 0;"></p>
+        <p id="end-msg" style="margin-bottom: 30px; font-size: 1.2rem;"></p>
+        <button class="btn-check" style="width: 250px; background: var(--mate-blue);" onclick="location.href='../../index.html'">Volver a mis Clases</button>
     </div>
 
     <script>
@@ -52,14 +59,13 @@
         let estudiante = JSON.parse(localStorage.getItem('estudiante_esmate'));
         
         let lives = 3;
-        let currentDecena = 1; // De 1 a 10
+        let currentDecena = 1; 
         let aciertos = 0;
         let fallos = 0;
         let secuenciaActual = [];
 
-        // Iniciar juego
         window.onload = () => {
-            if(!estudiante) { alert("Inicia sesión primero"); window.location.href="../../index.html"; return; }
+            if(!estudiante) { alert("¡Ups! Debes entrar con tu NIE primero."); window.location.href="../../index.html"; return; }
             generateLevel();
         };
 
@@ -70,10 +76,10 @@
             
             let start = (currentDecena - 1) * 10 + 1;
             let end = currentDecena * 10;
-            document.getElementById('range-text').innerText = `Números del ${start} al ${end}`;
+            document.getElementById('range-text').innerText = `Escribe los números del ${start} al ${end}`;
             
             secuenciaActual = [];
-            // Definimos pistas (posiciones aleatorias 1 y 10)
+            // Pistas fijas: el primero y el último
             let hintPos = [0, 9]; 
 
             for(let i = 0; i < 10; i++) {
@@ -87,38 +93,55 @@
                     box.classList.add('fixed');
                     box.innerText = val;
                 } else {
-                    box.innerHTML = `<input type="number" class="input-num" id="in-${i}" placeholder="?">`;
+                    // Input limpio sin barras laterales, solo para escribir
+                    box.innerHTML = `<input type="number" class="input-num" id="in-${i}" inputmode="numeric" placeholder="?">`;
                 }
                 grid.appendChild(box);
             }
         }
 
         function checkSequence() {
-            let correct = true;
+            let errorEnEstaDecena = false;
+            let vacios = false;
+
             for(let i = 0; i < 10; i++) {
                 let input = document.getElementById(`in-${i}`);
                 if(input) {
+                    if(input.value === "") { vacios = true; }
                     if(parseInt(input.value) !== secuenciaActual[i]) {
-                        correct = false;
-                        input.style.color = "red";
-                    } else {
-                        input.style.color = "green";
+                        errorEnEstaDecena = true;
                     }
                 }
             }
 
-            if(correct) {
+            if(vacios) {
+                document.getElementById('message').innerText = "¡No dejes cuadros vacíos! 🤔";
+                document.getElementById('message').style.color = "orange";
+                return;
+            }
+
+            if(!errorEnEstaDecena) {
                 aciertos++;
-                document.getElementById('message').innerText = "¡Excelente! 🎉";
+                document.getElementById('message').innerText = "¡Perfecto! Siguiente decena... 🚀";
                 document.getElementById('message').style.color = "green";
-                setTimeout(nextLevel, 1500);
+                setTimeout(nextLevel, 1200);
             } else {
                 lives--;
                 fallos++;
                 updateLives();
-                document.getElementById('message').innerText = "Hay números incorrectos ❌";
+                document.getElementById('message').innerText = "¡Cuidado! Revisa los números en rojo 🚩";
                 document.getElementById('message').style.color = "red";
-                if(lives <= 0) finishGame("💔 ¡Te has quedado sin vidas!");
+                
+                // Marcar en rojo los errores
+                for(let i=0; i<10; i++) {
+                    let input = document.getElementById(`in-${i}`);
+                    if(input && parseInt(input.value) !== secuenciaActual[i]) {
+                        input.style.backgroundColor = "#ffe3e3";
+                        input.style.color = "red";
+                    }
+                }
+
+                if(lives <= 0) finishGame("💔 ¡Vuelve a intentarlo!", "¡No te rindas! Sigue practicando para mejorar.");
             }
         }
 
@@ -134,22 +157,26 @@
                 currentDecena++;
                 generateLevel();
             } else {
-                finishGame("🏆 ¡Lo lograste!");
+                finishGame("🏆 ¡Nivel Completado!", "¡Eres un experto en los números!");
             }
         }
 
-        function finishGame(title) {
+        function finishGame(title, msg) {
             const screen = document.getElementById('end-screen');
             const scoreText = document.getElementById('end-score');
             
-            // Enviamos datos a Firebase
+            // Poner medalla según nota
+            let medalla = aciertos >= 9 ? "🥇" : (aciertos >= 7 ? "🥈" : "🥉");
+            document.getElementById('medal-icon').innerText = medalla;
+
+            // Datos para Firebase
             let data = {
                 nombre: estudiante.nombre,
                 grado: estudiante.grado,
-                tema: "Matemática - Secuencia hasta 100",
+                tema: "Los números hasta el 100", // Nombre real
                 aciertos: aciertos,
                 fallos: fallos,
-                fecha: new Date().toLocaleString()
+                fecha: new Date().toLocaleString('es-SV')
             };
 
             fetch(URL_BASE + "practicas.json", {
@@ -157,7 +184,8 @@
                 body: JSON.stringify(data)
             }).then(() => {
                 document.getElementById('end-title').innerText = title;
-                scoreText.innerText = `Puntuación: ${aciertos}/10`;
+                document.getElementById('end-msg').innerText = msg;
+                scoreText.innerText = `Lograste: ${aciertos}/10`;
                 screen.style.display = "flex";
             });
         }
