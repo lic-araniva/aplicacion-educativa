@@ -61,6 +61,19 @@
                 </select>
                 <button class="btn-action" id="btn-guardar-est" onclick="guardarEstudiante()">➕ Registrar</button>
             </div>
+
+            <div class="form-box" style="background: #f1f3f5; border: 1px solid #ddd;">
+                <span style="font-weight: bold; color: #555;">🔍 Filtrar tabla por grado:</span>
+                <select id="filtro-est-grado" onchange="filtrarEstudiantes()">
+                    <option value="">🏫 Todos los Grados</option>
+                    <option value="2">2º Grado</option>
+                    <option value="3">3º Grado</option>
+                    <option value="4">4º Grado</option>
+                    <option value="5">5º Grado</option>
+                    <option value="6">6º Grado</option>
+                </select>
+            </div>
+
             <table id="tabla-estudiantes">
                 <thead><tr><th>NIE</th><th>Nombre</th><th>Grado</th><th>Acciones</th></tr></thead>
                 <tbody id="est-body"></tbody>
@@ -136,33 +149,66 @@
 
         function cargarTodo() { cargarEstudiantes(); cargarPracticas(); cargarAsignaciones(); }
 
-        // --- LÓGICA ESTUDIANTES ---
+        // --- LÓGICA ESTUDIANTES (ACTUALIZADA CON FILTRO) ---
         function cargarEstudiantes() {
             fetch(URL_BASE + "estudiantes.json").then(res => res.json()).then(datos => {
                 listaEstudiantes = datos ? Object.keys(datos).map(k => ({nie:k, ...datos[k]})) : [];
-                let html = "", selectHtml = '<option value="">👤 Selecciona un estudiante...</option>';
+                
+                // Aplicar filtro si hay alguno seleccionado, si no, dibuja todos
+                filtrarEstudiantes();
+
+                // Llenar el selector de asignación individual
+                let selectHtml = '<option value="">👤 Selecciona un estudiante...</option>';
                 listaEstudiantes.sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(e => {
-                    html += `<tr><td>${e.nie}</td><td>${e.nombre}</td><td>${e.grado}º</td>
-                    <td><button class="btn-edit" onclick="prepararEdit('${e.nie}','${e.nombre}','${e.grado}')">✏️</button>
-                    <button class="btn-delete" onclick="borrarEst('${e.nie}')">🗑️</button></td></tr>`;
                     selectHtml += `<option value="${e.nie}">${e.nombre} (${e.grado}º)</option>`;
                 });
-                document.getElementById('est-body').innerHTML = html;
                 document.getElementById('assign-student').innerHTML = selectHtml;
             });
+        }
+
+        // Nueva función para filtrar estudiantes por grado
+        function filtrarEstudiantes() {
+            let gradoSeleccionado = document.getElementById('filtro-est-grado').value;
+            let listaFiltrada = listaEstudiantes;
+            
+            if (gradoSeleccionado !== "") {
+                listaFiltrada = listaEstudiantes.filter(e => e.grado === gradoSeleccionado);
+            }
+            
+            dibujarEstudiantes(listaFiltrada);
+        }
+
+        // Nueva función para dibujar la tabla de estudiantes
+        function dibujarEstudiantes(lista) {
+            let html = "";
+            lista.sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(e => {
+                html += `<tr><td>${e.nie}</td><td>${e.nombre}</td><td>${e.grado}º</td>
+                <td><button class="btn-edit" onclick="prepararEdit('${e.nie}','${e.nombre}','${e.grado}')">✏️</button>
+                <button class="btn-delete" onclick="borrarEst('${e.nie}')">🗑️</button></td></tr>`;
+            });
+            document.getElementById('est-body').innerHTML = html || "<tr><td colspan='4' style='text-align:center;'>No hay estudiantes en este grado.</td></tr>";
         }
 
         function guardarEstudiante() {
             let nie = document.getElementById('new-nie').value, nom = document.getElementById('new-nombre').value, gra = document.getElementById('new-grado').value;
             if(!nie || !nom) return alert("Completa los datos");
             fetch(URL_BASE + `estudiantes/${nie}.json`, { method:"PUT", body:JSON.stringify({nombre:nom, grado:gra}) }).then(()=> {
-                document.getElementById('new-nie').value=""; document.getElementById('new-nombre').value=""; cargarEstudiantes();
+                document.getElementById('new-nie').value=""; document.getElementById('new-nombre').value=""; 
+                alert("Estudiante guardado/actualizado");
+                cargarEstudiantes();
             });
         }
         
+        function prepararEdit(nie, nombre, grado) {
+            document.getElementById('new-nie').value = nie;
+            document.getElementById('new-nombre').value = nombre;
+            document.getElementById('new-grado').value = grado;
+            window.scrollTo(0, 0); // Sube la pantalla al formulario
+        }
+
         function borrarEst(nie) { if(confirm("¿Borrar estudiante?")) fetch(URL_BASE + `estudiantes/${nie}.json`, {method:"DELETE"}).then(()=>cargarEstudiantes()); }
 
-        // --- LÓGICA MOTOR DE ASIGNACIONES (EL CORAZÓN NUEVO) ---
+        // --- LÓGICA MOTOR DE ASIGNACIONES ---
         function cargarAsignaciones() {
             fetch(URL_BASE + "asignaciones.json").then(res => res.json()).then(datos => {
                 listaAsignaciones = [];
