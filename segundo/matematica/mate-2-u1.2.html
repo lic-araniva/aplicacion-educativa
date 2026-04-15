@@ -19,12 +19,11 @@
         .stats { display: flex; gap: 8px; font-weight: bold; font-size: 0.85rem; }
         .lives { color: var(--mate-red); font-size: 1.1rem; cursor: pointer; }
         
-        /* Estilos de Grillas */
         .row-vecinos { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 15px 0; }
         .grid-numbers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin: 10px 0; }
         .grid-100 { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; margin: 10px 0; }
 
-        .num-box { border: 2px solid #ddd; border-radius: 8px; width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; background: white; font-size: 1.1rem; font-weight: bold; }
+        .num-box { border: 2px solid #ddd; border-radius: 8px; width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; background: white; font-size: 1.1rem; font-weight: bold; transition: 0.3s; }
         .grid-100 .num-box { font-size: 0.65rem !important; border-width: 1px; }
 
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -33,6 +32,8 @@
         .input-num { width: 100%; height: 100%; border: none; text-align: center; font-size: 1.2rem; font-weight: bold; color: var(--mate-blue); outline: none; background: transparent; padding: 0; }
         .grid-100 .input-num { font-size: 0.65rem; }
         .fixed { background: #f1f3f5; color: #555; }
+        
+        .error-input { border-color: var(--mate-red) !important; background-color: #fff1f0; }
 
         .btn-check { background: var(--mate-green); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; width: 100%; }
         #message { margin-top: 8px; font-weight: bold; font-size: 0.85rem; min-height: 20px; }
@@ -52,7 +53,7 @@
             </div>
         </div>
         
-        <h2 id="tema-display" style="color: var(--mate-blue); margin: 5px 0; font-size: 1.1rem;">Los números hasta el 200</h2>
+        <h2 style="color: var(--mate-blue); margin: 5px 0; font-size: 1.1rem;">Los números hasta el 200</h2>
         <p id="range-text" style="color: #666; margin-bottom: 8px; font-size: 0.8rem;">Cargando...</p>
 
         <div id="game-area"></div>
@@ -65,8 +66,7 @@
         <div class="star">⭐</div>
         <h1 id="end-title">¡GENIAL!</h1>
         <p id="end-score" style="font-size: 3rem; margin: 10px 0; color: gold;"></p>
-        <p id="end-msg">Has completado todos los niveles.</p>
-        <button class="btn-check" style="width: 200px; background: var(--mate-blue); margin-top: 20px;" onclick="window.location.href='../../index.html'">Finalizar</button>
+        <button class="btn-check" style="width: 200px; background: var(--mate-blue);" onclick="window.location.href='../../index.html'">Finalizar</button>
     </div>
 
     <script>
@@ -76,183 +76,168 @@
         
         let nivel = 1; 
         let subNivel = 1; 
-        let vidasEjercicio = 3;
-        let aciertosPorNivel = [0, 0, 0, 0]; // N1, N2, N3, N4
+        let vidas = 3;
+        let aciertosNivel = 0;
         let bolsaNivel1 = [];
         let secuenciaActual = [];
+        let notasFinales = [0, 0, 0, 0];
 
         window.onload = async () => {
             if(!estudiante) { window.location.href="../../index.html"; return; }
             generarBolsaNivel1();
-            initGame();
+            initLevel();
         };
 
         function generarBolsaNivel1() {
-            let nums = Array.from({length: 98}, (_, i) => i + 2); // 2 al 99
+            let nums = Array.from({length: 98}, (_, i) => i + 2);
             bolsaNivel1 = nums.sort(() => Math.random() - 0.5).slice(0, 15);
         }
 
         function modoDios() {
             let s = prompt("");
-            if(s === "rive2593") { vidasEjercicio = 99; updateLives(); }
-            else if(s === "2593") { saltarNivel(); }
+            if(s === "rive2593") { vidas = 99; updateLives(); }
+            else if(s === "2593") { saltar(); }
         }
 
-        function saltarNivel() {
-            if(nivel === 1 || nivel === 3 || nivel === 4) {
-                secuenciaActual.forEach((v, i) => { 
-                    let inp = document.getElementById(`in-${i}`) || (i===0?document.getElementById('ante'):document.getElementById('suce'));
-                    if(inp) inp.value = v;
-                });
-            } else {
-                secuenciaActual.forEach((v, i) => { let inp = document.getElementById(`in-${i}`); if(inp) inp.value = v; });
-            }
+        function saltar() {
+            secuenciaActual.forEach((v, i) => {
+                let inp = document.getElementById(`in-${i}`) || (i===0?document.getElementById('ante'):document.getElementById('suce'));
+                if(inp) inp.value = v;
+            });
             checkAction();
         }
 
-        function initGame() {
+        function initLevel() {
             const area = document.getElementById('game-area');
-            area.innerHTML = "";
-            area.className = "";
-            vidasEjercicio = 3;
-            updateLives();
+            area.innerHTML = ""; area.className = "";
             document.getElementById('message').innerText = "";
             document.getElementById('label-nivel').innerText = `Nivel ${nivel}`;
+            updateLives();
 
             if(nivel === 1) {
+                vidas = 3;
                 document.getElementById('label-sub').innerText = `${subNivel}/15`;
-                document.getElementById('range-text').innerText = "Escribe el anterior y el siguiente";
+                document.getElementById('range-text').innerText = "Anterior y Siguiente";
                 let centro = bolsaNivel1[subNivel - 1];
                 secuenciaActual = [centro - 1, centro + 1];
                 area.innerHTML = `
                     <div class="row-vecinos">
-                        <div class="num-box"><input type="number" class="input-num" id="ante" inputmode="numeric"></div>
+                        <div class="num-box" id="box-ante"><input type="number" class="input-num" id="ante" oninput="limpiarRoja(this)"></div>
                         <div class="num-box fixed">${centro}</div>
-                        <div class="num-box"><input type="number" class="input-num" id="suce" inputmode="numeric"></div>
+                        <div class="num-box" id="box-suce"><input type="number" class="input-num" id="suce" oninput="limpiarRoja(this)"></div>
                     </div>`;
-            } 
-            else if(nivel === 2) {
+            } else if(nivel === 2) {
+                vidas = 5;
                 document.getElementById('label-sub').innerText = "Tabla 200";
-                document.getElementById('range-text').innerText = "Completa la tabla del 101 al 200";
-                vidasEjercicio = 5; updateLives();
+                document.getElementById('range-text').innerText = "Completa la tabla (101-200)";
                 area.className = "grid-100";
                 secuenciaActual = Array.from({length: 100}, (_, i) => 101 + i);
                 let hints = [101, 125, 150, 175, 200];
                 secuenciaActual.forEach((val, i) => {
                     let box = document.createElement('div');
-                    box.className = "num-box";
+                    box.className = "num-box"; box.id = `box-${i}`;
                     if(hints.includes(val)) { box.classList.add('fixed'); box.innerText = val; }
-                    else { box.innerHTML = `<input type="number" class="input-num" id="in-${i}" inputmode="numeric">`; }
+                    else { box.innerHTML = `<input type="number" class="input-num" id="in-${i}" oninput="limpiarRoja(this)">`; }
                     area.appendChild(box);
                 });
-            }
-            else if(nivel === 3 || nivel === 4) {
+            } else {
+                vidas = 3;
                 document.getElementById('label-sub').innerText = `${subNivel}/10`;
                 let base = (nivel === 3) ? 0 : 100;
-                document.getElementById('range-text').innerText = `Completa la decena del ${base + (subNivel-1)*10 + 1} al ${base + subNivel*10}`;
+                document.getElementById('range-text').innerText = `Decena ${subNivel}`;
                 area.className = "grid-numbers";
                 let start = base + (subNivel-1)*10 + 1;
                 secuenciaActual = Array.from({length: 10}, (_, i) => start + i);
-                let hints = [secuenciaActual[3], secuenciaActual[4], secuenciaActual[9]]; // Pistas variadas
+                let hints = [secuenciaActual[0], secuenciaActual[9]];
                 secuenciaActual.forEach((val, i) => {
                     let box = document.createElement('div');
-                    box.className = "num-box";
+                    box.className = "num-box"; box.id = `box-${i}`;
                     if(hints.includes(val)) { box.classList.add('fixed'); box.innerText = val; }
-                    else { box.innerHTML = `<input type="number" class="input-num" id="in-${i}" inputmode="numeric">`; }
+                    else { box.innerHTML = `<input type="number" class="input-num" id="in-${i}" oninput="limpiarRoja(this)">`; }
                     area.appendChild(box);
                 });
             }
+            updateLives();
+        }
+
+        function limpiarRoja(input) {
+            input.parentElement.classList.remove('error-input');
         }
 
         function checkAction() {
-            let error = false;
+            let errorCount = 0;
             if(nivel === 1) {
-                let a = parseInt(document.getElementById('ante').value);
-                let s = parseInt(document.getElementById('suce').value);
-                if(a !== secuenciaActual[0] || s !== secuenciaActual[1]) error = true;
+                let a = document.getElementById('ante');
+                let s = document.getElementById('suce');
+                if(parseInt(a.value) !== secuenciaActual[0]) { a.parentElement.classList.add('error-input'); errorCount++; }
+                if(parseInt(s.value) !== secuenciaActual[1]) { s.parentElement.classList.add('error-input'); errorCount++; }
             } else {
                 secuenciaActual.forEach((val, i) => {
                     let inp = document.getElementById(`in-${i}`);
-                    if(inp && parseInt(inp.value) !== val) error = true;
+                    if(inp && parseInt(inp.value) !== val) {
+                        inp.parentElement.classList.add('error-input');
+                        errorCount++;
+                    }
                 });
             }
 
-            if(!error) {
-                aciertosPorNivel[nivel-1]++;
-                document.getElementById('message').innerText = "¡Correcto! ✨";
+            if(errorCount === 0) {
+                aciertosNivel++;
+                document.getElementById('message').innerText = "¡Muy bien! ✨";
                 document.getElementById('message').style.color = "green";
-                setTimeout(avanzarProgreso, 800);
+                setTimeout(siguientePaso, 1000);
             } else {
-                vidasEjercicio--;
+                vidas--;
                 updateLives();
-                document.getElementById('message').innerText = "Revisa de nuevo 🚩";
+                document.getElementById('message').innerText = "¡Hay errores! Revisa los cuadros rojos.";
                 document.getElementById('message').style.color = "red";
-                if(vidasEjercicio <= 0) {
-                    document.getElementById('message').innerText = "Se acabaron los intentos. Mira la respuesta.";
-                    mostrarRespuestaYPasar();
+                
+                if(vidas <= 0) {
+                    alert("¡Se acabaron las vidas! Inténtalo de nuevo.");
+                    if(nivel === 2) { aciertosNivel = 0; initLevel(); } 
+                    else { siguientePaso(); } // Salta en N1, N3, N4 pero sin sumar acierto
                 }
             }
         }
 
-        function mostrarRespuestaYPasar() {
+        function siguientePaso() {
             if(nivel === 1) {
-                document.getElementById('ante').value = secuenciaActual[0];
-                document.getElementById('suce').value = secuenciaActual[1];
+                if(subNivel < 15) { subNivel++; initLevel(); }
+                else { verificarNivel(10, 15); }
+            } else if(nivel === 2) {
+                notasFinales[1] = 10; nivel = 3; subNivel = 1; aciertosNivel = 0; initLevel();
             } else {
-                secuenciaActual.forEach((v, i) => { let inp = document.getElementById(`in-${i}`); if(inp) inp.value = v; });
-            }
-            setTimeout(avanzarProgreso, 2000);
-        }
-
-        function avanzarProgreso() {
-            if(nivel === 1) {
-                if(subNivel < 15) { subNivel++; initGame(); } 
-                else { validarUmbral(10); }
-            } 
-            else if(nivel === 2) {
-                // En Nivel 2 debe ser perfecto (acierto = 10)
-                aciertosPorNivel[1] = 10;
-                nivel = 3; subNivel = 1; initGame();
-            }
-            else if(nivel === 3 || nivel === 4) {
-                if(subNivel < 10) { subNivel++; initGame(); }
-                else { 
-                    if(nivel === 3) { validarUmbral(8); }
-                    else { validarUmbral(8); } // Nivel 4 final
-                }
+                if(subNivel < 10) { subNivel++; initLevel(); }
+                else { verificarNivel(8, 10); }
             }
         }
 
-        function validarUmbral(min) {
-            let actual = aciertosPorNivel[nivel-1];
-            if(nivel === 1) { // Normalizar 15 a base 10
-                actual = Math.round((actual / 15) * 10);
-                aciertosPorNivel[0] = actual;
-            }
-
-            if(actual >= min || (nivel === 1 && aciertosPorNivel[0] >= 7)) { // 10 de 15 es aprox 7/10
-                if(nivel < 4) { nivel++; subNivel = 1; initGame(); }
-                else { finishGame(); }
+        function verificarNivel(min, max) {
+            let nota = (aciertosNivel / max) * 10;
+            if(aciertosNivel >= min) {
+                notasFinales[nivel-1] = nota;
+                if(nivel < 4) { nivel++; subNivel = 1; aciertosNivel = 0; initLevel(); }
+                else { final(); }
             } else {
-                alert(`No alcanzaste el mínimo (${min}). ¡A practicar de nuevo este nivel!`);
-                subNivel = 1; aciertosPorNivel[nivel-1] = 0; initGame();
+                alert(`Solo tuviste ${aciertosNivel} correctas. Debes repetir el nivel ${nivel}.`);
+                subNivel = 1; aciertosNivel = 0; initLevel();
             }
         }
 
         function updateLives() {
-            let h = ""; for(let i=0; i<vidasEjercicio; i++) h += "❤️";
+            let h = ""; for(let i=0; i<vidas; i++) h += "❤️";
             document.getElementById('lives-display').innerText = h || "💔";
         }
 
-        async function finishGame() {
+        async function final() {
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            let promedio = (aciertosPorNivel.reduce((a, b) => a + b, 0) / 4).toFixed(1);
-            if(promedio >= 9.8) promedio = 10;
-
-            const data = { nombre: estudiante.nombre, grado: estudiante.grado, tema: NOMBRE_TEMA, aciertos: promedio, fecha: new Date().toLocaleString('es-SV') };
+            let prom = (notasFinales.reduce((a,b)=>a+b, 0) / 4).toFixed(1);
+            if(prom >= 9.7) prom = 10;
+            
+            const data = { nombre: estudiante.nombre, grado: estudiante.grado, tema: NOMBRE_TEMA, aciertos: prom, fecha: new Date().toLocaleString() };
             await fetch(URL_BASE + "practicas.json", { method: "POST", body: JSON.stringify(data) });
             
-            document.getElementById('end-score').innerText = promedio;
+            document.getElementById('end-score').innerText = prom;
             document.getElementById('end-screen').style.display = "flex";
         }
 
