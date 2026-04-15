@@ -3,69 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mate 2º - Los números hasta el 100 P1</title>
+    <title>Mate 2º - Los números hasta el 100</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         :root { --mate-blue: #4361ee; --mate-green: #2a9d8f; --mate-red: #d90429; --bg: #f0f2f5; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; margin: 0; padding: 10px; }
         
         .game-container { 
-            background: white; 
-            padding: 20px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-            width: 95%; 
-            max-width: 420px; /* Reducido para que no se vea gigante */
-            text-align: center; 
-            border-top: 10px solid var(--mate-blue); 
-            margin-top: 10px;
+            background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            width: 95%; max-width: 500px; text-align: center; border-top: 10px solid var(--mate-blue); position: relative;
         }
 
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .btn-exit { background: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
-        .stats { display: flex; gap: 10px; font-weight: bold; align-items: center; font-size: 0.9rem; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .btn-exit { background: #6c757d; color: white; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; }
+        .stats { display: flex; gap: 10px; font-weight: bold; font-size: 0.9rem; }
         .lives { color: var(--mate-red); font-size: 1.2rem; cursor: pointer; }
         
-        /* Cuadros más pequeños y responsivos */
-        .grid-numbers { 
-            display: grid; 
-            grid-template-columns: repeat(5, 1fr); 
-            gap: 6px; 
-            margin: 15px 0; 
-        }
-        .num-box { 
-            border: 2px solid #ddd; 
-            border-radius: 8px; 
-            width: 100%; 
-            aspect-ratio: 1/1; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            background: white;
-        }
+        /* Grilla normal (Niveles 1-10) */
+        .grid-numbers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin: 10px 0; }
         
-        /* ELIMINAR FLECHAS (BARRA) DE LOS NÚMEROS */
-        input::-webkit-outer-spin-button, 
-        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        /* Grilla Nivel 11 (10x10) */
+        .grid-100 { grid-template-columns: repeat(10, 1fr) !important; gap: 2px !important; }
+        .grid-100 .num-box { font-size: 0.7rem !important; border-width: 1px !important; border-radius: 3px !important; }
+        .grid-100 .input-num { font-size: 0.7rem !important; }
+
+        .num-box { border: 2px solid #ddd; border-radius: 8px; width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; }
+        
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
-        .input-num { 
-            width: 100%; 
-            height: 100%; 
-            border: none; 
-            text-align: center; 
-            font-size: 1.3rem; 
-            font-weight: bold; 
-            color: var(--mate-blue); 
-            outline: none; 
-            background: transparent; 
-            padding: 0;
-        }
-        .fixed { background: #f1f3f5; color: #555; font-size: 1.3rem; font-weight: bold; }
+        .input-num { width: 100%; height: 100%; border: none; text-align: center; font-size: 1.2rem; font-weight: bold; color: var(--mate-blue); outline: none; background: transparent; }
+        .fixed { background: #f1f3f5; color: #555; font-size: 1.2rem; font-weight: bold; }
 
-        .btn-check { background: var(--mate-green); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; }
+        .btn-check { background: var(--mate-green); color: white; border: none; padding: 15px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; width: 100%; }
         #message { margin-top: 10px; font-weight: bold; font-size: 0.9rem; min-height: 20px; }
 
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); color: white; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; padding: 20px; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); color: white; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; padding: 20px; }
+        .star { font-size: 80px; color: gold; filter: drop-shadow(0 0 10px gold); animation: pulse 1s infinite alternate; }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.2); } }
     </style>
 </head>
 <body>
@@ -74,25 +49,26 @@
         <div class="top-bar">
             <button class="btn-exit" onclick="salirGuardando()">⬅️ Salir</button>
             <div class="stats">
-                <span>Decena: <b id="current-level">1</b>/10</span>
+                <span>Ronda: <b id="current-level">1</b>/11</span>
                 <span class="lives" id="lives-display" onclick="modoDios()">❤️❤️❤️</span>
             </div>
         </div>
         
-        <h2 style="color: var(--mate-blue); margin: 5px 0; font-size: 1.3rem;">Los números hasta el 100</h2>
-        <p id="range-text" style="color: #666; margin-bottom: 10px; font-size: 0.85rem;">Cargando...</p>
+        <h2 id="title-tema" style="color: var(--mate-blue); margin: 5px 0; font-size: 1.2rem;">Los números hasta el 100</h2>
+        <p id="range-text" style="color: #666; margin-bottom: 10px; font-size: 0.8rem;">Cargando...</p>
 
         <div class="grid-numbers" id="grid"></div>
 
-        <button class="btn-check" onclick="checkSequence()">Comprobar Decena ✅</button>
+        <button class="btn-check" onclick="checkSequence()">Comprobar ✅</button>
         <div id="message"></div>
     </div>
 
     <div id="end-screen" class="overlay">
-        <h1 id="end-title"></h1>
-        <div id="medal-icon" style="font-size: 60px;"></div>
-        <p id="end-score" style="font-size: 1.8rem;"></p>
-        <button class="btn-check" style="width: 200px; background: var(--mate-blue);" onclick="window.location.href='../../index.html'">Finalizar</button>
+        <div class="star">⭐</div>
+        <h1 id="end-title">¡MAESTRO DE NÚMEROS!</h1>
+        <p id="end-score" style="font-size: 2rem; margin: 10px 0;"></p>
+        <p id="end-msg">Has completado la tabla del 100 perfectamente.</p>
+        <button class="btn-check" style="width: 200px; background: var(--mate-blue); margin-top: 20px;" onclick="window.location.href='../../index.html'">Finalizar</button>
     </div>
 
     <script>
@@ -108,15 +84,23 @@
 
         window.onload = async () => {
             if(!estudiante) { window.location.href="../../index.html"; return; }
-            // Forzamos el nombre del tema en Firebase para que aparezca en el panel
-            fetch(`${URL_BASE}config/temas.json`, { method: "PATCH", body: JSON.stringify({ "1": NOMBRE_TEMA }) });
-            
             await cargarProgresoRemoto();
             generateLevel();
         };
 
+        // --- MODO DIOS MEJORADO ---
         function modoDios() {
-            if(confirm("¿Restaurar vidas?")) { lives = 3; updateLives(); }
+            let pass = prompt("MODO DOCENTE: Escribe 'vidas' para 3 vidas o 'saltar' para ganar este nivel.");
+            if(pass === "vidas") {
+                lives = 3; updateLives();
+            } else if(pass === "saltar") {
+                // Autocompletar inputs para ganar
+                secuenciaActual.forEach((val, i) => {
+                    let inp = document.getElementById(`in-${i}`);
+                    if(inp) inp.value = val;
+                });
+                checkSequence();
+            }
         }
 
         async function cargarProgresoRemoto() {
@@ -131,7 +115,7 @@
         }
 
         async function guardarProgresoNube() {
-            const temp = { tema: NOMBRE_TEMA, decena: currentDecena, aciertos: aciertos, fallos: fallos, vidas: lives };
+            const temp = { tema: NOMBRE_TEMA, decena: currentDecena, aciertos, fallos, vidas: lives };
             await fetch(`${URL_BASE}progreso_temp/${estudiante.nie}.json`, { method: "PUT", body: JSON.stringify(temp) });
         }
 
@@ -143,51 +127,71 @@
         function generateLevel() {
             const grid = document.getElementById('grid');
             grid.innerHTML = "";
+            grid.classList.remove('grid-100');
             document.getElementById('current-level').innerText = currentDecena;
-            let start = (currentDecena - 1) * 10 + 1;
-            let end = currentDecena * 10;
-            document.getElementById('range-text').innerText = `Escribe del ${start} al ${end}`;
             
-            secuenciaActual = [];
-            for(let i = 0; i < 10; i++) {
-                let val = start + i;
-                secuenciaActual.push(val);
-                let box = document.createElement('div');
-                box.className = "num-box";
-                if(i === 0 || i === 9) {
-                    box.classList.add('fixed'); box.innerText = val;
-                } else {
-                    box.innerHTML = `<input type="number" class="input-num" id="in-${i}" inputmode="numeric" placeholder="?">`;
+            if(currentDecena <= 10) {
+                // Niveles normales (1-10)
+                let start = (currentDecena - 1) * 10 + 1;
+                let end = currentDecena * 10;
+                document.getElementById('range-text').innerText = `Escribe del ${start} al ${end}`;
+                secuenciaActual = [];
+                for(let i = 0; i < 10; i++) {
+                    let val = start + i;
+                    secuenciaActual.push(val);
+                    let box = document.createElement('div');
+                    box.className = "num-box";
+                    if(i === 0 || i === 9) { box.classList.add('fixed'); box.innerText = val; }
+                    else { box.innerHTML = `<input type="number" class="input-num" id="in-${i}" inputmode="numeric">`; }
+                    grid.appendChild(box);
                 }
-                grid.appendChild(box);
+            } else {
+                // NIVEL 11: LA TABLA DEL 100
+                grid.classList.add('grid-100');
+                document.getElementById('range-text').innerText = "¡RETO FINAL! Completa toda la tabla";
+                secuenciaActual = Array.from({length: 100}, (_, i) => i + 1);
+                let hints = [1, 25, 50, 75, 100]; // 5 pistas fijas
+                
+                secuenciaActual.forEach((val, i) => {
+                    let box = document.createElement('div');
+                    box.className = "num-box";
+                    if(hints.includes(val)) {
+                        box.classList.add('fixed'); box.innerText = val;
+                    } else {
+                        box.innerHTML = `<input type="number" class="input-num" id="in-${i}" inputmode="numeric">`;
+                    }
+                    grid.appendChild(box);
+                });
             }
         }
 
         async function checkSequence() {
             let error = false;
-            for(let i = 0; i < 10; i++) {
+            secuenciaActual.forEach((val, i) => {
                 let input = document.getElementById(`in-${i}`);
-                if(input) {
-                    if(parseInt(input.value) !== secuenciaActual[i]) {
-                        error = true;
-                        input.style.color = "red";
-                    } else {
-                        input.style.color = "green";
-                    }
+                if(input && parseInt(input.value) !== val) {
+                    error = true;
+                    input.style.color = "red";
+                } else if(input) {
+                    input.style.color = "green";
                 }
-            }
+            });
 
             if(!error) {
                 aciertos++;
-                document.getElementById('message').innerText = "¡Muy bien! 🚀";
+                document.getElementById('message').innerText = "¡Excelente! 🚀";
                 document.getElementById('message').style.color = "green";
-                await guardarProgresoNube();
-                setTimeout(nextLevel, 1000);
+                if(currentDecena < 11) {
+                    await guardarProgresoNube();
+                    setTimeout(() => { currentDecena++; generateLevel(); document.getElementById('message').innerText=""; }, 1000);
+                } else {
+                    finishGame();
+                }
             } else {
                 lives--; fallos++; updateLives();
-                document.getElementById('message').innerText = "Revisa los números 🚩";
+                document.getElementById('message').innerText = "Hay errores. ¡Revisa bien!";
                 document.getElementById('message').style.color = "red";
-                if(lives <= 0) finishGame("Intentar de nuevo", "🥉");
+                if(lives <= 0) { alert("¡Se agotaron las vidas!"); location.reload(); }
             }
         }
 
@@ -196,18 +200,13 @@
             document.getElementById('lives-display').innerText = h;
         }
 
-        function nextLevel() {
-            if(currentDecena < 10) { currentDecena++; generateLevel(); document.getElementById('message').innerText = ""; } 
-            else { finishGame("¡Excelente!", "🥇"); }
-        }
-
-        async function finishGame(title, med) {
-            const data = { nombre: estudiante.nombre, grado: estudiante.grado, tema: NOMBRE_TEMA, aciertos, fallos, fecha: new Date().toLocaleString('es-SV') };
+        async function finishGame() {
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            const data = { nombre: estudiante.nombre, grado: estudiante.grado, tema: NOMBRE_TEMA, aciertos, fallos, fecha: new Date().toLocaleString() };
             await fetch(URL_BASE + "practicas.json", { method: "POST", body: JSON.stringify(data) });
             await fetch(`${URL_BASE}progreso_temp/${estudiante.nie}.json`, { method: "DELETE" });
-            document.getElementById('end-title').innerText = title;
-            document.getElementById('medal-icon').innerText = med;
-            document.getElementById('end-score').innerText = `${aciertos}/10`;
+            
+            document.getElementById('end-score').innerText = `Nota: ${aciertos}/11`;
             document.getElementById('end-screen').style.display = "flex";
         }
     </script>
