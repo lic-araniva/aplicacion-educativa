@@ -31,10 +31,14 @@
         
         .badge-assign { background: #fee440; color: #333; padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; margin-right: 5px; border: 1px solid #ccb100;}
         
-        /* Estilos para Sub-rendimiento */
         .sub-nav { display: flex; gap: 5px; margin-bottom: 15px; background: #f1f3f5; padding: 10px; border-radius: 8px; }
         .sub-btn { background: white; border: 1px solid #ccc; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; color: #666; }
         .sub-btn.active { background: var(--esmate-orange); color: white; border-color: var(--esmate-orange); }
+
+        /* Estilos específicos para la Sábana de Notas */
+        .input-nota { width: 45px; padding: 5px; text-align: center; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; color: var(--esmate-blue);}
+        .box-calificaciones { background: #fdf2f2; border: 2px solid var(--esmate-red); padding: 15px; border-radius: 10px; margin-bottom: 20px;}
+        .col-grupo { display: flex; flex-direction: column; gap: 5px; flex: 1; }
     </style>
 </head>
 <body>
@@ -55,6 +59,7 @@
             <button class="tab-btn active" onclick="cambiarPestana('estudiantes')">👥 Estudiantes</button>
             <button class="tab-btn" onclick="cambiarPestana('asignar')">🎯 Asignar</button>
             <button class="tab-btn" onclick="cambiarPestana('practicas')">📊 Rendimiento</button>
+            <button class="tab-btn" style="background: #e63946; color: white;" onclick="cambiarPestana('calificaciones')">📝 Calificaciones</button>
         </div>
 
         <div id="tab-estudiantes" class="tab-content active">
@@ -127,14 +132,76 @@
                 <button class="sub-btn" onclick="cambiarVistaRendimiento('asignatura', this)">📚 Por Asignatura</button>
                 <button class="sub-btn" onclick="cambiarVistaRendimiento('tema', this)">📐 Por Tema</button>
             </div>
-
-            <div id="rendimiento-controles" class="form-box">
-                </div>
-
+            <div id="rendimiento-controles" class="form-box"></div>
             <table id="tabla-rendimiento">
                 <thead id="rend-head"></thead>
                 <tbody id="rend-body"></tbody>
             </table>
+        </div>
+
+        <div id="tab-calificaciones" class="tab-content">
+            <h3 style="color: var(--esmate-red); margin-top: 0;">⚙️ Configuración del Trimestre</h3>
+            <p style="font-size: 14px; color: #555; margin-top: 0;">Define el peso (%) de cada rubro. Escribe manualmente los IDs de los temas a evaluar (Ej: 1, 2).</p>
+            
+            <div class="box-calificaciones" style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <div class="col-grupo">
+                    <label><b>Cotidianas (%)</b></label>
+                    <input type="number" id="peso-cot" value="35">
+                    <label>Escribir Temas:</label>
+                    <input type="text" id="temas-cot" placeholder="Ej: 1, 2">
+                </div>
+                <div class="col-grupo">
+                    <label><b>Integradoras (%)</b></label>
+                    <input type="number" id="peso-int" value="35">
+                    <label>Escribir Temas:</label>
+                    <input type="text" id="temas-int" placeholder="Ej: 3, 4">
+                </div>
+                <div class="col-grupo">
+                    <label><b>Prueba (%)</b></label>
+                    <input type="number" id="peso-pru" value="15">
+                    <label>Escribir Temas:</label>
+                    <input type="text" id="temas-pru" placeholder="Ej: 5">
+                </div>
+                <div class="col-grupo" style="justify-content: center; align-items: center; background: white; border-radius: 5px; padding: 10px;">
+                    <span style="font-size: 13px; text-align:center; color: #666;">
+                        <b>Auto/Co/Het</b><br>Tienen un valor fijo de<br><b>5% cada una</b><br>(Total 15%)
+                    </span>
+                </div>
+            </div>
+
+            <div class="form-box" style="background: #fff; border: 1px solid #ccc; display: flex; justify-content: space-between;">
+                <div>
+                    <select id="calif-grado">
+                        <option value="">Selecciona el Grado a evaluar...</option>
+                        <option value="2">2º Grado</option><option value="3">3º Grado</option>
+                        <option value="4">4º Grado</option><option value="5">5º Grado</option><option value="6">6º Grado</option>
+                    </select>
+                    <button class="btn-action" style="background: var(--esmate-blue);" onclick="generarSabanaNotas()">🧮 Generar Cuadro</button>
+                    <button class="btn-action" style="background: var(--esmate-green); display: none;" id="btn-guardar-notas" onclick="guardarNotasFinales()">💾 Guardar Boletines</button>
+                </div>
+                <button class="btn-action" style="background: #0077b6; display: none;" id="btn-exportar-csv" onclick="exportarCSV()">📥 Exportar a Excel</button>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table id="tabla-calificaciones">
+                    <thead>
+                        <tr style="background-color: var(--esmate-red);">
+                            <th>NIE</th>
+                            <th>Estudiante</th>
+                            <th>Cot</th>
+                            <th>Int</th>
+                            <th>Pru</th>
+                            <th title="Digita nota del 1 al 10 (Vale 5%)">Auto</th>
+                            <th title="Digita nota del 1 al 10 (Vale 5%)">Co</th>
+                            <th title="Digita nota del 1 al 10 (Vale 5%)">Het</th>
+                            <th>Nota Final</th>
+                        </tr>
+                    </thead>
+                    <tbody id="calif-body">
+                        <tr><td colspan="9" style="text-align: center;">Configura los temas y selecciona un grado para calcular.</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
     </div>
@@ -165,7 +232,6 @@
             cargarAsignaciones(); 
         }
 
-        // --- RETO: SINCRONIZACIÓN DE NOMBRES ---
         async function cargarNombresTemas() {
             try {
                 const res = await fetch(URL_BASE + "config/temas.json");
@@ -177,7 +243,6 @@
         function dibujarSelectTemas() {
             let html = "";
             for(let i=1; i<=20; i++) {
-                // Si existe un nombre en la DB lo pone, si no pone "Tema X"
                 let nombre = nombresTemas[i] || `Tema ${i}`;
                 html += `<option value="${i}">${nombre}</option>`;
             }
@@ -248,7 +313,7 @@
         }
         function borrarAsignacion(nie, id) { fetch(URL_BASE + `asignaciones/${nie}/${id}.json`, { method: "DELETE" }).then(() => cargarAsignaciones()); }
 
-        // --- OPCIÓN B: RENDIMIENTO DETALLADO ---
+        // --- RENDIMIENTO ---
         let vistaActualRendimiento = "individual";
         function cambiarVistaRendimiento(v, btn) {
             vistaActualRendimiento = v;
@@ -278,7 +343,6 @@
 
         function verRendimiento() {
             let body = document.getElementById('rend-body'), head = document.getElementById('rend-head'), html = "";
-            
             if(vistaActualRendimiento === "individual") {
                 head.innerHTML = "<tr><th>Fecha</th><th>Tema</th><th>Puntos</th><th>Fallos</th></tr>";
                 let nom = document.getElementById('rend-sel-est').value;
@@ -301,6 +365,133 @@
                 });
             }
             body.innerHTML = html || "<tr><td colspan='4' style='text-align:center;'>No hay datos para mostrar.</td></tr>";
+        }
+
+        // --- NUEVO MOTOR DE CALIFICACIONES ---
+        function calcularPromedioTemas(nombreEst, stringTemas) {
+            if(!stringTemas) return 0;
+            let temasRequeridos = stringTemas.split(',').map(t => t.trim()).filter(t => t);
+            if(temasRequeridos.length === 0) return 0;
+
+            let suma = 0;
+            let notasDelEstudiante = listaPracticas.filter(p => p.nombre === nombreEst);
+
+            temasRequeridos.forEach(idTemaStr => {
+                let nombreTemaCompleto = nombresTemas[idTemaStr] || `Tema ${idTemaStr}`;
+                let prac = notasDelEstudiante.find(p => p.tema.includes(idTemaStr) || p.tema === nombreTemaCompleto);
+                if(prac) { suma += parseInt(prac.aciertos); }
+            });
+
+            return suma / temasRequeridos.length; // Base 10
+        }
+
+        function recalcularFila(nie) {
+            let inCot = parseFloat(document.getElementById(`calc-cot-${nie}`).textContent) || 0;
+            let inInt = parseFloat(document.getElementById(`calc-int-${nie}`).textContent) || 0;
+            let inPru = parseFloat(document.getElementById(`calc-pru-${nie}`).textContent) || 0;
+            
+            // Evaluaciones manuales (se digita nota base 10 y se le saca el 5% = x 0.05)
+            let valAuto = parseFloat(document.getElementById(`input-auto-${nie}`).value) || 0;
+            let valCo = parseFloat(document.getElementById(`input-co-${nie}`).value) || 0;
+            let valHet = parseFloat(document.getElementById(`input-het-${nie}`).value) || 0;
+
+            let inAuto = valAuto * 0.05;
+            let inCo = valCo * 0.05;
+            let inHet = valHet * 0.05;
+
+            let notaFinal = (inCot + inInt + inPru + inAuto + inCo + inHet).toFixed(1);
+            
+            // Limitar a máximo 10 por seguridad
+            if(notaFinal > 10) notaFinal = 10.0;
+            
+            document.getElementById(`nota-final-${nie}`).textContent = notaFinal;
+        }
+
+        function generarSabanaNotas() {
+            let g = document.getElementById('calif-grado').value;
+            if(!g) return alert("Selecciona un grado para evaluar.");
+
+            let pCot = parseFloat(document.getElementById('peso-cot').value) / 100 || 0.35;
+            let pInt = parseFloat(document.getElementById('peso-int').value) / 100 || 0.35;
+            let pPru = parseFloat(document.getElementById('peso-pru').value) / 100 || 0.15;
+
+            let tCot = document.getElementById('temas-cot').value;
+            let tInt = document.getElementById('temas-int').value;
+            let tPru = document.getElementById('temas-pru').value;
+
+            let ests = listaEstudiantes.filter(e => e.grado === g).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+            let html = "";
+
+            ests.forEach(e => {
+                let baseCot = calcularPromedioTemas(e.nombre, tCot);
+                let baseInt = calcularPromedioTemas(e.nombre, tInt);
+                let basePru = calcularPromedioTemas(e.nombre, tPru);
+
+                let calcCot = (baseCot * pCot).toFixed(1); 
+                let calcInt = (baseInt * pInt).toFixed(1);
+                let calcPru = (basePru * pPru).toFixed(1);
+
+                let notaInicial = (parseFloat(calcCot) + parseFloat(calcInt) + parseFloat(calcPru)).toFixed(1);
+
+                html += `<tr>
+                    <td>${e.nie}</td>
+                    <td><b>${e.nombre}</b></td>
+                    <td id="calc-cot-${e.nie}">${calcCot}</td>
+                    <td id="calc-int-${e.nie}">${calcInt}</td>
+                    <td id="calc-pru-${e.nie}">${calcPru}</td>
+                    <td><input type="number" step="0.1" max="10" id="input-auto-${e.nie}" class="input-nota" placeholder="1-10" onkeyup="recalcularFila('${e.nie}')"></td>
+                    <td><input type="number" step="0.1" max="10" id="input-co-${e.nie}" class="input-nota" placeholder="1-10" onkeyup="recalcularFila('${e.nie}')"></td>
+                    <td><input type="number" step="0.1" max="10" id="input-het-${e.nie}" class="input-nota" placeholder="1-10" onkeyup="recalcularFila('${e.nie}')"></td>
+                    <td style="font-weight: bold; font-size: 16px; color: var(--esmate-red);" id="nota-final-${e.nie}">${notaInicial}</td>
+                </tr>`;
+            });
+
+            document.getElementById('calif-body').innerHTML = html || "<tr><td colspan='9' style='text-align: center;'>No hay estudiantes en este grado.</td></tr>";
+            document.getElementById('btn-guardar-notas').style.display = "inline-block";
+            document.getElementById('btn-exportar-csv').style.display = "inline-block";
+        }
+
+        function guardarNotasFinales() {
+            let g = document.getElementById('calif-grado').value;
+            let ests = listaEstudiantes.filter(e => e.grado === g);
+            let promesas = [];
+
+            ests.forEach(e => {
+                let finalScore = document.getElementById(`nota-final-${e.nie}`).textContent;
+                let data = { notaTrimestral: finalScore, fecha: new Date().toLocaleString('es-SV') };
+                promesas.push(fetch(URL_BASE + `boletines/${e.nie}.json`, { method: "PUT", body: JSON.stringify(data) }));
+            });
+
+            Promise.all(promesas).then(() => {
+                alert("💾 ¡Boletines Oficiales guardados con éxito en la base de datos!");
+            }).catch(err => alert("Error al guardar algunas notas."));
+        }
+
+        // --- EXPORTAR A EXCEL (CSV) ---
+        function exportarCSV() {
+            let rows = document.querySelectorAll("#tabla-calificaciones tr");
+            let csv = [];
+            for (let i = 0; i < rows.length; i++) {
+                let row = [], cols = rows[i].querySelectorAll("td, th");
+                for (let j = 0; j < cols.length; j++) {
+                    let text = "";
+                    // Si la celda tiene un input (las rúbricas), extraemos su valor digitado
+                    if (cols[j].querySelector("input")) {
+                        text = cols[j].querySelector("input").value || "0";
+                    } else {
+                        text = cols[j].innerText;
+                    }
+                    // Limpiamos saltos de línea y formateamos para CSV
+                    row.push('"' + text.replace(/"/g, '""').replace(/\n/g, '') + '"');
+                }
+                csv.push(row.join(","));
+            }
+            let csvString = csv.join("\n");
+            let blob = new Blob(["\uFEFF" + csvString], { type: "text/csv;charset=utf-8;" }); // uFEFF asegura que Excel lea los acentos
+            let link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "Cuadro_Notas_ESMATE.csv";
+            link.click();
         }
     </script>
 </body>
