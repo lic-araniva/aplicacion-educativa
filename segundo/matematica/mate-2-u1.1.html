@@ -6,53 +6,65 @@
     <title>Mate 2º - Los números hasta el 100</title>
     <style>
         :root { --mate-blue: #4361ee; --mate-green: #2a9d8f; --mate-red: #d90429; --bg: #f0f2f5; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; margin: 0; padding: 10px; }
         
-        /* Contenedor principal corregido */
         .game-container { 
             background: white; 
             padding: 20px; 
             border-radius: 20px; 
             box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
             width: 95%; 
-            max-width: 500px; 
+            max-width: 420px; /* Reducido para que no se vea gigante */
             text-align: center; 
             border-top: 10px solid var(--mate-blue); 
-            margin-top: 20px;
+            margin-top: 10px;
         }
 
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .btn-exit { background: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
+        .stats { display: flex; gap: 10px; font-weight: bold; align-items: center; font-size: 0.9rem; }
+        .lives { color: var(--mate-red); font-size: 1.2rem; cursor: pointer; }
         
-        .btn-exit { background: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
-        
-        .stats { display: flex; gap: 15px; font-weight: bold; align-items: center; }
-        .lives { color: var(--mate-red); font-size: 1.4rem; cursor: pointer; }
-        
-        /* Cuadros ajustados para que no sean gigantes */
+        /* Cuadros más pequeños y responsivos */
         .grid-numbers { 
             display: grid; 
             grid-template-columns: repeat(5, 1fr); 
-            gap: 8px; 
+            gap: 6px; 
             margin: 15px 0; 
         }
         .num-box { 
             border: 2px solid #ddd; 
-            border-radius: 10px; 
+            border-radius: 8px; 
             width: 100%; 
             aspect-ratio: 1/1; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            font-size: 1.4rem; 
-            font-weight: bold;
+            background: white;
         }
         
-        .input-num { width: 100%; height: 100%; border: none; text-align: center; font-size: 1.5rem; font-weight: bold; color: var(--mate-blue); outline: none; background: transparent; }
-        .fixed { background: #f1f3f5; color: #555; }
+        /* ELIMINAR FLECHAS (BARRA) DE LOS NÚMEROS */
+        input::-webkit-outer-spin-button, 
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
 
-        .btn-check { background: var(--mate-green); color: white; border: none; padding: 15px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; width: 100%; }
-        
-        #message { margin-top: 10px; font-weight: bold; font-size: 0.9rem; }
+        .input-num { 
+            width: 100%; 
+            height: 100%; 
+            border: none; 
+            text-align: center; 
+            font-size: 1.3rem; 
+            font-weight: bold; 
+            color: var(--mate-blue); 
+            outline: none; 
+            background: transparent; 
+            padding: 0;
+        }
+        .fixed { background: #f1f3f5; color: #555; font-size: 1.3rem; font-weight: bold; }
+
+        .btn-check { background: var(--mate-green); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; }
+        #message { margin-top: 10px; font-weight: bold; font-size: 0.9rem; min-height: 20px; }
+
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); color: white; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; padding: 20px; }
     </style>
 </head>
@@ -67,8 +79,8 @@
             </div>
         </div>
         
-        <h2 style="color: var(--mate-blue); margin: 10px 0 5px 0; font-size: 1.4rem;">Los números hasta el 100</h2>
-        <p id="range-text" style="color: #666; margin-bottom: 15px; font-size: 0.9rem;">Escribe del 1 al 10</p>
+        <h2 style="color: var(--mate-blue); margin: 5px 0; font-size: 1.3rem;">Los números hasta el 100</h2>
+        <p id="range-text" style="color: #666; margin-bottom: 10px; font-size: 0.85rem;">Cargando...</p>
 
         <div class="grid-numbers" id="grid"></div>
 
@@ -96,6 +108,9 @@
 
         window.onload = async () => {
             if(!estudiante) { window.location.href="../../index.html"; return; }
+            // Forzamos el nombre del tema en Firebase para que aparezca en el panel
+            fetch(`${URL_BASE}config/temas.json`, { method: "PATCH", body: JSON.stringify({ "1": NOMBRE_TEMA }) });
+            
             await cargarProgresoRemoto();
             generateLevel();
         };
@@ -142,7 +157,7 @@
                 if(i === 0 || i === 9) {
                     box.classList.add('fixed'); box.innerText = val;
                 } else {
-                    box.innerHTML = `<input type="number" class="input-num" id="in-${i}" inputmode="numeric">`;
+                    box.innerHTML = `<input type="number" class="input-num" id="in-${i}" inputmode="numeric" placeholder="?">`;
                 }
                 grid.appendChild(box);
             }
@@ -152,7 +167,14 @@
             let error = false;
             for(let i = 0; i < 10; i++) {
                 let input = document.getElementById(`in-${i}`);
-                if(input && parseInt(input.value) !== secuenciaActual[i]) error = true;
+                if(input) {
+                    if(parseInt(input.value) !== secuenciaActual[i]) {
+                        error = true;
+                        input.style.color = "red";
+                    } else {
+                        input.style.color = "green";
+                    }
+                }
             }
 
             if(!error) {
@@ -163,7 +185,7 @@
                 setTimeout(nextLevel, 1000);
             } else {
                 lives--; fallos++; updateLives();
-                document.getElementById('message').innerText = "Revisa los rojos 🚩";
+                document.getElementById('message').innerText = "Revisa los números 🚩";
                 document.getElementById('message').style.color = "red";
                 if(lives <= 0) finishGame("Intentar de nuevo", "🥉");
             }
@@ -180,7 +202,7 @@
         }
 
         async function finishGame(title, med) {
-            const data = { nombre: estudiante.nombre, grado: estudiante.grado, tema: NOMBRE_TEMA, aciertos, fallos, fecha: new Date().toLocaleString() };
+            const data = { nombre: estudiante.nombre, grado: estudiante.grado, tema: NOMBRE_TEMA, aciertos, fallos, fecha: new Date().toLocaleString('es-SV') };
             await fetch(URL_BASE + "practicas.json", { method: "POST", body: JSON.stringify(data) });
             await fetch(`${URL_BASE}progreso_temp/${estudiante.nie}.json`, { method: "DELETE" });
             document.getElementById('end-title').innerText = title;
