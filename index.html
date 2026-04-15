@@ -7,7 +7,7 @@
     <meta property="og:title" content="Plataforma Educativa Interactiva">
     <meta property="og:description" content="Aprende Matemática, Lenguaje, Ciencia y Ciudadanía de forma divertida.">
     <meta property="og:type" content="website">
-    <style>f
+    <style>
         :root {
             --color-lenguaje: #e63946; --color-mate: #4361ee;
             --color-ciencia: #2a9d8f; --color-valores: #f4a261;
@@ -27,17 +27,13 @@
         .btn-back:hover { background: #e9ecef; }
 
         .card-login { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); text-align: center; width: 90%; max-width: 450px; border-top: 8px solid var(--color-mate); }
-        .card-login input { width: 100%; padding: 15px; margin: 20px 0; border: 2px solid #ccc; border-radius: 10px; font-size: 20px; text-align: center; font-weight: bold; box-sizing: border-box; }
+        .card-login input { width: 100%; padding: 15px; margin: 10px 0 20px 0; border: 2px solid #ccc; border-radius: 10px; font-size: 18px; text-align: center; font-weight: bold; box-sizing: border-box; }
         .card-login input:focus { border-color: var(--color-mate); outline: none; }
         
         button.primary { background-color: var(--color-mate); color: white; border: none; padding: 15px 30px; font-weight: bold; font-size: 18px; border-radius: 10px; cursor: pointer; width: 100%; transition: 0.2s; }
         button.primary:hover { background-color: #3f37c9; }
         button.action-btn { background: #f4a261; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         button.action-btn:hover { background: #e76f51; }
-
-        .confirm-box { display: none; margin-top: 20px; padding: 20px; background: #e0fbfc; border-radius: 12px; border: 2px solid #90e0ef; }
-        .btn-yes { background: #2d6a4f; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; width: 48%; }
-        .btn-no { background: #d90429; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; width: 48%; }
 
         .grid-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; width: 100%; justify-content: center; }
         .card { background: white; border-radius: 15px; padding: 30px 20px; text-align: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-top: 8px solid #ccc; transition: transform 0.2s; }
@@ -50,16 +46,9 @@
         .card.ciencia { border-color: var(--color-ciencia); color: var(--color-ciencia); }
         .card.valores { border-color: var(--color-valores); color: var(--color-valores); }
 
-        /* ESTILOS PARA ASIGNACIONES */
-        .assignment-box { width: 100%; background: #fff9db; border: 3px solid var(--gold); border-radius: 15px; padding: 20px; margin-bottom: 30px; box-sizing: border-box; display: none; }
-        .assignment-title { display: flex; align-items: center; gap: 10px; color: #856404; font-weight: bold; margin-bottom: 15px; font-size: 18px; }
-        .grid-assign { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
-        .btn-task { background: white; border: 2px solid var(--gold); padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
-        .btn-task:hover { background: var(--gold); color: white; }
-
         .grid-small { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; width: 100%; }
-        .card-small { background: white; padding: 20px; border-radius: 10px; text-align: center; font-weight: bold; cursor: pointer; border: 2px solid #e9ecef;}
-        .card-small:hover { border-color: var(--text-dark); background: #f1f3f5; }
+        .card-small { background: white; padding: 20px; border-radius: 10px; text-align: center; font-weight: bold; cursor: pointer; border: 2px solid #e9ecef; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.2s;}
+        .card-small:hover { border-color: var(--text-dark) !important; background: #f1f3f5; transform: scale(1.02); }
 
         .student-table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-top: 10px; }
         .student-table th, .student-table td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; }
@@ -73,17 +62,24 @@
     <div id="screen-login" class="screen active">
         <div class="card-login">
             <h1 style="margin-top: 0; color: var(--text-dark);">🎒 Acceso Estudiantes</h1>
-            <p style="color: #666;">Ingresa tu código NIE para entrar.</p>
-            <input type="number" id="nie-input" placeholder="Ej. 12345" autocomplete="off">
-            <button class="primary" id="btn-buscar" onclick="buscarEstudiante()">🔍 Buscar mi nombre</button>
-            <p id="nie-error" style="color: var(--color-lenguaje); display: none; margin-top: 15px; font-weight: bold;">❌ NIE no registrado.</p>
-            <div id="confirmation-box" class="confirm-box">
-                <h3>¿Eres <span id="student-name-confirm"></span>?</h3>
-                <div style="display: flex; justify-content: space-between;">
-                    <button class="btn-yes" onclick="confirmarLogin()">✅ Sí, soy yo</button>
-                    <button class="btn-no" onclick="cancelarLogin()">❌ No</button>
-                </div>
-            </div>
+            <p style="color: #666;">Ingresa tus datos para entrar.</p>
+            
+            <input type="number" id="nie-input" placeholder="Tu código NIE" autocomplete="off">
+            <input type="password" id="pass-input" placeholder="Tu Contraseña" autocomplete="off">
+            
+            <button class="primary" id="btn-buscar" onclick="buscarEstudiante()">🚀 Entrar</button>
+            <p id="login-error" style="color: var(--color-lenguaje); display: none; margin-top: 15px; font-weight: bold;">❌ NIE o Contraseña incorrectos.</p>
+        </div>
+    </div>
+
+    <div id="screen-change-pass" class="screen">
+        <div class="card-login" style="border-top-color: var(--color-valores);">
+            <h1 style="margin-top: 0; color: var(--text-dark);">🔒 Seguridad</h1>
+            <p style="color: #666;">Por seguridad, debes crear una contraseña nueva y secreta que solo tú conozcas.</p>
+            
+            <input type="password" id="new-pass-input" placeholder="Escribe tu nueva contraseña">
+            
+            <button class="primary" style="background-color: var(--color-valores);" onclick="guardarNuevaPassword()">💾 Guardar y Entrar</button>
         </div>
     </div>
 
@@ -96,18 +92,19 @@
             </div>
         </div>
 
-        <div id="assignment-container" class="assignment-box">
-            <div class="assignment-title">📌 Tareas asignadas:</div>
-            <div id="assignment-list" class="grid-assign"></div>
-        </div>
-
         <h1 style="margin-bottom: 30px;">📚 Elige tu Materia</h1>
         <div class="grid-menu">
             <div class="card lenguaje" onclick="selectSubject('Lenguaje', 'lenguaje')"><div class="card-icon">📖</div><h2>Lenguaje</h2></div>
             <div class="card mate" onclick="selectSubject('Matemática', 'mate')"><div class="card-icon">📐</div><h2>Matemática</h2></div>
-            <div class="card ciencia" onclick="selectSubject('Ciencia', 'ciencia')"><div class="card-icon">🔬</div><h2>Ciencia</h2></div>
+            <div class="card ciencia" onclick="selectSubject('Ciencia', 'ciencia')"><div class="card-icon">🔬</div><h2>Ciencias</h2></div>
             <div class="card valores" onclick="selectSubject('Ciudadanía y Valores', 'valores')"><div class="card-icon">🤝</div><h2>Valores</h2></div>
         </div>
+    </div>
+
+    <div id="screen-grades" class="screen">
+        <div class="header"><button class="btn-back" onclick="goTo('screen-subjects')">⬅️ Volver</button><h1 id="title-grades">Materia</h1></div>
+        <p style="color: #666; margin-top: 0; margin-bottom: 20px;">Estos son los temas que tu docente ha activado para ti:</p>
+        <div class="grid-small" id="topics-container"></div>
     </div>
 
     <div id="screen-progress" class="screen">
@@ -115,109 +112,106 @@
         <div id="progress-content" style="width: 100%;"></div>
     </div>
 
-    <div id="screen-grades" class="screen">
-        <div class="header"><button class="btn-back" onclick="goTo('screen-subjects')">⬅️ Volver</button><h1 id="title-grades">Materia</h1></div>
-        <div class="grid-menu" id="grades-container" style="max-width: 300px;"></div>
-    </div>
-
-    <div id="screen-units" class="screen">
-        <div class="header"><button class="btn-back" onclick="goTo('screen-grades')">⬅️ Volver</button><h1 id="title-units">Grado</h1></div>
-        <div class="grid-small" id="units-container"></div>
-    </div>
-
     <script>
         const URL_BASE = "https://esmate-2026-default-rtdb.firebaseio.com/";
         let estudianteActual = null;
+        let misAsignaciones = [];
+        let nombresTemas = {};
 
         const mapaGrados = { "1": "primero", "2": "segundo", "3": "tercero", "4": "cuarto", "5": "quinto", "6": "sexto" };
         const mapaCarpetasMateria = { "Lenguaje": "lenguaje", "Matemática": "matematica", "Ciencia": "ciencia", "Ciudadanía y Valores": "ciudadania" };
         const mapaPrefijosArchivo = { "Lenguaje": "lenguaje", "Matemática": "mate", "Ciencia": "ciencia", "Ciudadanía y Valores": "ciudadania" };
 
-        window.onload = function() {
+        window.onload = async function() {
+            await cargarDiccionarioTemas();
             let guardado = localStorage.getItem('estudiante_esmate');
             if(guardado) {
                 estudianteActual = JSON.parse(guardado);
-                document.getElementById('user-greeting').textContent = `👤 Hola, ${estudianteActual.nombre}`;
-                ajustarMateriasPorGrado();
-                buscarAsignaciones(); // 🎯 Buscar tareas al cargar
-                if(localStorage.getItem('esmate_show_progress') === 'true') {
-                    localStorage.removeItem('esmate_show_progress');
-                    verMiProgreso(); 
-                } else { goTo('screen-subjects'); }
+                iniciarSesionExitosa();
             }
         };
 
+        async function cargarDiccionarioTemas() {
+            try {
+                const res = await fetch(URL_BASE + "config/temas.json");
+                nombresTemas = await res.json() || {};
+            } catch (e) { console.log("Usando temas por defecto"); }
+        }
+
+        // --- LÓGICA DE LOGIN ---
         function buscarEstudiante() {
             const nie = document.getElementById('nie-input').value.trim();
-            if (!nie) return;
+            const pass = document.getElementById('pass-input').value.trim();
             
-            document.getElementById('btn-buscar').innerHTML = "⏳ Buscando...";
-            document.getElementById('nie-error').style.display = 'none'; // Oculta errores viejos
+            if (!nie || !pass) return alert("Por favor ingresa tu NIE y Contraseña");
+            
+            document.getElementById('btn-buscar').innerHTML = "⏳ Comprobando...";
+            document.getElementById('login-error').style.display = 'none';
             
             fetch(URL_BASE + `estudiantes/${nie}.json`).then(res => res.json()).then(datos => {
-                document.getElementById('btn-buscar').innerHTML = "🔍 Buscar mi nombre";
-                if (datos) {
-                    estudianteActual = datos; estudianteActual.nie = nie;
-                    document.getElementById('student-name-confirm').textContent = estudianteActual.nombre;
-                    document.getElementById('confirmation-box').style.display = 'block';
-                    document.getElementById('btn-buscar').style.display = 'none'; 
-                    document.getElementById('nie-input').disabled = true; // Bloquea la caja
+                document.getElementById('btn-buscar').innerHTML = "🚀 Entrar";
+                
+                // Si el alumno existe y la contraseña coincide (por defecto es 2026 si no hay nada guardado en BD)
+                let passReal = datos && datos.password ? datos.password : "2026";
+
+                if (datos && pass === passReal) {
+                    estudianteActual = datos; 
+                    estudianteActual.nie = nie;
+                    
+                    // Si la clave es 2026 o el docente forzó el cambio
+                    if(pass === "2026" || datos.debeCambiarPass === true) {
+                        goTo('screen-change-pass');
+                    } else {
+                        iniciarSesionExitosa();
+                    }
                 } else { 
-                    document.getElementById('nie-error').style.display = 'block'; 
+                    document.getElementById('login-error').style.display = 'block'; 
                 }
+            }).catch(e => alert("Error de conexión"));
+        }
+
+        function guardarNuevaPassword() {
+            let nueva = document.getElementById('new-pass-input').value.trim();
+            if(nueva.length < 4) return alert("Tu contraseña debe ser de al menos 4 letras o números.");
+            
+            estudianteActual.password = nueva;
+            estudianteActual.debeCambiarPass = false;
+
+            fetch(URL_BASE + `estudiantes/${estudianteActual.nie}.json`, {
+                method: "PUT",
+                body: JSON.stringify(estudianteActual)
+            }).then(() => {
+                alert("✅ ¡Contraseña guardada correctamente!");
+                iniciarSesionExitosa();
             });
         }
 
-        function cancelarLogin() { 
-            estudianteActual = null; 
-            document.getElementById('confirmation-box').style.display = 'none'; 
-            document.getElementById('btn-buscar').style.display = 'block'; 
-            document.getElementById('nie-input').disabled = false; // Desbloquea la caja
-            document.getElementById('nie-input').value = ""; // Borra el texto equivocado
-            document.getElementById('nie-error').style.display = 'none'; // Limpia el error
-            document.getElementById('nie-input').focus(); // Pone el cursor listo para escribir
-        }
-
-        function confirmarLogin() { 
+        async function iniciarSesionExitosa() {
             localStorage.setItem('estudiante_esmate', JSON.stringify(estudianteActual)); 
-            document.getElementById('user-greeting').textContent = `👤 Hola, ${estudianteActual.nombre}`; 
+            document.getElementById('user-greeting').textContent = `¡Hola, ${estudianteActual.nombre}! Bienvenido a tu plataforma educativa.`;
+            
             ajustarMateriasPorGrado(); 
-            buscarAsignaciones(); // 🎯 Buscar tareas al confirmar
-            goTo('screen-subjects'); 
+            await cargarMisAsignaciones();
+            
+            if(localStorage.getItem('esmate_show_progress') === 'true') {
+                localStorage.removeItem('esmate_show_progress');
+                verMiProgreso(); 
+            } else { 
+                goTo('screen-subjects'); 
+            }
         }
 
         function cerrarSesion() { localStorage.removeItem('estudiante_esmate'); location.reload(); }
 
-        // ==========================================
-        // MOTOR DE ASIGNACIONES (CLIENTE)
-        // ==========================================
-        function buscarAsignaciones() {
+        // --- CARGAR ASIGNACIONES MÁGICAS ---
+        async function cargarMisAsignaciones() {
             if(!estudianteActual) return;
-            fetch(URL_BASE + `asignaciones/${estudianteActual.nie}.json`).then(res => res.json()).then(datos => {
-                const container = document.getElementById('assignment-container');
-                const list = document.getElementById('assignment-list');
-                
-                if(datos) {
-                    container.style.display = 'block';
-                    let html = "";
-                    for(let id in datos) {
-                        let a = datos[id];
-                        let ruta = `${mapaGrados[a.grado]}/${mapaCarpetasMateria[a.materia]}/${mapaPrefijosArchivo[a.materia]}-${a.grado}-u${a.unidad}.html`;
-                        html += `
-                            <div class="btn-task" onclick="window.location.href='${ruta}'">
-                                <div style="font-size:30px;">⭐</div>
-                                <div>
-                                    <div style="font-size:12px; color:#666;">${a.grado}º Grado</div>
-                                    <div style="color:var(--color-mate)">${a.materia} - Unidad ${a.unidad}</div>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    list.innerHTML = html;
-                } else {
-                    container.style.display = 'none';
-                }
-            });
+            let res = await fetch(URL_BASE + `asignaciones/${estudianteActual.nie}.json`);
+            let datos = await res.json();
+            misAsignaciones = [];
+            if(datos) {
+                for(let id in datos) misAsignaciones.push(datos[id]);
+            }
         }
 
         function ajustarMateriasPorGrado() {
@@ -228,43 +222,78 @@
             document.querySelector('.card.valores').style.display = visibilidad;
         }
 
-        // --- NAVEGACIÓN NORMAL ---
+        // --- NAVEGACIÓN A TEMAS ---
         function selectSubject(name, colorClass) {
             document.getElementById('title-grades').textContent = name;
-            document.getElementById('grades-container').innerHTML = `<div class="card ${colorClass}" onclick="selectGrade(${estudianteActual.grado})"><div class="card-icon">🎓</div><h2>${estudianteActual.grado}º Grado</h2></div>`;
+            
+            // Filtra solo los temas que el profe le asignó para esta materia
+            let asignadas = misAsignaciones.filter(a => a.materia === name);
+            
+            let html = "";
+            if(asignadas.length === 0) {
+                html = `<h3 style='grid-column: 1/-1; color:#666;'>Aún no tienes temas asignados en esta materia. ¡Vuelve pronto!</h3>`;
+            } else {
+                asignadas.forEach(a => {
+                    let nombreTemaOficial = nombresTemas[a.tema] || `Tema ${a.tema}`;
+                    let strGrado = mapaGrados[estudianteActual.grado];
+                    let ruta = `${strGrado}/${mapaCarpetasMateria[name]}/${mapaPrefijosArchivo[name]}-${estudianteActual.grado}-u${a.unidad}.${a.tema}.html`;
+                    
+                    html += `
+                    <div class="card-small" style="border-bottom: 4px solid var(--color-${colorClass});" onclick="window.location.href='${ruta}'">
+                        <div style="font-size: 30px; margin-bottom: 5px;">🚀</div>
+                        <div style="font-size: 13px; color: #555;">Unidad ${a.unidad}</div>
+                        <div style="color: var(--color-${colorClass}); font-size: 15px;">${nombreTemaOficial}</div>
+                    </div>`;
+                });
+            }
+            
+            document.getElementById('topics-container').innerHTML = html;
             goTo('screen-grades');
         }
-        function selectGrade(grade) {
-            document.getElementById('title-units').textContent = grade + "º Grado";
-            let html = "";
-            for(let i=1; i<=10; i++) html += `<div class="card-small" onclick="selectUnit(${i}, ${grade})">Unidad ${i}</div>`;
-            document.getElementById('units-container').innerHTML = html;
-            goTo('screen-units');
-        }
-        function selectUnit(u, g) {
-            let mat = document.getElementById('title-grades').textContent;
-            window.location.href = `${mapaGrados[g]}/${mapaCarpetasMateria[mat]}/${mapaPrefijosArchivo[mat]}-${g}-u${u}.html`;
-        }
+
         function goTo(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 
-        // --- PROGRESO (SIN CAMBIOS) ---
-        function verMiProgreso() {
+        // --- PROGRESO Y BOLETÍN OFICIAL ---
+        async function verMiProgreso() {
             goTo('screen-progress');
-            document.getElementById('progress-content').innerHTML = "Cargando...";
-            fetch(URL_BASE + "practicas.json").then(res => res.json()).then(datos => {
-                let misPracticas = [];
-                for (let id in datos) { if (datos[id].nombre === estudianteActual.nombre) misPracticas.push(datos[id]); }
-                renderizarProgreso(misPracticas.reverse());
-            });
-        }
-        function renderizarProgreso(practicas) {
-            if(practicas.length === 0) { document.getElementById('progress-content').innerHTML = "<h3>No hay prácticas aún.</h3>"; return; }
-            let html = `<table class="student-table"><tr><th>Fecha</th><th>Tema</th><th>Nota</th></tr>`;
-            practicas.forEach(p => {
-                let color = parseInt(p.aciertos) >= 6 ? "green" : "red";
-                html += `<tr><td>${p.fecha.split(',')[0]}</td><td>${p.tema}</td><td style="color:${color}; font-weight:bold;">${p.aciertos}/10</td></tr>`;
-            });
-            document.getElementById('progress-content').innerHTML = html + "</table>";
+            document.getElementById('progress-content').innerHTML = "Cargando tus logros...";
+            
+            // 1. Cargar el Boletín (Nota Trimestral)
+            let resBol = await fetch(URL_BASE + `boletines/${estudianteActual.nie}.json`);
+            let datosBol = await resBol.json();
+            
+            let bloqueNota = "";
+            if(datosBol && datosBol.notaTrimestral) {
+                bloqueNota = `
+                <div style="background: #fff9db; border: 3px solid var(--gold); padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                    <h2 style="margin:0 0 10px 0; color: #856404; display: flex; align-items:center; justify-content:center; gap:10px;">
+                        🌟 Tu Calificación Trimestral 🌟
+                    </h2>
+                    <div style="font-size: 50px; font-weight: 900; color: var(--color-mate); line-height: 1;">
+                        ${datosBol.notaTrimestral}
+                    </div>
+                </div>`;
+            }
+
+            // 2. Cargar el Historial de Prácticas
+            let resPrac = await fetch(URL_BASE + "practicas.json");
+            let datosPrac = await resPrac.json();
+            let misPracticas = [];
+            for (let id in datosPrac) { if (datosPrac[id].nombre === estudianteActual.nombre) misPracticas.push(datosPrac[id]); }
+            
+            let tabla = "";
+            if(misPracticas.length === 0) { 
+                tabla = "<h3>No hay prácticas registradas aún. ¡A jugar!</h3>"; 
+            } else {
+                tabla = `<table class="student-table"><tr><th>Fecha</th><th>Tema</th><th>Puntos</th></tr>`;
+                misPracticas.reverse().forEach(p => {
+                    let color = parseInt(p.aciertos) >= 6 ? "green" : "red";
+                    tabla += `<tr><td>${p.fecha.split(',')[0]}</td><td>${p.tema}</td><td style="color:${color}; font-weight:bold; font-size:16px;">${p.aciertos}/10</td></tr>`;
+                });
+                tabla += "</table>";
+            }
+
+            document.getElementById('progress-content').innerHTML = bloqueNota + tabla;
         }
     </script>
 </body>
