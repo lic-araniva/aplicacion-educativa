@@ -66,11 +66,8 @@
                 <span style="font-weight: bold; color: #555;">🔍 Filtrar tabla por grado:</span>
                 <select id="filtro-est-grado" onchange="filtrarEstudiantes()">
                     <option value="">🏫 Todos los Grados</option>
-                    <option value="2">2º Grado</option>
-                    <option value="3">3º Grado</option>
-                    <option value="4">4º Grado</option>
-                    <option value="5">5º Grado</option>
-                    <option value="6">6º Grado</option>
+                    <option value="2">2º Grado</option><option value="3">3º Grado</option>
+                    <option value="4">4º Grado</option><option value="5">5º Grado</option><option value="6">6º Grado</option>
                 </select>
             </div>
 
@@ -81,34 +78,51 @@
         </div>
 
         <div id="tab-asignar" class="tab-content">
-            <h3>Asignar Unidad de Refuerzo o Nivelación</h3>
+            
+            <h3 style="color: var(--esmate-blue); margin-bottom: 5px;">👤 Asignación Individual</h3>
+            <p style="margin-top: 0; font-size: 14px; color: #666;">Envía una actividad a un estudiante específico (Nivelación o Refuerzo).</p>
             <div class="form-box" style="background: #fff3cd; border: 2px solid #ffeeba;">
-                <select id="assign-student">
-                    <option value="">👤 Selecciona un estudiante...</option>
-                </select>
-                <select id="assign-grado">
-                    <option value="2">De 2º Grado</option><option value="3">De 3º Grado</option>
-                    <option value="4">De 4º Grado</option><option value="5">De 5º Grado</option>
-                </select>
+                <select id="assign-student"><option value="">👤 Selecciona un estudiante...</option></select>
                 <select id="assign-materia">
                     <option value="Matemática">Matemática</option><option value="Lenguaje">Lenguaje</option>
-                    <option value="Ciencia">Ciencia</option>
+                    <option value="Ciencias">Ciencias</option><option value="Ciudadanía">Ciudadanía y Valores</option>
                 </select>
                 <select id="assign-unidad">
-                    <option value="1">Unidad 1</option>
-                    <option value="2">Unidad 2</option>
-                    <option value="3">Unidad 3</option>
-                    <option value="4">Unidad 4</option>
-                    <option value="5">Unidad 5</option>
-                    <option value="6">Unidad 6</option>
-                    <option value="7">Unidad 7</option>
-                    <option value="8">Unidad 8</option>
-                    <option value="9">Unidad 9</option>
-                    <option value="10">Unidad 10</option>
+                    <option value="1">Unidad 1</option><option value="2">Unidad 2</option><option value="3">Unidad 3</option>
+                    <option value="4">Unidad 4</option><option value="5">Unidad 5</option>
                 </select>
-                <button class="btn-action" style="background: var(--esmate-blue);" onclick="crearAsignacion()">🎯 Asignar</button>
+                <select id="assign-tema">
+                    <option value="1">Tema 1</option><option value="2">Tema 2</option><option value="3">Tema 3</option>
+                    <option value="4">Tema 4</option><option value="5">Tema 5</option>
+                </select>
+                <button class="btn-action" style="background: var(--esmate-blue);" onclick="crearAsignacion()">🎯 Asignar a Uno</button>
             </div>
-            <h3>Tareas Asignadas Actuales</h3>
+
+            <h3 style="color: var(--esmate-green); margin-bottom: 5px; margin-top: 30px;">🏫 Asignación Masiva</h3>
+            <p style="margin-top: 0; font-size: 14px; color: #666;">Envía el tema de la clase de hoy a todos los estudiantes de un grado simultáneamente.</p>
+            <div class="form-box" style="background: #e6f7f5; border: 2px solid #2a9d8f;">
+                <select id="masivo-grado">
+                    <option value="">🏫 Selecciona el grado completo...</option>
+                    <option value="2">Todos los de 2º Grado</option><option value="3">Todos los de 3º Grado</option>
+                    <option value="4">Todos los de 4º Grado</option><option value="5">Todos los de 5º Grado</option>
+                    <option value="6">Todos los de 6º Grado</option>
+                </select>
+                <select id="masivo-materia">
+                    <option value="Matemática">Matemática</option><option value="Lenguaje">Lenguaje</option>
+                    <option value="Ciencias">Ciencias</option><option value="Ciudadanía">Ciudadanía y Valores</option>
+                </select>
+                <select id="masivo-unidad">
+                    <option value="1">Unidad 1</option><option value="2">Unidad 2</option><option value="3">Unidad 3</option>
+                    <option value="4">Unidad 4</option><option value="5">Unidad 5</option>
+                </select>
+                <select id="masivo-tema">
+                    <option value="1">Tema 1</option><option value="2">Tema 2</option><option value="3">Tema 3</option>
+                    <option value="4">Tema 4</option><option value="5">Tema 5</option>
+                </select>
+                <button class="btn-action" style="background: var(--esmate-green);" onclick="crearAsignacionMasiva()">🚀 Asignar a Todos</button>
+            </div>
+
+            <h3 style="margin-top: 30px;">📋 Tareas Asignadas Actuales</h3>
             <table>
                 <thead><tr><th>Estudiante</th><th>Contenido Asignado</th><th>Acción</th></tr></thead>
                 <tbody id="assign-body"></tbody>
@@ -149,15 +163,12 @@
 
         function cargarTodo() { cargarEstudiantes(); cargarPracticas(); cargarAsignaciones(); }
 
-        // --- LÓGICA ESTUDIANTES (ACTUALIZADA CON FILTRO) ---
+        // --- LÓGICA ESTUDIANTES ---
         function cargarEstudiantes() {
             fetch(URL_BASE + "estudiantes.json").then(res => res.json()).then(datos => {
                 listaEstudiantes = datos ? Object.keys(datos).map(k => ({nie:k, ...datos[k]})) : [];
-                
-                // Aplicar filtro si hay alguno seleccionado, si no, dibuja todos
                 filtrarEstudiantes();
 
-                // Llenar el selector de asignación individual
                 let selectHtml = '<option value="">👤 Selecciona un estudiante...</option>';
                 listaEstudiantes.sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(e => {
                     selectHtml += `<option value="${e.nie}">${e.nombre} (${e.grado}º)</option>`;
@@ -166,19 +177,13 @@
             });
         }
 
-        // Nueva función para filtrar estudiantes por grado
         function filtrarEstudiantes() {
             let gradoSeleccionado = document.getElementById('filtro-est-grado').value;
             let listaFiltrada = listaEstudiantes;
-            
-            if (gradoSeleccionado !== "") {
-                listaFiltrada = listaEstudiantes.filter(e => e.grado === gradoSeleccionado);
-            }
-            
+            if (gradoSeleccionado !== "") { listaFiltrada = listaEstudiantes.filter(e => e.grado === gradoSeleccionado); }
             dibujarEstudiantes(listaFiltrada);
         }
 
-        // Nueva función para dibujar la tabla de estudiantes
         function dibujarEstudiantes(lista) {
             let html = "";
             lista.sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(e => {
@@ -186,7 +191,7 @@
                 <td><button class="btn-edit" onclick="prepararEdit('${e.nie}','${e.nombre}','${e.grado}')">✏️</button>
                 <button class="btn-delete" onclick="borrarEst('${e.nie}')">🗑️</button></td></tr>`;
             });
-            document.getElementById('est-body').innerHTML = html || "<tr><td colspan='4' style='text-align:center;'>No hay estudiantes en este grado.</td></tr>";
+            document.getElementById('est-body').innerHTML = html || "<tr><td colspan='4' style='text-align:center;'>No hay estudiantes.</td></tr>";
         }
 
         function guardarEstudiante() {
@@ -194,16 +199,13 @@
             if(!nie || !nom) return alert("Completa los datos");
             fetch(URL_BASE + `estudiantes/${nie}.json`, { method:"PUT", body:JSON.stringify({nombre:nom, grado:gra}) }).then(()=> {
                 document.getElementById('new-nie').value=""; document.getElementById('new-nombre').value=""; 
-                alert("Estudiante guardado/actualizado");
-                cargarEstudiantes();
+                alert("Estudiante guardado/actualizado"); cargarEstudiantes();
             });
         }
         
         function prepararEdit(nie, nombre, grado) {
-            document.getElementById('new-nie').value = nie;
-            document.getElementById('new-nombre').value = nombre;
-            document.getElementById('new-grado').value = grado;
-            window.scrollTo(0, 0); // Sube la pantalla al formulario
+            document.getElementById('new-nie').value = nie; document.getElementById('new-nombre').value = nombre; document.getElementById('new-grado').value = grado;
+            window.scrollTo(0, 0); 
         }
 
         function borrarEst(nie) { if(confirm("¿Borrar estudiante?")) fetch(URL_BASE + `estudiantes/${nie}.json`, {method:"DELETE"}).then(()=>cargarEstudiantes()); }
@@ -214,9 +216,7 @@
                 listaAsignaciones = [];
                 if(datos) {
                     for(let nie in datos) {
-                        for(let idAsig in datos[nie]) {
-                            listaAsignaciones.push({ id: idAsig, nie: nie, ...datos[nie][idAsig] });
-                        }
+                        for(let idAsig in datos[nie]) { listaAsignaciones.push({ id: idAsig, nie: nie, ...datos[nie][idAsig] }); }
                     }
                 }
                 dibujarTablaAsignaciones();
@@ -228,9 +228,10 @@
             listaAsignaciones.forEach(a => {
                 let est = listaEstudiantes.find(e => e.nie == a.nie);
                 let nombreEst = est ? est.nombre : "NIE: " + a.nie;
+                // Ahora mostramos la materia, unidad y TEMA
                 html += `<tr>
                     <td><b>${nombreEst}</b></td>
-                    <td><span class="badge-assign">${a.grado}º Grado</span> ${a.materia} - Unidad ${a.unidad}</td>
+                    <td><span class="badge-assign">${a.materia}</span> Unidad ${a.unidad} - Tema ${a.tema}</td>
                     <td><button class="btn-delete" onclick="borrarAsignacion('${a.nie}', '${a.id}')">Eliminar</button></td>
                 </tr>`;
             });
@@ -239,27 +240,58 @@
 
         function crearAsignacion() {
             let nie = document.getElementById('assign-student').value;
-            let grado = document.getElementById('assign-grado').value;
             let materia = document.getElementById('assign-materia').value;
             let unidad = document.getElementById('assign-unidad').value;
+            let tema = document.getElementById('assign-tema').value;
 
             if(!nie) return alert("Selecciona un estudiante");
 
-            let nuevaAsig = { grado: grado, materia: materia, unidad: unidad, fecha: new Date().toLocaleString() };
+            let nuevaAsig = { materia: materia, unidad: unidad, tema: tema, fecha: new Date().toLocaleString('es-SV') };
 
             fetch(URL_BASE + `asignaciones/${nie}.json`, {
                 method: "POST",
                 body: JSON.stringify(nuevaAsig)
-            }).then(() => {
-                alert("🎯 Contenido asignado con éxito");
-                cargarAsignaciones();
-            });
+            }).then(() => { alert("🎯 Asignación individual enviada con éxito"); cargarAsignaciones(); });
+        }
+
+        // NUEVA FUNCIÓN: ASIGNACIÓN MASIVA
+        function crearAsignacionMasiva() {
+            let grado = document.getElementById('masivo-grado').value;
+            let materia = document.getElementById('masivo-materia').value;
+            let unidad = document.getElementById('masivo-unidad').value;
+            let tema = document.getElementById('masivo-tema').value;
+
+            if(!grado) return alert("⚠️ Selecciona un grado completo para la asignación masiva.");
+
+            let estudiantesGrado = listaEstudiantes.filter(e => e.grado === grado);
+            if(estudiantesGrado.length === 0) return alert(`No tienes estudiantes matriculados en ${grado}º Grado.`);
+
+            if(confirm(`¿Seguro que deseas asignar la Unidad ${unidad} - Tema ${tema} de ${materia} a los ${estudiantesGrado.length} estudiantes de ${grado}º Grado?`)) {
+                
+                let promesas = [];
+                let nuevaAsig = { materia: materia, unidad: unidad, tema: tema, fecha: new Date().toLocaleString('es-SV') };
+
+                // Hacemos un POST por cada estudiante de ese grado
+                estudiantesGrado.forEach(est => {
+                    let peticion = fetch(URL_BASE + `asignaciones/${est.nie}.json`, {
+                        method: "POST",
+                        body: JSON.stringify(nuevaAsig)
+                    });
+                    promesas.push(peticion);
+                });
+
+                // Esperamos a que Firebase guarde todo y luego recargamos la tabla
+                Promise.all(promesas).then(() => {
+                    alert(`🚀 ¡Éxito! Se asignó el tema a los ${estudiantesGrado.length} estudiantes.`);
+                    cargarAsignaciones();
+                }).catch(err => {
+                    alert("Hubo un error de conexión al asignar a algunos estudiantes.");
+                });
+            }
         }
 
         function borrarAsignacion(nie, id) {
-            if(confirm("¿Quitar esta asignación?")) {
-                fetch(URL_BASE + `asignaciones/${nie}/${id}.json`, { method: "DELETE" }).then(() => cargarAsignaciones());
-            }
+            if(confirm("¿Quitar esta asignación?")) { fetch(URL_BASE + `asignaciones/${nie}/${id}.json`, { method: "DELETE" }).then(() => cargarAsignaciones()); }
         }
 
         // --- RENDIMIENTO ---
@@ -267,8 +299,7 @@
             fetch(URL_BASE + "practicas.json").then(res => res.json()).then(datos => {
                 listaPracticas = datos ? Object.keys(datos).map(k => ({id:k, ...datos[k]})) : [];
                 listaPracticas.reverse();
-                extraerTemas();
-                dibujarPracticas(listaPracticas);
+                extraerTemas(); dibujarPracticas(listaPracticas);
             });
         }
         function dibujarPracticas(l) {
