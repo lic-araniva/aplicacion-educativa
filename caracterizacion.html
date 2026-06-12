@@ -1,76 +1,8 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instrumento de Caracterización - Primera Infancia</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Nunito', sans-serif;
-            background-color: #f3f4f6;
-            color: #374151;
-        }
-        .print-area {
-            background-color: white;
-            max-width: 210mm; /* A4 width */
-            margin: 0 auto;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* Estilos base para inputs interactivos que se ven bien al imprimir */
-        .input-line {
-            width: 100%;
-            border-bottom: 2px dotted #9ca3af;
-            background-color: transparent;
-            padding: 0.25rem 0.5rem;
-            font-weight: 700;
-            color: #1f2937;
-            transition: all 0.2s;
-            outline: none;
-        }
-        .input-line:focus {
-            border-bottom-color: #3b82f6;
-            background-color: #eff6ff;
-        }
-        
-        .input-box {
-            width: 100%;
-            background-color: #f8fafc;
-            border: 2px dashed #cbd5e1;
-            border-radius: 0.75rem;
-            padding: 0.75rem;
-            min-height: 80px;
-            font-weight: 600;
-            color: #1f2937;
-            resize: none;
-            overflow: hidden;
-            outline: none;
-            transition: all 0.2s;
-        }
-        .input-box:focus {
-            border-color: #3b82f6;
-            background-color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        /* Ocultar barra de herramientas y estilar inputs en modo impresión */
-        @media print {
-            body { background-color: white; }
-            .print-area { box-shadow: none; max-width: 100%; padding: 0 !important; }
-            .no-print { display: none !important; }
-            .page-break { page-break-before: always; }
-            
-            .input-line { border-bottom: 1px solid black; padding: 0; }
-            .input-box { border: none; background-color: transparent; padding: 0; min-height: auto; }
-            
-            /* Ajustar color de fondo para la impresión si es necesario */
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+a-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
     </style>
 </head>
-<body class="pb-12">
+<body class="pb-12"> 
 
     <!-- BARRA DE HERRAMIENTAS FLOTANTE -->
     <div class="no-print sticky top-0 z-40 bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-200 mb-6 p-4">
@@ -351,7 +283,9 @@
     </div>
 
     <script>
-        // ESTADO DE LA APLICACIÓN (EN MEMORIA DE LA SESIÓN)
+    // URL DE TU BASE DE DATOS FIREBASE
+        const URL_BASE = "https://esmate-2026-default-rtdb.firebaseio.com/";
+        
         let registros = [];
         let idFichaActual = null;
 
@@ -367,15 +301,12 @@
             document.getElementById('toast-icon').textContent = icono;
             document.getElementById('toast-msg').textContent = mensaje;
             
-            // Limpiar colores previos
             toast.className = `fixed bottom-5 right-5 text-white font-bold px-6 py-4 rounded-xl shadow-2xl transform transition-all duration-300 z-50 flex items-center gap-3 ${colorFondo}`;
             
-            // Animar entrada
             requestAnimationFrame(() => {
                 toast.classList.remove('translate-y-32', 'opacity-0');
             });
 
-            // Ocultar después de 3 segundos
             setTimeout(() => {
                 toast.classList.add('translate-y-32', 'opacity-0');
             }, 3000);
@@ -383,15 +314,12 @@
 
         // OBTENER TODOS LOS DATOS DEL FORMULARIO
         function obtenerDatosFormulario() {
-            // Obtener Grado
             const gradoSeleccionado = document.querySelector('input[name="grado"]:checked');
-            
-            // Obtener Discapacidades
             const discNodos = document.querySelectorAll('input[name="discapacidad"]:checked');
             const discapacidadesSeleccionadas = Array.from(discNodos).map(n => n.value);
 
             return {
-                id: idFichaActual || Date.now().toString(),
+                id: idFichaActual || Date.now().toString(), // Genera un ID único basado en la hora si es nuevo
                 nombre: document.getElementById('nombre_estudiante').value.trim(),
                 fecha: document.getElementById('fecha_nacimiento').value,
                 grado: gradoSeleccionado ? gradoSeleccionado.value : '',
@@ -413,64 +341,81 @@
             };
         }
 
-        // GUARDAR REGISTRO
-        function guardarRegistro() {
+        // 🚀 GUARDAR REGISTRO EN FIREBASE
+        async function guardarRegistro() {
             const datos = obtenerDatosFormulario();
             
-            // Validación mínima
             if (!datos.nombre) {
                 mostrarToast('⚠️', 'Por favor, escribe el nombre del estudiante', 'bg-red-500');
                 document.getElementById('nombre_estudiante').focus();
                 return;
             }
 
-            if (idFichaActual) {
-                // Actualizar existente
-                const index = registros.findIndex(r => r.id === idFichaActual);
-                if(index !== -1) {
-                    registros[index] = datos;
+            mostrarToast('⏳', 'Guardando en la nube...', 'bg-blue-500');
+
+            try {
+                // Usamos PUT para que guarde o actualice en el ID específico
+                await fetch(`${URL_BASE}caracterizaciones/${datos.id}.json`, {
+                    method: 'PUT',
+                    body: JSON.stringify(datos)
+                });
+
+                if (idFichaActual) {
+                    mostrarToast('✅', 'Ficha actualizada correctamente', 'bg-blue-600');
+                } else {
+                    idFichaActual = datos.id;
+                    mostrarToast('💾', 'Nueva ficha guardada con éxito', 'bg-green-600');
                 }
-                mostrarToast('✅', 'Ficha actualizada correctamente', 'bg-blue-600');
-            } else {
-                // Crear nuevo
-                registros.push(datos);
-                idFichaActual = datos.id;
-                mostrarToast('💾', 'Nueva ficha guardada con éxito', 'bg-green-600');
+            } catch (error) {
+                mostrarToast('❌', 'Error de conexión. Revisa tu internet.', 'bg-red-600');
             }
         }
 
-        // ABRIR Y RENDERIZAR MODAL BUSCAR
-        function abrirBuscar() {
+        // 🔍 ABRIR Y RENDERIZAR MODAL BUSCAR DESDE FIREBASE
+        async function abrirBuscar() {
             const modal = document.getElementById('modal-buscar');
             const lista = document.getElementById('lista-registros');
             const vacia = document.getElementById('busqueda-vacia');
             
-            lista.innerHTML = ''; // Limpiar lista
-            
-            if (registros.length === 0) {
-                lista.classList.add('hidden');
-                vacia.classList.remove('hidden');
-            } else {
-                lista.classList.remove('hidden');
-                vacia.classList.add('hidden');
-                
-                // Renderizar items
-                registros.forEach(reg => {
-                    const li = document.createElement('li');
-                    li.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-200 cursor-pointer hover:border-indigo-400 hover:shadow-md transition flex justify-between items-center";
-                    li.innerHTML = `
-                        <div>
-                            <p class="font-bold text-gray-800">${reg.nombre}</p>
-                            <p class="text-xs text-gray-500">${reg.grado || 'Grado no especificado'}</p>
-                        </div>
-                        <span class="text-indigo-600 font-bold bg-indigo-50 px-3 py-1 rounded-full text-xs">Cargar</span>
-                    `;
-                    li.onclick = () => cargarRegistro(reg.id);
-                    lista.appendChild(li);
-                });
-            }
-            
+            lista.innerHTML = '<p class="text-center text-indigo-600 font-bold p-4">Cargando desde Firebase...</p>'; 
+            lista.classList.remove('hidden');
+            vacia.classList.add('hidden');
             modal.classList.remove('hidden');
+
+            try {
+                const res = await fetch(`${URL_BASE}caracterizaciones.json`);
+                const data = await res.json();
+                
+                lista.innerHTML = ''; 
+                
+                if (!data) {
+                    lista.classList.add('hidden');
+                    vacia.classList.remove('hidden');
+                    registros = [];
+                } else {
+                    // Convertir el objeto de Firebase a un Array
+                    registros = Object.values(data);
+                    
+                    lista.classList.remove('hidden');
+                    vacia.classList.add('hidden');
+                    
+                    registros.forEach(reg => {
+                        const li = document.createElement('li');
+                        li.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-200 cursor-pointer hover:border-indigo-400 hover:shadow-md transition flex justify-between items-center";
+                        li.innerHTML = `
+                            <div>
+                                <p class="font-bold text-gray-800">${reg.nombre}</p>
+                                <p class="text-xs text-gray-500">${reg.grado || 'Grado no especificado'}</p>
+                            </div>
+                            <span class="text-indigo-600 font-bold bg-indigo-50 px-3 py-1 rounded-full text-xs">Cargar</span>
+                        `;
+                        li.onclick = () => cargarRegistro(reg.id);
+                        lista.appendChild(li);
+                    });
+                }
+            } catch (error) {
+                lista.innerHTML = '<p class="text-center text-red-500 font-bold p-4">Error al cargar los datos.</p>';
+            }
         }
 
         function cerrarBuscar() {
@@ -484,35 +429,31 @@
 
             idFichaActual = reg.id;
             
-            // Textos
-            document.getElementById('nombre_estudiante').value = reg.nombre;
-            document.getElementById('fecha_nacimiento').value = reg.fecha;
-            document.getElementById('persona_responsable').value = reg.responsable;
-            document.getElementById('composicion_familia').value = reg.familia;
-            document.getElementById('situaciones_familiares').value = reg.situaciones;
-            document.getElementById('estado_nutricional').value = reg.nutricion;
-            document.getElementById('vacunacion').value = reg.vacunas;
-            document.getElementById('diagnostico_clinico').value = reg.diagnostico;
-            document.getElementById('nivel_3').value = reg.nivel3;
-            document.getElementById('nivel_2').value = reg.nivel2;
-            document.getElementById('nivel_1').value = reg.nivel1;
-            document.getElementById('alertas').value = reg.alertas;
-            document.getElementById('brechas').value = reg.brechas;
-            document.getElementById('comunicacion').value = reg.comunicacion;
-            document.getElementById('adecuaciones').value = reg.adecuaciones;
-            document.getElementById('apoyos').value = reg.apoyos;
+            document.getElementById('nombre_estudiante').value = reg.nombre || '';
+            document.getElementById('fecha_nacimiento').value = reg.fecha || '';
+            document.getElementById('persona_responsable').value = reg.responsable || '';
+            document.getElementById('composicion_familia').value = reg.familia || '';
+            document.getElementById('situaciones_familiares').value = reg.situaciones || '';
+            document.getElementById('estado_nutricional').value = reg.nutricion || '';
+            document.getElementById('vacunacion').value = reg.vacunas || '';
+            document.getElementById('diagnostico_clinico').value = reg.diagnostico || '';
+            document.getElementById('nivel_3').value = reg.nivel3 || '';
+            document.getElementById('nivel_2').value = reg.nivel2 || '';
+            document.getElementById('nivel_1').value = reg.nivel1 || '';
+            document.getElementById('alertas').value = reg.alertas || '';
+            document.getElementById('brechas').value = reg.brechas || '';
+            document.getElementById('comunicacion').value = reg.comunicacion || '';
+            document.getElementById('adecuaciones').value = reg.adecuaciones || '';
+            document.getElementById('apoyos').value = reg.apoyos || '';
 
-            // Radios (Grado)
             document.querySelectorAll('input[name="grado"]').forEach(el => {
                 el.checked = (el.value === reg.grado);
             });
 
-            // Checkboxes (Discapacidad)
             document.querySelectorAll('input[name="discapacidad"]').forEach(el => {
-                el.checked = reg.discapacidades.includes(el.value);
+                el.checked = reg.discapacidades ? reg.discapacidades.includes(el.value) : false;
             });
 
-            // Reajustar altura de textareas
             document.querySelectorAll('textarea').forEach(el => autoResize(el));
 
             cerrarBuscar();
@@ -528,17 +469,15 @@
         }
 
         function ejecutarLimpiar() {
-            idFichaActual = null; // Reiniciar ID para que el próximo sea un registro nuevo
+            idFichaActual = null; 
             
-            // Limpiar Textos y Textareas
             document.querySelectorAll('input[type="text"], input[type="date"], textarea').forEach(el => {
                 el.value = '';
                 if(el.tagName === 'TEXTAREA') {
-                    el.style.height = '80px'; // Altura mínima original
+                    el.style.height = '80px'; 
                 }
             });
 
-            // Limpiar selecciones
             document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(el => {
                 el.checked = false;
             });
@@ -548,7 +487,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Inicializar textareas
         window.onload = () => {
             document.querySelectorAll('textarea').forEach(el => autoResize(el));
         };
